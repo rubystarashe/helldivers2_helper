@@ -265,7 +265,7 @@ setInterval(async () => {
       stratagemPending = false
     }
   } catch (e) {}
-}, 1000)
+}, 2000)
 
 const createMainWindow = () => {
   windows.main = new BrowserWindow({
@@ -459,7 +459,7 @@ const createMainWindow = () => {
     chatInputting = true
     await windowFocus(gameHWND)
     while (!focuswindowIsGame()) {
-      await sleep(1000 / 60)
+      await sleep(1000 / 24)
     }
     pendingDuringChatKey = true
     if (chat) await sendText(chat, chatinputdelay)
@@ -820,7 +820,7 @@ const createMainWindow = () => {
         windows['overlay'].webContents.send('visible', false)
       }
     } catch (e) {}
-  }, 1000 / 60)
+  }, 1000 / 24)
 
   ipcMain.handle('loaded', async (_, window) => {
     if (windows[window].isLoaded) return { isDev }
