@@ -1,0 +1,60 @@
+{
+  "name": "helldivers2_helper",
+  "version": "0.0.1",
+  "description": "",
+  "license": "ISC",
+  "author": "",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "set NODE_ENV=development& concurrently --kill-others \"nuxt dev\" \"electron .\"",
+    "nuxt": "nuxt dev",
+    "generate": "nuxt generate",
+    "start": "electron-forge start",
+    "deploy": "push-dir --dir=dist --branch=gh-pages --cleanup",
+    "electron": "set NODE_ENV=development&electron .",
+    "pack": "nuxt generate && electron-builder --dir",
+    "dist": "nuxt generate && electron-builder"
+  },
+  "dependencies": {
+    "electron-updater": "^6.3.9",
+    "ffi-rs": "^1.2.4",
+    "socket.io-client": "^4.8.1",
+    "winreg": "^1.2.5"
+  },
+  "devDependencies": {
+    "@vue-macros/nuxt": "^1.12.16",
+    "@vueuse/nuxt": "^12.5.0",
+    "concurrently": "^9.1.2",
+    "electron": "^34.0.1",
+    "electron-builder": "^25.1.8",
+    "nuxt": "^3.15.3",
+    "sass": "^1.83.4"
+  },
+  "build": {
+    "appId": "com.example.hdhelper",
+    "artifactName": "hdhelper-${version}.${ext}",
+    "productName": "Helldivers2 Helper",
+    "files": [
+      "!.nuxt/**",
+      "!generator/**",
+      "!public/**",
+      "!legacy/**",
+      "!package/**",
+      "!app.vue",
+      "!components/**",
+      "!nuxt.config.js",
+      "!utils/**",
+      "!.output/**",
+      "!error.vue",
+      "!layouts/**",
+      "!pages/**"
+    ],
+    "directories": {
+      "output": "package"
+    },
+    "win": {
+      "target": "nsis"
+    }
+  }
+}
