@@ -820,7 +820,7 @@ const createMainWindow = () => {
         windows['overlay'].webContents.send('visible', false)
       }
     } catch (e) {}
-  }, 1000 / 24)
+  }, 1000 / 6)
 
   ipcMain.handle('loaded', async (_, window) => {
     if (windows[window].isLoaded) return { isDev }
