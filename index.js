@@ -679,12 +679,6 @@ const createMainWindow = () => {
             key == keyBinds['heal']
         ) {
           stratagemReady = false
-          if (map_opened || stratagem_opened) {
-            map_opened = false
-            stratagem_opened = false
-            cancelable_acting = false
-            await cinematic_input_queue_run()
-          }
           return
         }
   
@@ -861,10 +855,9 @@ ipcMain.handle('check_update', async () => {
     return
   }
   autoUpdater.checkForUpdatesAndNotify(new Notification({
-    // icon: path.join(app.getAppPath(), 'icon.png'),
-    title: 'Helldivers2 Helper', body: '새 버전 다운로드가 완료되었습니다!'
+    icon: path.join(app.getAppPath(), 'icon.png'),
+    title: 'Helldivers2 Helper', body: '새 업데이트가 있습니다!'
   }))
-  await new Promise(res => setTimeout(res, 3000))
   return
 })
 ipcMain.on('update_install', () => {
@@ -889,8 +882,8 @@ app.whenReady().then(() => {
   })
   createMainWindow()
   autoUpdater.checkForUpdatesAndNotify(new Notification({
-    // icon: path.join(app.getAppPath(), 'icon.png'),
-    title: 'Helldivers2 Helper', body: '새 버전 다운로드가 완료되었습니다!'
+    icon: path.join(app.getAppPath(), 'icon.png'),
+    title: 'Helldivers2 Helper', body: '새 업데이트가 있습니다!'
   }))
 })
 app.on('window-all-closed', () => {

@@ -679,21 +679,24 @@ export const GENERAL_STRATEGEMS = [
     keys: ['up', 'up', 'left', 'right', 'down', 'down'],
     icon: '/stratagems/General Stratagems/Seismic Probe.svg',
     type: 'general',
-    index: 3
+    index: 3,
+    instant: true
   },
   {
     name: 'Prospecting Drill',
     keys: ['down', 'down', 'left', 'right', 'down', 'down'],
     icon: '/stratagems/General Stratagems/Prospecting Drill.svg',
     type: 'general',
-    index: 4
+    index: 4,
+    instant: true
   },
   {
     name: 'Super Earth Flag',
     keys: ['down', 'up', 'down', 'up'],
     icon: '/stratagems/General Stratagems/Super Earth Flag.svg',
     type: 'general',
-    index: 5
+    index: 5,
+    instant: true
   },
   {
     name: 'Orbital Illumination Flare',

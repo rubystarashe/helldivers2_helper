@@ -179,6 +179,8 @@
         <div>당신은 장애를 갖고 있거나, 겁쟁이입니다. 하지만 이 새로운 기술을 사용하면 반드시 장애를 극복하고 두려움없는 헬다이버로 거듭날 수 있습니다.</div>
       </div>
     </div>
+    <div class="update" v-if="c_newversion" @click="f_update_install">최신 업데이트가 다운로드 되었습니다! 클릭하여 업데이트 하세요</div>
+    <div class="update" v-else-if="_progress">신규 업데이트를 다운로드 받고 있습니다. {{ _progress?.percent?.toFixed(0) || 0 }}%</div>
   </div>
 </template>
 
@@ -186,6 +188,41 @@
 definePageMeta({
   layout: 'main'
 })
+
+const _newversion = ref(false)
+const _updating = ref(false)
+const _progress = ref()
+ipcRenderer.on('checking-for-update', v => {
+  console.log(v)
+})
+ipcRenderer.on('update-not-available', v => {
+  console.log(v)
+})
+ipcRenderer.on('update-error', v => {
+  console.log(v)
+})
+ipcRenderer.on('update-available', v => {
+  console.log('update-available')
+  _updating.value = true
+})
+ipcRenderer.on('download-progress', v => {
+  _progress.value = v
+})
+ipcRenderer.on('update-downloaded', v => {
+  _updating.value = false
+  _newversion.value = true
+})
+const c_newversion = computed(() => {
+  return !_updating.value && _newversion.value
+})
+const f_update_install = () => {
+  ipcRenderer.send('update_install')
+}
+setInterval(async () => {
+  try {
+    await ipcRenderer.invoke('check_update')
+  } catch (e) {}
+}, 1000 * 60 * 10)
 
 const _process = ref(false)
 onMounted(async () => {
@@ -591,6 +628,19 @@ onMounted(() => {
         }
       }
     }
+  }
+  .update{
+    position: fixed;
+    background: rgb(255, 232, 0);
+    color: black;
+    font-size: 28px;
+    padding: 20px;
+    left: 0;
+    right: 0;
+    top: 50px;
+    cursor: pointer;
+    font-weight: 400;
+    text-align: center;
   }
 }
 </style>
