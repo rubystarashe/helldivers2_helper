@@ -461,9 +461,11 @@ const createMainWindow = () => {
     while (!focuswindowIsGame()) {
       await sleep(1000 / 60)
     }
+    pendingDuringChatKey = true
     if (chat) await sendText(chat, chatinputdelay)
     await KeyPressAndRelease(keyBinds['chat'])
     windows.chat.setIgnoreMouseEvents(true)
+    pendingDuringChatKey = false
     chatInputting = false
   })
   ipcMain.handle('chatInputInit', async () => {
