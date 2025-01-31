@@ -75,13 +75,6 @@
             </div>
             <div class="description">우클릭</div>
           </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">한글 채팅 확장 단축키</div>
-            </div>
-            <div class="description">한/영</div>
-          </div>
         </div>
         <div class="section">
           <h3 class="title">성능 설정</h3>
@@ -113,12 +106,36 @@
             </div>
             <input class="input" type="number" v-model="_default_delay"/>
           </div>
+        </div>
+        <div class="section">
+          <h3 class="title">한글 채팅창 설정정</h3>
           <div class="option">
             <div class="meta">
               <div class="deco"/>
               <div class="name">한글 채팅 입력 딜레이</div>
             </div>
             <input class="input" type="number" v-model="_chatinputdelay"/>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">한글 채팅 확장 창 좌측상단으로</div>
+            </div>
+            <div class="button" @click="f_chat_lefttop">초기화</div>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">채팅 입력 시 자동 한글 확장 켜기</div>
+            </div>
+            <input type="checkbox" class="checkbox" v-model="_instant_chat"/>
+          </div>
+          <div class="option" v-if="!_instant_chat">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">한글 채팅 확장 단축키</div>
+            </div>
+            <div class="description">한/영</div>
           </div>
         </div>
         <div class="section">
@@ -175,16 +192,6 @@
               <div class="name">자동 반동 제어</div>
             </div>
             <div class="description">준비중</div>
-          </div>
-        </div>
-        <div class="section">
-          <h3 class="title">기타 설정</h3>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">한글 채팅창 좌측상단으로</div>
-            </div>
-            <div class="button" @click="f_chat_lefttop">초기화</div>
           </div>
         </div>
       </div>
@@ -435,6 +442,11 @@ const _rotate_delay = ref(300)
 watch(_rotate_delay, () => {
   localStorage.setItem('rotate_delay', _rotate_delay.value)
   ipcRenderer.send('rotate_delay', parseInt(_rotate_delay.value || 0) || 0)
+})
+const _instant_chat = ref(true)
+watch(_instant_chat, () => {
+  localStorage.setItem('instant_chat', _instant_chat.value)
+  ipcRenderer.send('instant_chat', _instant_chat.value)
 })
 const _cinematic_mode = ref(false)
 watch(_cinematic_mode, () => {

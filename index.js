@@ -80,6 +80,10 @@ let rotate_delay = 300
 ipcMain.on('rotate_delay', (_, value) => {
   rotate_delay = parseInt(value) || 0
 })
+let instant_chat = true
+ipcMain.on('instant_chat', (_, value) => {
+  instant_chat = value
+})
 let cinematic_mode = false
 ipcMain.on('cinematic_mode', (_, value) => {
   cinematic_mode = value
@@ -644,24 +648,13 @@ const createMainWindow = () => {
       }
 
       if (!state) {
-        if (key == keyBinds['HANGUL']) {
-          if (stratagemPending) {
-            await KeyRelease(keyBinds['HANGUL'])
-            await KeyPressAndRelease('BACK')
-            await windows.chat.setIgnoreMouseEvents(false)
-            await windows.chat.focus()
-            windows.chat.webContents.send('chatInput', true)
-            // const chatHWND = windows.chat.getNativeWindowHandle()
-            // await setIMEMode(chatHWND)
-          }
-          return
-        }
         switch (key) {
+          case keyBinds['HANGUL']:
           case 'RMENU':
           case 'KANJI':
           case 'NEXT':
           case 'RCONTROL':
-            if (stratagemPending) {
+            if (stratagemPending && !instant_chat) {
               await KeyRelease(key)
               await KeyPressAndRelease('BACK')
               await windows.chat.setIgnoreMouseEvents(false)
@@ -678,6 +671,13 @@ const createMainWindow = () => {
           if (!stratagemPending) {
             stratagemPending = true
             stratagemReady = false
+            if (instant_chat) {
+              await KeyRelease(key)
+              await KeyPressAndRelease('BACK')
+              await windows.chat.setIgnoreMouseEvents(false)
+              await windows.chat.focus()
+              windows.chat.webContents.send('chatInput', true)
+            }
           } else if (keyBinds['chat'] == 'RETURN') {
             stratagemPending = false
             stratagemReady = false
