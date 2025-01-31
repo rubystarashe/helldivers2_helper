@@ -222,10 +222,13 @@ setInterval(async () => {
   try {
     await ipcRenderer.invoke('check_update')
   } catch (e) {}
-}, 1000 * 60 * 10)
+}, 1000 * 60 * 1)
 
+const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 const _process = ref(false)
 onMounted(async () => {
+  await ipcRenderer.invoke('check_update')
+  await sleep(1000)
   _process.value = await ipcRenderer.invoke('loaded', 'main')
   if (!_process.value?.isDev) {
     onkeydown = e => {

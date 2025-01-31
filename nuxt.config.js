@@ -47,7 +47,7 @@ export default {
 
   nitro: {
     output: {
-      publicDir: '../dist'
+      publicDir: './dist'
     }
   },
 

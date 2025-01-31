@@ -14,9 +14,7 @@
 const _visible = ref(false)
 ipcRenderer.on('visible', v => {
   if (!v) visible.value = v
-  else setTimeout(() => {
-    _visible.value = v
-  }, 1000)
+  _visible.value = v
 })
 
 const { public: { version: $version } } = useRuntimeConfig()
