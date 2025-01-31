@@ -654,6 +654,22 @@ const createMainWindow = () => {
           }
           return
         }
+        switch (key) {
+          case 'RMENU':
+          case 'KANJI':
+          case 'NEXT':
+          case 'RCONTROL':
+            if (stratagemPending) {
+              await KeyRelease(key)
+              await KeyPressAndRelease('BACK')
+              await windows.chat.setIgnoreMouseEvents(false)
+              await windows.chat.focus()
+              windows.chat.webContents.send('chatInput', true)
+              // const chatHWND = windows.chat.getNativeWindowHandle()
+              // await setIMEMode(chatHWND)
+            }
+            return
+        }
 
         if (key == keyBinds['chat']) {
           if (pendingDuringChatKey) return

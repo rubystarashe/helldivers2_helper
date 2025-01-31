@@ -158,6 +158,13 @@
           <div class="option">
             <div class="meta">
               <div class="deco"/>
+              <div class="name">폭발 석궁 연사 모드</div>
+            </div>
+            <div class="description">준비중</div>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
               <div class="name">아크 발사기 연사 모드</div>
             </div>
             <div class="description">준비중</div>
