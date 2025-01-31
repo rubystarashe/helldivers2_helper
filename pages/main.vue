@@ -81,14 +81,14 @@
           <div class="option">
             <div class="meta">
               <div class="deco"/>
-              <div class="name">스트라타젬 즉시 사용</div>
+              <div class="name">스트라타젬 즉시 투척</div>
             </div>
             <input type="checkbox" class="checkbox" v-model="_stratagem_instant_fire"/>
           </div>
           <div class="option">
             <div class="meta">
               <div class="deco"/>
-              <div class="name">스트라타젬 즉시 사용 딜레이</div>
+              <div class="name">스트라타젬 투척 딜레이</div>
             </div>
             <input class="input" type="number" v-model="_stratagem_instant_fire_delay"/>
           </div>

@@ -54,7 +54,8 @@
       "output": "package"
     },
     "win": {
-      "target": "nsis"
+      "target": "nsis",
+      "requestedExecutionLevel": "requireAdministrator"
     }
   }
 }
