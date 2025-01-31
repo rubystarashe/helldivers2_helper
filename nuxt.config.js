@@ -1,7 +1,13 @@
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
+
+const packageJson = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf-8'));
+const version = packageJson.version;
+
 export default {
   runtimeConfig: {
     public: {
-      version: '0.0.1',
+      version,
     },
   },
 

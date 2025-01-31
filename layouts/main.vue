@@ -1,7 +1,7 @@
 <template>
   <div class="layout" :class="{ visible: _visible }">
     <div class="titlebar">
-      <div class="title">Helldivers2 Helper</div>
+      <div class="title">Helldivers2 Helper - v{{ $version }}</div>
       <ElectronWindowControl />
     </div>
     <div class="page">
@@ -18,6 +18,8 @@ ipcRenderer.on('visible', v => {
     _visible.value = v
   }, 1000)
 })
+
+const { public: { version: $version } } = useRuntimeConfig()
 </script>
 
 <style lang="scss" scoped>
