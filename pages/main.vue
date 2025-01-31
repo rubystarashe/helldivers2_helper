@@ -177,6 +177,16 @@
             <div class="description">준비중</div>
           </div>
         </div>
+        <div class="section">
+          <h3 class="title">기타 설정</h3>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">한글 채팅창 좌측상단으로</div>
+            </div>
+            <div class="button" @click="f_chat_lefttop">초기화</div>
+          </div>
+        </div>
       </div>
       <div class="textbox">
         <div class="textboxtitle">
@@ -438,6 +448,10 @@ onMounted(() => {
   _default_delay.value = localStorage.getItem('inputDelay') ? parseInt(localStorage.getItem('inputDelay')) : 20
   _cinematic_mode.value = localStorage.getItem('cinematic_mode') ? localStorage.getItem('cinematic_mode') == 'true' : false
 })
+
+const f_chat_lefttop = () => {
+  ipcRenderer.send('chat_lefttop')
+}
 </script>
 
 <style lang="scss" scoped>
@@ -608,6 +622,14 @@ onMounted(() => {
                 border-color: rgb(255, 232, 0);
                 background-color: rgb(255, 232, 0);
             }
+          }
+          .button {
+            background: rgb(255, 232, 0);
+            padding: 3px 6px;
+            font-size: 14px;
+            color: black;
+            font-weight: 500;
+            cursor: pointer;
           }
         }
       }

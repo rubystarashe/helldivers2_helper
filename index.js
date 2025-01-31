@@ -456,6 +456,7 @@ const createMainWindow = () => {
   let chatInputting = false
   ipcMain.on('chatInput', async (_, chat) => {
     if (chatInputting) return
+    windows['chat'].setIgnoreMouseEvents(true)
     chatInputting = true
     await windowFocus(gameHWND)
     while (!focuswindowIsGame()) {
@@ -469,6 +470,7 @@ const createMainWindow = () => {
     chatInputting = false
   })
   ipcMain.handle('chatInputInit', async () => {
+    windows['chat'].setIgnoreMouseEvents(false)
     await KeyPressAndRelease('I')
     return true
   })
@@ -814,13 +816,20 @@ const createMainWindow = () => {
         windows['overlay'].webContents.send('visible', true)
         windows['overlay'].webContents.send('cinematic_mode', cinematic_mode)
 
-        windows['chat'].setSize(parseInt(rect.height / 3.5), parseInt(rect.height / 2))
-        windows['chat'].setPosition(parseInt(rect.width - rect.height / 40 - rect.height / 3.5), parseInt(rect.height - rect.height / 13 - rect.height / 2))
+        if (!windows['chat'].inited) {
+          windows['chat'].setSize(parseInt(rect.height / 3.1), 40)
+          windows['chat'].setPosition(parseInt(rect.width - rect.height / 40 - rect.height / 3.3), parseInt(rect.height - rect.height / 13 - 40))
+          windows['chat'].inited = true
+        }
       } else {
         windows['overlay'].webContents.send('visible', false)
       }
     } catch (e) {}
   }, 1000 / 6)
+
+  ipcMain.on('chat_lefttop', () => {
+    windows['chat'].setPosition(0, 0)
+  })
 
   ipcMain.handle('loaded', async (_, window) => {
     if (windows[window].isLoaded) return { isDev }

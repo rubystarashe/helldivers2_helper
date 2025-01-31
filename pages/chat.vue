@@ -1,7 +1,8 @@
 <template>
   <div class="chat" :class="{ visible: _visible }">
-    <input v-model="_chat" @input="$event => _chat = $event.target.value" ref="r_chat" @keydown.enter="f_sendChat" @keydown.esc="f_closeChat">
     <div class="name">한글입력중</div>
+    <input v-model="_chat" @input="$event => _chat = $event.target.value" ref="r_chat" @keydown.enter="f_sendChat" @keydown.esc="f_closeChat">
+    <div class="cover"/>
   </div>
 </template>
 
@@ -77,37 +78,44 @@ const f_closeChat = () => {
   width: 100%;
   height: 100%;
   pointer-events: none;
+  display: flex;
   &.visible {
     opacity: 1;
   }
   input {
     pointer-events: auto;
-    position: fixed;
-    bottom: .1vh;
-    right: 0;
     ime-mode: auto;
-    width: 90%;
     border: none;
-    height: 5vh;
-    font-size: 2.8vh;
+    height: 100%;
+    font-size: 20px;
+    width: 100%;
     padding: 0;
     background: rgba(0, 0, 0, 1);
     color: white;
     font-weight: 300;
+    padding-left: 10px;
     &:focus {
       outline: none;
     }
   }
   .name {
-    position: fixed;
-    left: 0;
-    bottom: 5vh;
     background: white;
-    font-size: 2vh;
-    background: white;
+    font-size: 20px;
+    height: 100%;
     padding: 2px 4px;
     color: black;
-    opacity: .8;
+    flex-shrink: 0;
+    display: flex;
+    padding-top: 4px;
+  }
+  .cover {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    -webkit-user-select: none;
+    -webkit-app-region: drag;
   }
 }
 </style>
