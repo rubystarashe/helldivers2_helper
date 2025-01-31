@@ -817,8 +817,8 @@ const createMainWindow = () => {
         windows['overlay'].webContents.send('cinematic_mode', cinematic_mode)
 
         if (!windows['chat'].inited) {
-          windows['chat'].setSize(parseInt(rect.height / 3.1), 40)
-          windows['chat'].setPosition(parseInt(rect.width - rect.height / 40 - rect.height / 3.3), parseInt(rect.height - rect.height / 13 - 40))
+          windows['chat'].setSize(parseInt(rect.height / 3), 40)
+          windows['chat'].setPosition(parseInt(rect.width - rect.height / 40 - rect.height / 3), parseInt(rect.height - rect.height / 13 - 40))
           windows['chat'].inited = true
         }
       } else {
