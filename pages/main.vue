@@ -108,7 +108,7 @@
           </div>
         </div>
         <div class="section">
-          <h3 class="title">한글 채팅창 설정정</h3>
+          <h3 class="title">한글 채팅창 설정</h3>
           <div class="option">
             <div class="meta">
               <div class="deco"/>
