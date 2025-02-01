@@ -27,6 +27,7 @@ onMounted(async () => {
   pointer-events: none !important;
 }
 body, pre {
+  background: rgba(0, 0, 0, 0);
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;

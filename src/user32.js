@@ -776,6 +776,52 @@ export const MouseRightClick = async (ms = 5) => {
   await MouseRightRelease()
 }
 
+export const MoveMouse = async (dx, dy) => {
+  await load({
+    library: user32Library,
+    funcName: 'SendInput',
+    retType: DataType.I32,
+    paramsType: [DataType.I32, DataType.External, DataType.I32],
+    paramsValue: [
+      1,
+      unwrapPointer(createPointer({
+        paramsType: [{
+          type: DataType.I32,
+          "???": DataType.I32,
+          dx: DataType.I32,
+          dy: DataType.I32,
+          mouseData: DataType.I32,
+          dwFlags: DataType.I32,
+          time: DataType.I32,
+          dwExtraInfo: DataType.I64
+        }],
+        paramsValue: [{
+          type: 0, // 마우스 이벤트
+          "???": 0,
+          dx,
+          dy,
+          mouseData: 0,
+          dwFlags: 0x0001, // MOUSEEVENTF_MOVE
+          time: 0,
+          dwExtraInfo: 0
+        }]
+      }))[0],
+      40
+    ]
+  })
+}
+
+export const MoveMouseSmoothly = async (dx, dy, duration = 100, steps = 20) => {
+  const stepX = dx / steps
+  const stepY = dy / steps
+  const stepDelay = duration / steps
+  
+  for (let i = 1; i <= steps; i++) {
+    await MoveMouse(Math.round(stepX), Math.round(stepY))
+    await sleep(stepDelay)
+  }
+}
+
 export const MoveMouseTo = async (x, y) => {
   await load({
     library: user32Library,

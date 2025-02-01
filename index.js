@@ -1,10 +1,14 @@
-import { Key, keyboard, getForegroundWindowHWND, getWindowText, getWindowRect, KeyPress, KeyRelease, KeyPressAndRelease, MouseLeftClick, MouseRightClick, windowFocus, sendText } from './src/user32.js'
+import { MoveMouse, Key, keyboard, getForegroundWindowHWND, getWindowText, getWindowRect, KeyPress, KeyRelease, KeyPressAndRelease, MouseLeftClick, MouseRightClick, windowFocus, sendText, MouseLeftPress, MouseLeftRelease, MouseRightPress, MouseRightRelease } from './src/user32.js'
 import { app, BrowserWindow, protocol, net, ipcMain, Notification, Menu, dialog, shell } from 'electron'
 import pkg from 'electron-updater'
 const { autoUpdater } = pkg
 import path from 'path'
 import { getCurrentSteamUser, getSteamID64, getSteamInfo, getUserConfigPath, readUserConfig } from './steam.js'
 import fs from 'fs'
+import { createRequire } from 'module';
+
+const require = createRequire(import.meta.url);
+const lerp = require('lerp');
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -24,6 +28,10 @@ app.setAppLogsPath()
 const logpath = app.getPath('logs')
 const userdatapath = app.getPath('userData')
 
+app.commandLine.appendSwitch('use-angle', 'd3d11')
+app.commandLine.appendSwitch('enable-gpu')
+app.commandLine.appendSwitch('enable-native-gpu-memory-buffers')
+
 
 let keyBinds = {
   rotatekey: 'T',
@@ -36,6 +44,11 @@ let keyBinds = {
   sprint: 'LSHIFT',
   dive: 'LMENU',
 
+  move_forward: 'W',
+  move_back: 'S',
+  move_left: 'A',
+  move_right: 'D',
+
   stratagem_console: 'LCONTROL',
 
   weapon_1: '1',
@@ -45,6 +58,8 @@ let keyBinds = {
   weapon_5: '5',
   granade: 'G',
   heal: 'V',
+
+  reload: 'R',
 
   weapon_swap: null,
 
@@ -60,7 +75,9 @@ let keyBinds = {
   left: 'A',
   right: 'D',
 
-  HANGUL: 'HANGUL'
+  HANGUL: 'HANGUL',
+
+  autokey: 'XBUTTON1'
 }
 
 const settingPath = path.join(userdatapath, 'user.settings.json')
@@ -116,6 +133,51 @@ ipcMain.on('cinematic_mode', (_, value) => {
   } catch (e) {}
 })
 
+let autokey_enabled = false
+ipcMain.on('autokey_enabled', (_, value) => {
+  autokey_enabled = value
+  settings.autokey_enabled = autokey_enabled
+  saveSetting()
+})
+let autokey_type = ''
+ipcMain.on('autokey_type', (_, value) => {
+  autokey_type = value
+  settings.autokey_type = autokey_type
+  saveSetting()
+})
+
+let auto_arc_delay = 1100
+ipcMain.on('auto_arc_delay', (_, value) => {
+  auto_arc_delay = value
+  settings.auto_arc_delay = auto_arc_delay
+  saveSetting()
+})
+let auto_railgun_delay = 2900
+ipcMain.on('auto_railgun_delay', (_, value) => {
+  auto_railgun_delay = value
+  settings.auto_railgun_delay = auto_railgun_delay
+  saveSetting()
+})
+let auto_railgun_reload_delay = 1000
+ipcMain.on('auto_railgun_reload_delay', (_, value) => {
+  auto_railgun_reload_delay = value
+  settings.auto_railgun_reload_delay = auto_railgun_reload_delay
+  saveSetting()
+})
+let auto_eruptor_delay = 400
+ipcMain.on('auto_eruptor_delay', (_, value) => {
+  auto_eruptor_delay = value
+  settings.auto_eruptor_delay = auto_eruptor_delay
+  saveSetting()
+})
+let apw_start_rate = 240
+ipcMain.on('apw_start_rate', (_, value) => {
+  apw_start_rate = parseInt(value) || 0
+  settings.apw_start_rate = apw_start_rate
+  saveSetting()
+})
+
+
 if (fs.existsSync(settingPath)) {
   settings = JSON.parse(fs.readFileSync(settingPath, 'utf8'))
   if (settings.instantfire !== undefined) instantfire = settings.instantfire
@@ -125,6 +187,13 @@ if (fs.existsSync(settingPath)) {
   if (settings.rotate_delay !== undefined) rotate_delay = settings.rotate_delay
   if (settings.instant_chat !== undefined) instant_chat = settings.instant_chat
   if (settings.cinematic_mode !== undefined) cinematic_mode = settings.cinematic_mode
+  if (settings.autokey_enabled !== undefined) autokey_enabled = settings.autokey_enabled
+  if (settings.autokey_type !== undefined) autokey_type = settings.autokey_type
+  if (settings.auto_arc_delay !== undefined) auto_arc_delay = settings.auto_arc_delay
+  if (settings.auto_railgun_delay !== undefined) auto_railgun_delay = settings.auto_railgun_delay
+  if (settings.auto_railgun_reload_delay !== undefined) auto_railgun_reload_delay = settings.auto_railgun_reload_delay
+  if (settings.auto_eruptor_delay !== undefined) auto_eruptor_delay = settings.auto_eruptor_delay
+  if (settings.apw_start_rate !== undefined) apw_start_rate = settings.apw_start_rate
 }
 
 let stratagemRunning = false
@@ -293,6 +362,31 @@ setInterval(async () => {
         const newkey = bindHelldivers2Key(setting.input)
         if (newkey) keyBinds['dive'] = newkey
       }
+      if (Avatar?.Reload) {
+        const setting = Avatar.Reload.find(e => e.device_type == 'Keyboard')
+        const newkey = bindHelldivers2Key(setting.input)
+        if (newkey) keyBinds['reload'] = newkey
+      }
+      if (Avatar?.MoveForward) {
+        const setting = Avatar.MoveForward.find(e => e.device_type == 'Keyboard')
+        const newkey = bindHelldivers2Key(setting.input)
+        if (newkey) keyBinds['move_forward'] = newkey
+      }
+      if (Avatar?.MoveBack) {
+        const setting = Avatar.MoveBack.find(e => e.device_type == 'Keyboard')
+        const newkey = bindHelldivers2Key(setting.input)
+        if (newkey) keyBinds['move_back'] = newkey
+      }
+      if (Avatar?.MoveLeft) {
+        const setting = Avatar.MoveLeft.find(e => e.device_type == 'Keyboard')
+        const newkey = bindHelldivers2Key(setting.input)
+        if (newkey) keyBinds['move_left'] = newkey
+      }
+      if (Avatar?.MoveRight) {
+        const setting = Avatar.MoveRight.find(e => e.device_type == 'Keyboard')
+        const newkey = bindHelldivers2Key(setting.input)
+        if (newkey) keyBinds['move_right'] = newkey
+      }
       for (const [ key, value ] of Object.entries(Stratagem || {})) {
         const setting = value.find(e => e.device_type == 'Keyboard')
         const newkey = bindHelldivers2Key(setting.input)
@@ -358,7 +452,8 @@ const createMainWindow = () => {
     transparent: true,
     show: false,
     webPreferences: {
-      preload: path.join(app.getAppPath(), '/preload.js')
+      preload: path.join(app.getAppPath(), '/preload.js'),
+      backgroundThrottling: false
     },
     icon: path.join(app.getAppPath(), 'icon.png'),
     frame: false,
@@ -455,6 +550,30 @@ const createMainWindow = () => {
     queueRunning = false
   }
 
+  const inputFire = async (delay = inputDelay, type = 'click') => {
+    switch (keyBinds['fire']) {
+      case 'LBUTTON':
+        if (type == 'press') await MouseLeftPress()
+        else if (type == 'release') await MouseLeftRelease()
+        else await MouseLeftClick(delay)
+        break
+      case 'RBUTTON':
+        if (type == 'press') await MouseRightPress()
+        else if (type == 'release') await MouseRightRelease()
+        else await MouseRightClick(delay)
+        break
+      default:
+        if (type == 'press') await KeyPress(keyBinds['fire'])
+        else if (type == 'release') await KeyRelease(keyBinds['fire'])
+        else await KeyPressAndRelease(keyBinds['fire'], delay)
+        break
+    }
+  }
+  const waitforrotatefree = async () => {
+    while (keyboard.status[keyBinds['rotatekey']] || keyboard.status[keyBinds['rotatekey_reverse']]) {
+      await sleep(1000 / 120)
+    }
+  }
   const inputStratagem = async (stratagem, delay = inputDelay) => {
     const { promise, resolve } = Promise.withResolvers()
     stratagemQueue.push(async () => {
@@ -481,10 +600,12 @@ const createMainWindow = () => {
         freekeys.push(keyBinds['right'])
         await KeyRelease(keyBinds['right'])
       }
+      await waitforrotatefree()
       await KeyPress(keyBinds['stratagem_console'])
       await sleep(delay)
       for (const key of stratagem.keys) {
         await sleep(delay)
+        await waitforrotatefree()
         await KeyPressAndRelease(keyBinds[key], delay)
       }
       await KeyRelease(keyBinds['stratagem_console'])
@@ -497,17 +618,7 @@ const createMainWindow = () => {
         stratagemReady = false
       } else {
         if (instantfire) {
-          switch (keyBinds['fire']) {
-            case 'LBUTTON':
-              await MouseLeftClick(delay)
-              break
-            case 'RBUTTON':
-              await MouseRightClick(delay)
-              break
-            default:
-              await KeyPressAndRelease(keyBinds['fire'], delay)
-              break
-          }
+          await inputFire(delay)
           await sleep(delay)
         }
       }
@@ -593,6 +704,30 @@ const createMainWindow = () => {
         }
       }
       if (!focuswindowIsGame()) return
+
+      if (key == keyBinds['autokey']) {
+        if (state && auto_reloading) return
+        autokey_enabled = state
+        if (autokey_type == 'railgun' && !state && railgun_fired) {
+          if (keyboard.status[keyBinds['fire']]) await inputFire(0, 'release')
+          await sleep(inputDelay)
+          await KeyPressAndRelease(keyBinds['reload'], inputDelay)
+        }
+        if (!state && keyboard.status[keyBinds['fire']]) {
+          await inputFire(0, 'release')
+        }
+        return
+      } else {
+        switch (key) {
+          case keyBinds['map']:
+          case keyBinds['stratagem_console']:
+          case keyBinds['dropopen']:
+          case keyBinds['chat']:
+          case keyBinds['dive']:
+            autokey_enabled = false
+            break
+        }
+      }
 
       if (cinematic_mode) {
         if (key == keyBinds['dive'] && !state) {
@@ -764,6 +899,10 @@ const createMainWindow = () => {
             key == keyBinds['granade'] ||
             key == keyBinds['heal']
         ) {
+          if (key == keyBinds['weapon_1']) lastusedweapon = 1
+          if (key == keyBinds['weapon_2']) lastusedweapon = 2
+          if (key == keyBinds['weapon_3']) lastusedweapon = 3
+          if (key == keyBinds['weapon_4']) lastusedweapon = 4
           stratagemReady = false
           return
         }
@@ -895,6 +1034,106 @@ const createMainWindow = () => {
     } catch (e) {}
   }, 1000 / 6)
 
+  const enginerunning = () => {
+    const isgame = focuswindowIsGame()
+    if (!isgame) autokey_enabled = false
+    return autokey_enabled && autokey_type
+  }
+  let lastusedweapon = 1
+  const eunginesleep = async (ms) => {
+    const now = Date.now()
+    const end = now + ms
+    while (Date.now() + inputDelay < end) {
+      if (!enginerunning()) break
+      await sleep(inputDelay)
+    }
+  }
+  let railgun_fired = false
+  let apw_start = apw_start_rate
+  let apw_counts = 0
+  let auto_reloading = false
+  const autokey_engine = async () => {
+    if (!enginerunning()) {
+      await sleep(1000 / 120)
+      apw_start = apw_start_rate
+      apw_counts = 0
+      autokey_engine()
+      return
+    }
+    switch (autokey_type) {
+      case 'arc':
+        // console.time('arc')
+        await inputFire(0, 'press')
+        if (!enginerunning()) break
+        await eunginesleep(auto_arc_delay)
+        if (!enginerunning()) break
+        await inputFire(0, 'release')
+        await sleep(inputDelay)
+        // console.timeEnd('arc')
+        break
+      case 'railgun':
+        await inputFire(0, 'press')
+        railgun_fired = true
+        if (!enginerunning()) break
+        await eunginesleep(auto_railgun_delay)
+        if (!enginerunning()) break
+        await inputFire(0, 'release')
+        if (!enginerunning()) break
+        await sleep(inputDelay)
+        if (!enginerunning()) break
+        railgun_fired = false
+        auto_reloading = true
+        await KeyPressAndRelease(keyBinds['reload'], inputDelay)
+        await sleep(auto_railgun_reload_delay)
+        auto_reloading = false
+        break
+      case 'eruptor':
+        if (lastusedweapon != 1) {
+          await KeyPressAndRelease(keyBinds['weapon_1'], inputDelay)
+          await sleep(auto_eruptor_delay * 2)
+        }
+        await inputFire(inputDelay)
+        await sleep(inputDelay)
+        if (!enginerunning()) break
+        await KeyPressAndRelease(keyBinds['weapon_swap'], inputDelay)
+        await sleep(auto_eruptor_delay)
+        await KeyPressAndRelease(keyBinds['weapon_swap'], inputDelay)
+        await sleep(auto_eruptor_delay)
+        break
+      case 'apw':
+        await inputFire(inputDelay)
+        let recover = Date.now() + (150 - inputDelay) // 400rpm = 150ms
+        if (keyboard.status[keyBinds['move_forward']] ||
+            keyboard.status[keyBinds['move_back']] ||
+            keyboard.status[keyBinds['move_left']] ||
+            keyboard.status[keyBinds['move_right']]
+        ) {
+          apw_start *= 1.3
+        }
+        await MoveMouse(0, parseInt(apw_start))
+        apw_start /= 2
+        apw_counts++
+        if (apw_counts < 7) {
+          while (Date.now() + inputDelay < recover) {
+            await sleep(inputDelay)
+          }
+        } else {
+          auto_reloading = true
+          await KeyPressAndRelease(keyBinds['reload'], inputDelay)
+          await sleep(1800)
+          auto_reloading = false
+          apw_start = apw_start_rate
+          apw_counts = 0
+        }
+        break
+      default:
+        await sleep(1000 / 120)
+        break
+    }
+    autokey_engine()
+  }
+  autokey_engine()
+
   ipcMain.on('chat_lefttop', () => {
     windows['chat'].setPosition(0, 0)
   })
@@ -925,7 +1164,14 @@ const createMainWindow = () => {
         chatinputdelay,
         rotate_delay,
         instant_chat,
-        cinematic_mode
+        cinematic_mode,
+        autokey_type,
+        autokey_enabled,
+        auto_arc_delay,
+        auto_railgun_delay,
+        auto_railgun_reload_delay,
+        auto_eruptor_delay,
+        apw_start_rate
       })
 
       windows[window].show()

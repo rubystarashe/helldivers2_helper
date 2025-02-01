@@ -155,52 +155,60 @@
               <div class="name">시네마틱 모드 활성화</div>
             </div>
             <input type="checkbox" v-if="_keyBinds.cinematic_mode" class="checkbox" v-model="_cinematic_mode"/>
-            <div class="description" v-else>HUD 켜기/끄기 키설정 필요</div>
+            <div class="description" v-else>HUD 켜기/끄기<br/>키설정 필요</div>
           </div>
         </div>
         <div class="section">
-          <h3 class="title">기계화 설정</h3>
+          <h3 class="title">기계화 설정 (실험실)</h3>
           <div class="option">
             <div class="meta">
               <div class="deco"/>
               <div class="name">기계화 전투 단축키</div>
             </div>
-            <div class="description">준비중</div>
+            <div class="description">마우스버튼1</div>
           </div>
           <div class="option">
             <div class="meta">
               <div class="deco"/>
-              <div class="name">레일건 초과충전 방지</div>
+              <div class="name">기계화 전투 사용 안함</div>
             </div>
-            <div class="description">준비중</div>
+            <input type="radio" class="radio" v-model="_autokey_type" :value="''">
           </div>
           <div class="option">
             <div class="meta">
               <div class="deco"/>
-              <div class="name">이럽터 연사 모드</div>
+              <div class="name">폭발 무기 연사</div>
             </div>
-            <div class="description">준비중</div>
+            <input type="radio" v-if="_keyBinds.weapon_swap" class="radio" v-model="_autokey_type" value="eruptor">
+            <div class="description" v-else>장비 교체(짧은무기)<br/>키설정 필요</div>
           </div>
           <div class="option">
             <div class="meta">
               <div class="deco"/>
-              <div class="name">폭발 석궁 연사 모드</div>
+              <div class="name">레일건 자동 조작 보조</div>
             </div>
-            <div class="description">준비중</div>
+            <input type="radio" class="radio" v-model="_autokey_type" value="railgun">
           </div>
           <div class="option">
             <div class="meta">
               <div class="deco"/>
-              <div class="name">아크 발사기 연사 모드</div>
+              <div class="name">아크 발사기 자동 조작 보조</div>
             </div>
-            <div class="description">준비중</div>
+            <input type="radio" class="radio" v-model="_autokey_type" value="arc">
           </div>
           <div class="option">
             <div class="meta">
               <div class="deco"/>
-              <div class="name">자동 반동 제어</div>
+              <div class="name">대물소총 연발 사격</div>
             </div>
-            <div class="description">준비중</div>
+            <input type="radio" class="radio" v-model="_autokey_type" value="apw">
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">대물소총 반동 제어 감도</div>
+            </div>
+            <input class="input" type="number" v-model="_apw_start_rate"/>
           </div>
         </div>
       </div>
@@ -484,6 +492,57 @@ ipcRenderer.on('cinematic_mode', v => {
   _cinematic_mode.value = v
 })
 
+const _autokey_enabled = ref(false)
+watch(_autokey_enabled, () => {
+  ipcRenderer.send('autokey_enabled', _autokey_enabled.value)
+})
+ipcRenderer.on('autokey_enabled', v => {
+  _autokey_enabled.value = v
+})
+const _autokey_type = ref(null)
+watch(_autokey_type, () => {
+  ipcRenderer.send('autokey_type', _autokey_type.value)
+})
+ipcRenderer.on('autokey_type', v => {
+  _autokey_type.value = v
+})
+
+const _auto_arc_delay = ref(1000)
+watch(_auto_arc_delay, () => {
+  ipcRenderer.send('auto_arc_delay', _auto_arc_delay.value)
+})
+ipcRenderer.on('auto_arc_delay', v => {
+  _auto_arc_delay.value = v
+})
+const _auto_railgun_delay = ref(2900)
+watch(_auto_railgun_delay, () => {
+  ipcRenderer.send('auto_railgun_delay', _auto_railgun_delay.value)
+})
+ipcRenderer.on('auto_railgun_delay', v => {
+  _auto_railgun_delay.value = v
+})
+const _auto_railgun_reload_delay = ref(1000)
+watch(_auto_railgun_reload_delay, () => {
+  ipcRenderer.send('auto_railgun_reload_delay', _auto_railgun_reload_delay.value)
+})
+ipcRenderer.on('auto_railgun_reload_delay', v => {
+  _auto_railgun_reload_delay.value = v
+})
+const _auto_eruptor_delay = ref(400)
+watch(_auto_eruptor_delay, () => {
+  ipcRenderer.send('auto_eruptor_delay', _auto_eruptor_delay.value)
+})
+ipcRenderer.on('auto_eruptor_delay', v => {
+  _auto_eruptor_delay.value = v
+})
+const _apw_start_rate = ref(240)
+watch(_apw_start_rate, () => {
+  ipcRenderer.send('apw_start_rate', _apw_start_rate.value)
+})
+ipcRenderer.on('apw_start_rate', v => {
+  _apw_start_rate.value = v
+})
+
 ipcRenderer.on('initSettings', v => {
   _stratagem_instant_fire.value = v.instantfire
   _stratagem_instant_fire_delay.value = v.instantfire_delay
@@ -492,6 +551,13 @@ ipcRenderer.on('initSettings', v => {
   _rotate_delay.value = v.rotate_delay
   _instant_chat.value = v.instant_chat
   _cinematic_mode.value = v.cinematic_mode
+  _autokey_enabled.value = v.autokey_enabled
+  _autokey_type.value = v.autokey_type
+  _auto_arc_delay.value = v.auto_arc_delay
+  _auto_railgun_delay.value = v.auto_railgun_delay
+  _auto_railgun_reload_delay.value = v.auto_railgun_reload_delay
+  _auto_eruptor_delay.value = v.auto_eruptor_delay
+  _apw_start_rate.value = v.apw_start_rate
 })
 
 // onMounted(() => {
@@ -653,8 +719,8 @@ const f_open_config_path = () => {
             display: flex;
             text-align: left;
             align-items: center;
-            width: 100%;
             margin-right: 10px;
+            flex-shrink: 0;
             .deco {
               width: 3px;
               height: 15px;
@@ -674,6 +740,7 @@ const f_open_config_path = () => {
             text-align: right;
             word-break: keep-all;
             min-width: 50px;
+            width: 100%;
           }
           .input {
             width: 50px;
@@ -700,6 +767,34 @@ const f_open_config_path = () => {
             &[type="checkbox"]:checked {
                 border-color: rgb(255, 232, 0);
                 background-color: rgb(255, 232, 0);
+            }
+          }
+          .radio {
+            &[type="radio"] {
+              appearance: none;
+              width: 17px;
+              height: 17px;
+              border: 1.5px solid rgb(150, 150, 150);
+              border-radius: 50%;
+              cursor: pointer;
+              position: relative;
+            }
+            
+            &[type="radio"]:checked {
+              border-color: rgb(255, 232, 0);
+              background-color: transparent;
+              
+              &::after {
+                content: '';
+                position: absolute;
+                width: 9px;
+                height: 9px;
+                border-radius: 50%;
+                background-color: rgb(255, 232, 0);
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+              }
             }
           }
           .button {
