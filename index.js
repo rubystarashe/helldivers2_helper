@@ -742,12 +742,12 @@ const createMainWindow = () => {
 
         if (key == keyBinds['weapon_function'] && state) {
           if (stratagem_opened || map_opened) return
-          if (weapon_function_key_type == 'LongPress') {
+          if (weapon_function_key_type == 'LongPress' || weapon_function_key_type == 'Press') {
             if (long_delay_listeners[keyBinds['weapon_function']]) return
             long_delay_listeners[keyBinds['weapon_function']] = setTimeout(async () => {
               long_delay_listeners[keyBinds['weapon_function']] = null
               await cinematic_input_queue_run()
-            }, 300)
+            }, weapon_function_key_type == 'LongPress' ? 300 : 50)
           } else {
             cancelable_acting = true
           }
@@ -755,7 +755,7 @@ const createMainWindow = () => {
         }
         if (key == keyBinds['weapon_function'] && !state) {
           if (stratagem_opened || map_opened) return
-          if (weapon_function_key_type == 'LongPress') {
+          if (weapon_function_key_type == 'LongPress' || weapon_function_key_type == 'Press') {
             if (long_delay_listeners[keyBinds['weapon_function']]) {
               clearTimeout(long_delay_listeners[keyBinds['weapon_function']])
               long_delay_listeners[keyBinds['weapon_function']] = null
