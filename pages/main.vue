@@ -601,7 +601,7 @@ watch(_mousestratagem_threshold, () => {
 ipcRenderer.on('mousestratagem_threshold', v => {
   _mousestratagem_threshold.value = v
 })
-const _mousestratagem_delay = ref(50)
+const _mousestratagem_delay = ref(100)
 watch(_mousestratagem_delay, () => {
   ipcRenderer.send('mousestratagem_delay', _mousestratagem_delay.value)
 })

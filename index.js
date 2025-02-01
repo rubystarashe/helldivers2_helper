@@ -196,7 +196,7 @@ ipcMain.on('mousestratagem_threshold', (_, value) => {
   settings.mousestratagem_threshold = mousestratagem_threshold
   saveSetting()
 })
-let mousestratagem_delay = 50
+let mousestratagem_delay = 100
 ipcMain.on('mousestratagem_delay', (_, value) => {
   mousestratagem_delay = parseInt(value) || 0
   settings.mousestratagem_delay = mousestratagem_delay
