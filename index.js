@@ -470,8 +470,15 @@ const createMainWindow = () => {
     if (chat) await sendText(chat, chatinputdelay)
     await KeyPressAndRelease(keyBinds['chat'])
     windows.chat.setIgnoreMouseEvents(true)
+    await sleep(chatinputdelay)
+    if (cinematic_mode) {
+      await sleep(inputDelay)
+      await cinematic_input_queue_run()
+    }
     pendingDuringChatKey = false
     chatInputting = false
+    stratagemPending = false
+    stratagemReady = false
   })
   ipcMain.handle('chatInputInit', async () => {
     windows['chat'].setIgnoreMouseEvents(false)
@@ -624,27 +631,6 @@ const createMainWindow = () => {
           await cinematic_input_queue_run()
           return
         }
-
-        if (key == keyBinds['chat'] && !state) {
-          if (pendingDuringChatKey) return
-          if (keyBinds['chat'] != 'RETURN' && !cinematic_state) return
-          pendingDuringChatKey = true
-          if (!map_opened) await cinematic_input_queue_run()
-          await sleep(inputDelay)
-          await KeyPressAndRelease(keyBinds['chat'])
-          stratagemPending = true
-          stratagemReady = false
-          await sleep(inputDelay)
-          pendingDuringChatKey = false
-          return
-        }
-        if (keyBinds['chat'] != 'RETURN' && key == 'RETURN' && !state) {
-          if (pendingDuringChatKey) return
-          if (!map_opened) await cinematic_input_queue_run()
-          stratagemPending = false
-          stratagemReady = false
-          return
-        }
       }
 
       if (!state) {
@@ -671,7 +657,13 @@ const createMainWindow = () => {
           if (!stratagemPending) {
             stratagemPending = true
             stratagemReady = false
+            if (cinematic_mode && !map_opened) {
+              await cinematic_input_queue_run()
+              // await sleep(inputDelay)
+              await KeyPressAndRelease(keyBinds['chat'])
+            }
             if (instant_chat) {
+              pendingDuringChatKey = true
               await KeyRelease(key)
               await KeyPressAndRelease('BACK')
               await windows.chat.setIgnoreMouseEvents(false)
@@ -679,13 +671,21 @@ const createMainWindow = () => {
               windows.chat.webContents.send('chatInput', true)
             }
           } else if (keyBinds['chat'] == 'RETURN') {
+            if (cinematic_mode && !map_opened) await cinematic_input_queue_run()
             stratagemPending = false
             stratagemReady = false
           }
           return
         }
         if (key == 'RETURN') {
-          if (stratagemPending) stratagemPending = false
+          if (pendingDuringChatKey) return
+          if (stratagemPending) {
+            stratagemPending = false
+            if (cinematic_mode && !map_opened) {
+              await sleep(inputDelay)
+              await cinematic_input_queue_run()
+            }
+          }
           stratagemReady = false
           return
         }
@@ -704,6 +704,7 @@ const createMainWindow = () => {
   
         if (key == keyBinds['escape']) {
           stratagemPending = false
+          pendingDuringChatKey = false
           return
         }
   
@@ -932,9 +933,9 @@ if (!app.requestSingleInstanceLock()) {
   app.quit()
 } else {
   app.on('second-instance', (event, commandLine, workingDirectory) => {
-  if (windows.main) {
-    if (windows.main.isMinimized()) windows.main.restore()
-      windows.main.focus()
+    if (windows.main) {
+      if (windows.main.isMinimized()) windows.main.restore()
+        windows.main.focus()
     }
   })
 }
