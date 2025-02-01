@@ -293,7 +293,7 @@ setInterval(async () => {
         const newkey = bindHelldivers2Key(setting.input)
         if (newkey) keyBinds['dive'] = newkey
       }
-      for (const [ key, value ] of Object.entries(Stratagem)) {
+      for (const [ key, value ] of Object.entries(Stratagem || {})) {
         const setting = value.find(e => e.device_type == 'Keyboard')
         const newkey = bindHelldivers2Key(setting.input)
         if (!newkey) continue
@@ -323,7 +323,6 @@ setInterval(async () => {
       windows.main.webContents.send('steaminfo', { username, steamID64, gamePath, configPath, configInfo })
     }
   } catch (e) {
-    console.log(e)
     windows.main.webContents.send('steaminfo', { username, steamID64, gamePath, configPath })
   }
 }, 2000)
@@ -917,7 +916,7 @@ const createMainWindow = () => {
       windows[window].webContents.send('keyBinds', keyBinds)
       windows[window].webContents.send('visible', true)
       if (username && steamID64 && gamePath && configPath) windows.main.webContents.send('steaminfo', { username, steamID64, gamePath, configPath, configInfo })
-      else windows.main.webContents.send('steaminfo', { error: 'steam not found' })
+      // else windows.main.webContents.send('steaminfo', { error: 'steam not found' })
 
       windows[window].webContents.send('initSettings', {
         instantfire,
