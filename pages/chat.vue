@@ -1,7 +1,7 @@
 <template>
   <div class="chat" :class="{ visible: _visible }">
     <div class="name">한글입력중</div>
-    <input v-model="_chat" @input="$event => _chat = $event.target.value" ref="r_chat" @keydown.enter="f_sendChat" @keydown.esc="f_closeChat">
+    <input v-model="_chat" @input="$event => _chat = $event.target.value" ref="r_chat" spellcheck="false" @keydown.enter="f_sendChat" @keydown.esc="f_closeChat">
     <div class="cover"/>
   </div>
 </template>

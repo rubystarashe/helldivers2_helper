@@ -178,6 +178,19 @@ ipcMain.on('apw_start_rate', (_, value) => {
   settings.apw_start_rate = apw_start_rate
   saveSetting()
 })
+let heavy_start_rate = 50
+ipcMain.on('heavy_start_rate', (_, value) => {
+  heavy_start_rate = parseInt(value) || 0
+  settings.heavy_start_rate = heavy_start_rate
+  saveSetting()
+})
+let heavy_rpm = 750
+ipcMain.on('heavy_rpm', (_, value) => {
+  heavy_rpm = parseInt(value) || 0
+  settings.heavy_rpm = heavy_rpm
+  saveSetting()
+})
+
 let mousestratagem_enabled = false
 ipcMain.on('mousestratagem_enabled', (_, value) => {
   mousestratagem_enabled = value
@@ -219,6 +232,8 @@ if (fs.existsSync(settingPath)) {
   if (settings.auto_railgun_reload_delay !== undefined) auto_railgun_reload_delay = settings.auto_railgun_reload_delay
   if (settings.auto_eruptor_delay !== undefined) auto_eruptor_delay = settings.auto_eruptor_delay
   if (settings.apw_start_rate !== undefined) apw_start_rate = settings.apw_start_rate
+  if (settings.heavy_start_rate !== undefined) heavy_start_rate = settings.heavy_start_rate
+  if (settings.heavy_rpm !== undefined) heavy_rpm = settings.heavy_rpm
   if (settings.mousestratagem_enabled !== undefined) mousestratagem_enabled = settings.mousestratagem_enabled
   if (settings.mousestratagem_with_console !== undefined) mousestratagem_with_console = settings.mousestratagem_with_console
   if (settings.mousestratagem_threshold !== undefined) mousestratagem_threshold = settings.mousestratagem_threshold
@@ -1185,10 +1200,17 @@ const createMainWindow = () => {
   let railgun_fired = false
   let apw_start = apw_start_rate
   let apw_counts = 0
+  let heavy_start = heavy_start_rate
+  let heavy_firing = false
   let auto_reloading = false
   const autokey_engine = async () => {
     if (!enginerunning()) {
+      if (heavy_firing) {
+        await inputFire(0, 'release')
+        heavy_firing = false
+      }
       await sleep(1000 / 30)
+      heavy_start = heavy_start_rate
       apw_start = apw_start_rate
       apw_counts = 0
       autokey_engine()
@@ -1248,7 +1270,7 @@ const createMainWindow = () => {
         apw_start /= 2
         apw_counts++
         if (apw_counts < 7) {
-          while (Date.now() + inputDelay < recover) {
+          while (Date.now() < recover) {
             await sleep(inputDelay)
           }
         } else {
@@ -1259,6 +1281,23 @@ const createMainWindow = () => {
           apw_start = apw_start_rate
           apw_counts = 0
         }
+        break
+      case 'heavy':
+        if (!heavy_firing) heavy_firing = Date.now()
+        const rpmtick = 60000 / heavy_rpm
+        const tick = (Date.now() - heavy_firing) / rpmtick
+        heavy_firing = Date.now()
+        if (!keyboard.status[keyBinds['fire']]) await inputFire(0, 'press')
+        if (keyboard.status[keyBinds['move_forward']] ||
+            keyboard.status[keyBinds['move_back']] ||
+            keyboard.status[keyBinds['move_left']] ||
+            keyboard.status[keyBinds['move_right']]
+        ) {
+          heavy_start *= 1 + (tick / 5)
+        }
+        if (heavy_start > 0.000000001) await MoveMouse(0, parseInt(heavy_start))
+        heavy_start /= 1 + (tick)
+        await sleep(inputDelay)
         break
       default:
         await sleep(1000 / 30)
@@ -1306,6 +1345,8 @@ const createMainWindow = () => {
         auto_railgun_reload_delay,
         auto_eruptor_delay,
         apw_start_rate,
+        heavy_start_rate,
+        heavy_rpm,
         mousestratagem_enabled,
         mousestratagem_with_console,
         mousestratagem_threshold,

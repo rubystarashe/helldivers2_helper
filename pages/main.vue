@@ -237,6 +237,27 @@
           <div class="option">
             <div class="meta">
               <div class="deco"/>
+              <div class="name">중기관총 반동 제어 보조</div>
+            </div>
+            <input type="radio" class="radio" v-model="_autokey_type" value="heavy">
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">중기관총 반동 제어 감도</div>
+            </div>
+            <input class="input" type="number" v-model="_heavy_start_rate"/>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">중기관총 사용 RPM</div>
+            </div>
+            <input class="input" type="number" v-model="_heavy_rpm"/>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
               <div class="name">대물소총 연발 사격</div>
             </div>
             <input type="radio" class="radio" v-model="_autokey_type" value="apw">
@@ -580,6 +601,20 @@ watch(_apw_start_rate, () => {
 ipcRenderer.on('apw_start_rate', v => {
   _apw_start_rate.value = v
 })
+const _heavy_rpm = ref(750)
+watch(_heavy_rpm, () => {
+  ipcRenderer.send('heavy_rpm', _heavy_rpm.value)
+})
+ipcRenderer.on('heavy_rpm', v => {
+  _heavy_rpm.value = v
+})
+const _heavy_start_rate = ref(240)
+watch(_heavy_start_rate, () => {
+  ipcRenderer.send('heavy_start_rate', _heavy_start_rate.value)
+})
+ipcRenderer.on('heavy_start_rate', v => {
+  _heavy_start_rate.value = v
+})
 const _mousestratagem_enabled = ref(false)
 watch(_mousestratagem_enabled, () => {
   ipcRenderer.send('mousestratagem_enabled', _mousestratagem_enabled.value)
@@ -624,6 +659,8 @@ ipcRenderer.on('initSettings', v => {
   _auto_railgun_reload_delay.value = v.auto_railgun_reload_delay
   _auto_eruptor_delay.value = v.auto_eruptor_delay
   _apw_start_rate.value = v.apw_start_rate
+  _heavy_rpm.value = v.heavy_rpm
+  _heavy_start_rate.value = v.heavy_start_rate
   _mousestratagem_enabled.value = v.mousestratagem_enabled
   _mousestratagem_with_console.value = v.mousestratagem_with_console
   _mousestratagem_threshold.value = v.mousestratagem_threshold
