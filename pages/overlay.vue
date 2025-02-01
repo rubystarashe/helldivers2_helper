@@ -100,7 +100,7 @@ ipcRenderer.on('cinematic_mode', v => {
   align-items: center;
   .stratagems {
     position: fixed;
-    bottom: 10vh;
+    bottom: 50vh;
     display: flex;
     opacity: .5;
     .stratagem {
@@ -108,12 +108,12 @@ ipcRenderer.on('cinematic_mode', v => {
       display: flex;
       justify-content: center;
       align-items: center;
-      margin: 1vh;
+      margin: 5vh;
       background: rgba(0, 0, 0, .05);
-      border: .3vh solid transparent;
+      border: 1.5vh solid transparent;
       transform: scale(.8);
       .icon {
-        height: 6vh;
+        height: 30vh;
         opacity: .3;
         &.canuse {
           opacity: 1;
@@ -130,8 +130,8 @@ ipcRenderer.on('cinematic_mode', v => {
       }
       .rotatekey {
         position: absolute;
-        bottom: -1.5vh;
-        font-size: 2vh;
+        bottom: -7.5vh;
+        font-size: 10vh;
         background: white;
         padding: 2px 4px;
         color: black;
@@ -139,31 +139,31 @@ ipcRenderer.on('cinematic_mode', v => {
       .hotkey {
         position: absolute;
         top: -1.5vh;
-        font-size: 2vh;
+        font-size: 10vh;
         background: white;
         padding: 2px 4px;
         color: black;
       }
       &.reinforce {
-        margin-left: 3vh;
+        margin-left: 15vh;
       }
     }
     &.focusing {
       opacity: 1;
     }
     &.cinematic {
-      bottom: 1vh;
+      bottom: 5vh;
       .stratagem {
         .icon {
-          height: 4vh;
+          height: 20vh;
         }
         .rotatekey {
-          font-size: 1vh;
-          bottom: -.7vh;
+          font-size: 5vh;
+          bottom: -3.5vh;
         }
         .hotkey {
-          font-size: 1vh;
-          top: -.7vh;
+          font-size: 5vh;
+          top: -3.5vh;
         }
       }
     }

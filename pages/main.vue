@@ -44,6 +44,15 @@
       </div>
     </div>
     <div class="settings">
+      <div class="error" v-if="_steaminfo?.error">
+        스팀의 게임 또는 계정 정보를 불러오는데 실패했습니다. 스팀 로그인을 확인하세요.
+      </div>
+      <div class="error" v-else-if="_steaminfo?.username &&!_steaminfo?.configInfo" @click="f_open_config_path"
+        :style="{ cursor: 'pointer' }"
+      >
+        {{ _steaminfo?.username }} 계정의 {{ _steaminfo?.configPath }} 경로에 설정 파일이 없거나 문제가 있습니다.
+      </div>
+      <!-- <div class="username" v-else-if="_steaminfo?.username">{{ _steaminfo.username }}</div> -->
       <div class="options">
         <div class="section">
           <h3 class="title">단축키 설정</h3>
@@ -464,6 +473,15 @@ onMounted(() => {
 const f_chat_lefttop = () => {
   ipcRenderer.send('chat_lefttop')
 }
+
+const _steaminfo = ref({})
+ipcRenderer.on('steaminfo', v => {
+  _steaminfo.value = v
+})
+
+const f_open_config_path = () => {
+  ipcRenderer.send('open_config_path')
+}
 </script>
 
 <style lang="scss" scoped>
@@ -545,6 +563,7 @@ const f_chat_lefttop = () => {
     }
   }
   .settings {
+    position: relative;
     width: 100%;
     max-width: 900px;
     padding: 20px 0;
@@ -556,6 +575,23 @@ const f_chat_lefttop = () => {
     flex-direction: column;
     align-items: center;
     justify-content: space-between;
+    .error {
+      word-break: break-all;
+      width: 280px;
+      box-sizing: border-box;
+      padding: 10px;
+      background: rgb(255, 232, 0);
+      color: black;
+      font-weight: 500;
+      padding-right: 20px;
+    }
+    .username {
+      opacity: .3;
+      font-size: 13px;
+      position: absolute;
+      right: 20px;
+      top: 0px;
+    }
     .options {
       width: 100%;
       height: 100%;

@@ -3,7 +3,7 @@ import { app, BrowserWindow, protocol, net, ipcMain, Notification, Menu, dialog,
 import pkg from 'electron-updater'
 const { autoUpdater } = pkg
 import path from 'path'
-import { getSteamInfo } from './steam.js'
+import { getCurrentSteamUser, getSteamID64, getSteamInfo, getUserConfigPath, readUserConfig } from './steam.js'
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -155,10 +155,28 @@ const bindHelldivers2Key = key => {
   return null
 }
 
+let dynamic_interval_stopper = false
+let gameId = '553850'
+let steamID64
+let gamePath
+let username
+let configPath
+let configInfo
 setInterval(async () => {
+  if (dynamic_interval_stopper) return
+  if (!steamID64 || !gamePath || !username || !configPath) {
+    try {
+      steamID64 = await getSteamID64()
+      gamePath = await getUserConfigPath(steamID64, gameId)
+      username = await getCurrentSteamUser()
+      configPath = await getUserConfigPath(steamID64, gameId)
+    } catch (e) {
+      windows.main.webContents.send('steaminfo', { error: e })
+    }
+  }
   try {
     const before = JSON.stringify(keyBinds)
-    const { configInfo, steamID64, gamePath } = await getSteamInfo()
+    configInfo = await readUserConfig(steamID64, gameId, configPath)
     if (configInfo?.json) {
       const { json } = configInfo
       const { Stratagem, Avatar, Player, Misc } = json
@@ -267,8 +285,12 @@ setInterval(async () => {
     if (before != JSON.stringify(keyBinds)) {
       windows.main.webContents.send('keyBinds', keyBinds)
       stratagemPending = false
+      windows.main.webContents.send('steaminfo', { username, steamID64, gamePath, configPath, configInfo })
     }
-  } catch (e) {}
+  } catch (e) {
+    console.log(e)
+    windows.main.webContents.send('steaminfo', { username, steamID64, gamePath, configPath })
+  }
 }, 2000)
 
 const createMainWindow = () => {
@@ -371,11 +393,20 @@ const createMainWindow = () => {
     windows.overlay.webContents.send('stratagemsets', stratagemsets)
   })
 
+  ipcMain.on('open_config_path', (_, __) => {
+    try {
+      shell.openPath(configPath.replace('\\input_settings.config', ''))
+    } catch (e) {
+      console.log(e)
+    }
+  })
+
   const stratagemQueue = []
   let queueRunning = false
   const stratagemQueueRun = async () => {
     if (queueRunning) return
     queueRunning = true
+    dynamic_interval_stopper = true
     while (stratagemQueue.length) {
       await stratagemQueue.shift()()
       if (instantfire) {
@@ -386,6 +417,7 @@ const createMainWindow = () => {
         }
       }
     }
+    dynamic_interval_stopper = false
     queueRunning = false
   }
 
@@ -800,6 +832,7 @@ const createMainWindow = () => {
   let focuswindow
   const focuswindowIsGame = () => focuswindow == 'HELLDIVERS™ 2'
   setInterval(async () => {
+    if (dynamic_interval_stopper) return
     try {
       const HWND = await getForegroundWindowHWND()
       const text = await getWindowText(HWND)
@@ -812,8 +845,8 @@ const createMainWindow = () => {
         gameHWND = HWND
         windows['overlay'].setAlwaysOnTop(true, 'screen-saver')
         windows['overlay'].setIgnoreMouseEvents(true)
-        windows['overlay'].setSize(rect.width, rect.height)
-        windows['overlay'].setPosition(rect.x, rect.y)
+        windows['overlay'].setSize(rect.width, parseInt(rect.height / 5))
+        windows['overlay'].setPosition(rect.x, rect.height - parseInt(rect.height / 5))
         windows['overlay'].webContents.send('visible', true)
         windows['overlay'].webContents.send('cinematic_mode', cinematic_mode)
 
@@ -848,6 +881,8 @@ const createMainWindow = () => {
     if (window == 'main') {
       windows[window].webContents.send('keyBinds', keyBinds)
       windows[window].webContents.send('visible', true)
+      if (username && steamID64 && gamePath && configPath) windows.main.webContents.send('steaminfo', { username, steamID64, gamePath, configPath, configInfo })
+      else windows.main.webContents.send('steaminfo', { error: 'steam not found' })
       windows[window].show()
       await sleep(20)
       windows[window].focus()

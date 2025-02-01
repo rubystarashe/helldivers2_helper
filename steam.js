@@ -198,9 +198,8 @@ const parseConfigToJson = (configData) => {
     }
 };
 
-const readUserConfig = async (steamID64, appId) => {
+const readUserConfig = async (steamID64, appId, configPath) => {
     try {
-        const configPath = await getUserConfigPath(steamID64, appId)
         
         // 파일 존재 여부 확인
         try {
@@ -236,7 +235,8 @@ const getSteamInfo = async () => {
         const username = await getCurrentSteamUser()
         const steamID64 = await getSteamID64()
         const gamePath = await getGameInstallPath('553850')
-        const configInfo = await readUserConfig(steamID64, '553850')
+        const configPath = await getUserConfigPath(steamID64, '553850')
+        const configInfo = await readUserConfig(steamID64, '553850', configPath)
         
         // console.log('현재 로그인된 사용자:', username)
         // console.log('Steam64 ID:', steamID64)
