@@ -1016,6 +1016,121 @@ const createMainWindow = () => {
         windows.overlay.webContents.send('stratagemFocus', stratagemCount)
         return
       }
+
+      if (!state) {
+        switch (key) {
+          case keyBinds['HANGUL']:
+          case 'RMENU':
+          case 'KANJI':
+          case 'NEXT':
+          case 'RCONTROL':
+            if (stratagemPending && !instant_chat) {
+              await KeyRelease(key)
+              await KeyPressAndRelease('BACK')
+              await windows.chat.setIgnoreMouseEvents(false)
+              await windows.chat.focus()
+              windows.chat.webContents.send('chatInput', true)
+              // const chatHWND = windows.chat.getNativeWindowHandle()
+              // await setIMEMode(chatHWND)
+            }
+            return
+        }
+
+        if (key == keyBinds['chat']) {
+          if (pendingDuringChatKey) return
+          if (!stratagemPending) {
+            stratagemPending = true
+            stratagemReady = false
+            if (cinematic_mode && !map_opened) {
+              await cinematic_input_queue_run()
+              // await sleep(inputDelay)
+              await KeyPressAndRelease(keyBinds['chat'])
+            }
+            if (instant_chat) {
+              pendingDuringChatKey = true
+              await KeyRelease(key)
+              await KeyPressAndRelease('BACK')
+              await windows.chat.setIgnoreMouseEvents(false)
+              await windows.chat.focus()
+              windows.chat.webContents.send('chatInput', true)
+            }
+          } else if (keyBinds['chat'] == 'RETURN') {
+            if (cinematic_mode && !map_opened) await cinematic_input_queue_run()
+            stratagemPending = false
+            stratagemReady = false
+          }
+          return
+        }
+        if (key == 'RETURN') {
+          if (pendingDuringChatKey) return
+          if (stratagemPending) {
+            stratagemPending = false
+            if (cinematic_mode && !map_opened) {
+              await sleep(inputDelay)
+              await cinematic_input_queue_run()
+            }
+          }
+          stratagemReady = false
+          return
+        }
+
+        if (key == keyBinds['weapon_1'] ||
+            key == keyBinds['weapon_2'] ||
+            key == keyBinds['weapon_3'] ||
+            key == keyBinds['weapon_4'] ||
+            key == keyBinds['weapon_5'] ||
+            key == keyBinds['granade'] ||
+            key == keyBinds['heal']
+        ) {
+          if (key == keyBinds['weapon_1']) lastusedweapon = 1
+          if (key == keyBinds['weapon_2']) lastusedweapon = 2
+          if (key == keyBinds['weapon_3']) lastusedweapon = 3
+          if (key == keyBinds['weapon_4']) lastusedweapon = 4
+          stratagemReady = false
+          return
+        }
+  
+        if (key == keyBinds['escape']) {
+          stratagemPending = false
+          pendingDuringChatKey = false
+          return
+        }
+  
+        if (key == keyBinds['fire']) {
+          stratagemPending = false
+          if (stratagemReady) {
+            stratagemReady.lastFire = Date.now()
+            windows.overlay.webContents.send('stratagemFire', stratagemReady)
+          }
+          stratagemReady = false
+          return
+        }
+
+        // if (key == keyBinds['resupply']) {
+        //   if (stratagemRunning || stratagemPending) return
+        //   await inputStratagem({
+        //     name: 'Resupply',
+        //     keys: ['down', 'down', 'up', 'right'],
+        //     icon: '/stratagems/General Stratagems/Resupply.svg',
+        //     cooldown: 1000 * 160,
+        //     cooldown: 1000 * 15
+        //   })
+        // }
+        if (key == keyBinds['reinforce']) {
+          if (stratagemRunning || stratagemPending) return
+          await inputStratagem({
+            name: 'Reinforce',
+            keys: ['up', 'down', 'right', 'left', 'up'],
+            icon: '/stratagems/General Stratagems/Reinforce.svg',
+          })
+          return
+        }
+        if (key == keyBinds['stratagem_console'] && !stratagemRunning) {
+          stratagemReady = false
+          return
+        }
+      }
+
     })
   }
 
