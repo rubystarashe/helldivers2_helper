@@ -315,110 +315,110 @@ setInterval(async () => {
       const { Stratagem, Avatar, Player, Misc } = json || {}
       if (Avatar?.Sprint) {
         const setting = Avatar.Sprint.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['sprint'] = newkey
       }
       if (Player?.OpenChat) {
         const setting = Player.OpenChat.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['chat'] = newkey
       }
       if (Avatar?.ChangeEquipmentContextSensitiveShort) {
         const setting = Avatar.ChangeEquipmentContextSensitiveShort.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['weapon_swap'] = newkey
       }
       if (Avatar?.ChangeEquipmentPrimary) {
         const setting = Avatar.ChangeEquipmentPrimary.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['weapon_1'] = newkey
       }
       if (Avatar?.ChangeEquipmentSecondary) {
         const setting = Avatar.ChangeEquipmentSecondary.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['weapon_2'] = newkey
       }
       if (Avatar?.ChangeEquipmentSupport) {
         const setting = Avatar.ChangeEquipmentTertiary.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['weapon_3'] = newkey
       }
       if (Avatar?.ChangeEquipmentGrenade) {
         const setting = Avatar.ChangeEquipmentGrenade.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['weapon_4'] = newkey
       }
       if (Avatar?.BackpackFunction) {
         const setting = Avatar.BackpackFunction.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['weapon_5'] = newkey
       }
       if (Avatar?.ChangeEquipmentQuickGrenade) {
         const setting = Avatar.ChangeEquipmentQuickGrenade.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['granade'] = newkey
       }
       if (Avatar?.QuickStim) {
         const setting = Avatar.QuickStim.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['heal'] = newkey
       }
       if (Avatar?.WeaponFunctionOpen) {
         const setting = Avatar.WeaponFunctionOpen.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['weapon_function'] = newkey
-        weapon_function_key_type = setting.trigger
+        weapon_function_key_type = setting?.trigger
       }
       if (Avatar?.Map) {
         const setting = Avatar.Map.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['map'] = newkey
-        map_key_type = setting.trigger
+        map_key_type = setting?.trigger
       }
       if (Misc?.ToggleHudVisibility) {
         const setting = Misc.ToggleHudVisibility.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['cinematic_mode'] = newkey
       }
       if (Avatar?.DropOpen) {
         const setting = Avatar.DropOpen.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['dropopen'] = newkey
-        dropopen_key_type = setting.trigger
+        dropopen_key_type = setting?.trigger
       }
       if (Avatar?.Dodge) {
         const setting = Avatar.Dodge.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['dive'] = newkey
       }
       if (Avatar?.Reload) {
         const setting = Avatar.Reload.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['reload'] = newkey
       }
       if (Avatar?.MoveForward) {
         const setting = Avatar.MoveForward.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['move_forward'] = newkey
       }
       if (Avatar?.MoveBack) {
         const setting = Avatar.MoveBack.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['move_back'] = newkey
       }
       if (Avatar?.MoveLeft) {
         const setting = Avatar.MoveLeft.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['move_left'] = newkey
       }
       if (Avatar?.MoveRight) {
         const setting = Avatar.MoveRight.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (newkey) keyBinds['move_right'] = newkey
       }
       for (const [ key, value ] of Object.entries(Stratagem || {})) {
         const setting = value.find(e => e.device_type == 'Keyboard')
-        const newkey = bindHelldivers2Key(setting.input)
+        const newkey = bindHelldivers2Key(setting?.input)
         if (!newkey) continue
         switch (key) {
           case 'Up':
@@ -435,7 +435,7 @@ setInterval(async () => {
             break
           case 'Start':
             keyBinds['stratagem_console'] = newkey
-            stratagem_key_type = setting.trigger
+            if (setting?.trigger) stratagem_key_type = setting?.trigger
             break
         }
       }
@@ -446,6 +446,7 @@ setInterval(async () => {
       windows.main.webContents.send('steaminfo', { username, steamID64, gamePath, configPath, configInfo })
     }
   } catch (e) {
+    console.log(e)
     windows.main.webContents.send('steaminfo', { username, steamID64, gamePath, configPath })
   }
 }, 2000)
@@ -600,7 +601,7 @@ const createMainWindow = () => {
   }
   const waitforrotatefree = async () => {
     while (keyboard.status[keyBinds['rotatekey']] || keyboard.status[keyBinds['rotatekey_reverse']]) {
-      await sleep(1000 / 120)
+      await sleep(1000 / 24)
     }
   }
   const inputStratagem = async (stratagem, delay = inputDelay) => {
@@ -731,7 +732,7 @@ const createMainWindow = () => {
   let last_mouse_stratagem_point = null
   const mouse_stratagem_engine = async () => {
     if (!mouse_stratagem_state) {
-      await sleep(1000 / 60)
+      await sleep(1000 / 30)
       mouse_stratagem_engine()
       return
     }
@@ -761,7 +762,7 @@ const createMainWindow = () => {
         await sleep(mousestratagem_delay)
         last_mouse_stratagem_point = null
       } else {
-        await sleep(1000 / 60)
+        await sleep(1000 / 30)
       }
     }
     mouse_stratagem_engine()
@@ -1145,7 +1146,7 @@ const createMainWindow = () => {
       focuswindow = text
       const rect = await getWindowRect(HWND)
       if (text == 'HELLDIVERS™ 2') {
-        if (!windows['overlay'].isVisible()) windows['overlay'].show()
+        if (!windows['overlay'].isVisible() && stratagemsets.length) windows['overlay'].show()
         if (!windows['chat'].isVisible()) windows['chat'].show()
 
         gameHWND = HWND
@@ -1187,7 +1188,7 @@ const createMainWindow = () => {
   let auto_reloading = false
   const autokey_engine = async () => {
     if (!enginerunning()) {
-      await sleep(1000 / 60)
+      await sleep(1000 / 30)
       apw_start = apw_start_rate
       apw_counts = 0
       autokey_engine()
@@ -1260,7 +1261,7 @@ const createMainWindow = () => {
         }
         break
       default:
-        await sleep(1000 / 120)
+        await sleep(1000 / 30)
         break
     }
     autokey_engine()

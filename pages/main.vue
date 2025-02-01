@@ -659,6 +659,10 @@ const f_open_config_path = () => {
   padding: 20px;
   justify-content: space-around;
   box-sizing: border-box;
+  img {
+    -webkit-user-drag: none;
+    user-drag: none;
+  }
   .console {
     display: flex;
     flex-direction: column;
