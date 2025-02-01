@@ -214,7 +214,7 @@ setInterval(async () => {
     configInfo = await readUserConfig(steamID64, gameId, configPath)
     if (configInfo?.json) {
       const { json } = configInfo
-      const { Stratagem, Avatar, Player, Misc } = json
+      const { Stratagem, Avatar, Player, Misc } = json || {}
       if (Avatar?.Sprint) {
         const setting = Avatar.Sprint.find(e => e.device_type == 'Keyboard')
         const newkey = bindHelldivers2Key(setting.input)
