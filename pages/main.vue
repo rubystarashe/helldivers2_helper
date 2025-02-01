@@ -177,7 +177,7 @@
           <div class="option">
             <div class="meta">
               <div class="deco"/>
-              <div class="name">폭발 무기 연사</div>
+              <div class="name">폭발 주무기 연사</div>
             </div>
             <input type="radio" v-if="_keyBinds.weapon_swap" class="radio" v-model="_autokey_type" value="eruptor">
             <div class="description" v-else>장비 교체(짧은무기)<br/>키설정 필요</div>
