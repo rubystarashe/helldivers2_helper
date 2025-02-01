@@ -943,7 +943,6 @@ const createMainWindow = () => {
         return
       }
       if (key == keyBinds['stratagem_console'] && !state) {
-        console.log('pressed')
         if (cinematic_mode) {
           if (map_opened) return
           await cinematic_input_queue_run()
@@ -962,7 +961,6 @@ const createMainWindow = () => {
             mouse_stratagem_state = false
             windows.overlay.webContents.send('mouse_stratagem_state', false)
           } else {
-            console.log('mouse_stratagem_state', mouse_stratagem_state)
             mouse_stratagem_state = !mouse_stratagem_state
             windows.overlay.webContents.send('mouse_stratagem_state', mouse_stratagem_state)
           }
