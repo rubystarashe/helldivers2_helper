@@ -1,7 +1,7 @@
 <template>
   <div class="layout" :class="{ visible: _visible }">
     <div class="titlebar">
-      <div class="title">Helldivers2 Helper - v{{ $version }}</div>
+      <div class="title">Accessible Rich Helldivers Application - v{{ $version }}</div>
       <ElectronWindowControl />
     </div>
     <div class="page">
