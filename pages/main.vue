@@ -429,46 +429,77 @@ const _categories = {
 
 const _stratagem_instant_fire = ref(true)
 watch(_stratagem_instant_fire, () => {
-  localStorage.setItem('instantfire', _stratagem_instant_fire.value)
+  // localStorage.setItem('instantfire', _stratagem_instant_fire.value)
   ipcRenderer.send('instantfire', _stratagem_instant_fire.value)
+})
+ipcRenderer.on('instantfire', v => {
+  _stratagem_instant_fire.value = v
 })
 const _stratagem_instant_fire_delay = ref(1000)
 watch(_stratagem_instant_fire_delay, () => {
-  localStorage.setItem('instantfire_delay', _stratagem_instant_fire_delay.value)
+  // localStorage.setItem('instantfire_delay', _stratagem_instant_fire_delay.value)
   ipcRenderer.send('instantfire_delay', parseInt(_stratagem_instant_fire_delay.value || 0) || 0)
+})
+ipcRenderer.on('instantfire_delay', v => {
+  _stratagem_instant_fire_delay.value = v
 })
 const _default_delay = ref(30)
 watch(_default_delay, () => {
-  localStorage.setItem('inputDelay', _default_delay.value)
+  // localStorage.setItem('inputDelay', _default_delay.value)
   ipcRenderer.send('inputDelay', parseInt(_default_delay.value || 0) || 0)
+})
+ipcRenderer.on('inputDelay', v => {
+  _default_delay.value = v
 })
 const _chatinputdelay = ref(5)
 watch(_chatinputdelay, () => {
-  localStorage.setItem('chatinputdelay', _chatinputdelay.value)
+  // localStorage.setItem('chatinputdelay', _chatinputdelay.value)
   ipcRenderer.send('chatinputdelay', parseInt(_chatinputdelay.value || 0) || 0)
+})
+ipcRenderer.on('chatinputdelay', v => {
+  _chatinputdelay.value = v
 })
 const _rotate_delay = ref(300)
 watch(_rotate_delay, () => {
-  localStorage.setItem('rotate_delay', _rotate_delay.value)
+  // localStorage.setItem('rotate_delay', _rotate_delay.value)
   ipcRenderer.send('rotate_delay', parseInt(_rotate_delay.value || 0) || 0)
+})
+ipcRenderer.on('rotate_delay', v => {
+  _rotate_delay.value = v
 })
 const _instant_chat = ref(true)
 watch(_instant_chat, () => {
-  localStorage.setItem('instant_chat', _instant_chat.value)
+  // localStorage.setItem('instant_chat', _instant_chat.value)
   ipcRenderer.send('instant_chat', _instant_chat.value)
+})
+ipcRenderer.on('instant_chat', v => {
+  _instant_chat.value = v
 })
 const _cinematic_mode = ref(false)
 watch(_cinematic_mode, () => {
-  localStorage.setItem('cinematic_mode', _cinematic_mode.value)
+  // localStorage.setItem('cinematic_mode', _cinematic_mode.value)
   ipcRenderer.send('cinematic_mode', _cinematic_mode.value)
 })
-
-onMounted(() => {
-  _stratagem_instant_fire.value = localStorage.getItem('instantfire') ? localStorage.getItem('instantfire') == 'true' : true
-  _stratagem_instant_fire_delay.value = localStorage.getItem('instantfire_delay') ? parseInt(localStorage.getItem('instantfire_delay')) : 1000
-  _default_delay.value = localStorage.getItem('inputDelay') ? parseInt(localStorage.getItem('inputDelay')) : 20
-  _cinematic_mode.value = localStorage.getItem('cinematic_mode') ? localStorage.getItem('cinematic_mode') == 'true' : false
+ipcRenderer.on('cinematic_mode', v => {
+  _cinematic_mode.value = v
 })
+
+ipcRenderer.on('initSettings', v => {
+  _stratagem_instant_fire.value = v.instantfire
+  _stratagem_instant_fire_delay.value = v.instantfire_delay
+  _default_delay.value = v.inputDelay
+  _chatinputdelay.value = v.chatinputdelay
+  _rotate_delay.value = v.rotate_delay
+  _instant_chat.value = v.instant_chat
+  _cinematic_mode.value = v.cinematic_mode
+})
+
+// onMounted(() => {
+//   _stratagem_instant_fire.value = localStorage.getItem('instantfire') ? localStorage.getItem('instantfire') == 'true' : true
+//   _stratagem_instant_fire_delay.value = localStorage.getItem('instantfire_delay') ? parseInt(localStorage.getItem('instantfire_delay')) : 1000
+//   _default_delay.value = localStorage.getItem('inputDelay') ? parseInt(localStorage.getItem('inputDelay')) : 20
+//   _cinematic_mode.value = localStorage.getItem('cinematic_mode') ? localStorage.getItem('cinematic_mode') == 'true' : false
+// })
 
 const f_chat_lefttop = () => {
   ipcRenderer.send('chat_lefttop')

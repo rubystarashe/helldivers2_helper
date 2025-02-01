@@ -4,6 +4,7 @@ import pkg from 'electron-updater'
 const { autoUpdater } = pkg
 import path from 'path'
 import { getCurrentSteamUser, getSteamID64, getSteamInfo, getUserConfigPath, readUserConfig } from './steam.js'
+import fs from 'fs'
 
 const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
@@ -21,6 +22,7 @@ const windows = {}
 
 app.setAppLogsPath()
 const logpath = app.getPath('logs')
+const userdatapath = app.getPath('userData')
 
 
 let keyBinds = {
@@ -60,37 +62,70 @@ let keyBinds = {
 
   HANGUL: 'HANGUL'
 }
+
+const settingPath = path.join(userdatapath, 'user.settings.json')
+let settings = {}
+const saveSetting = () => {
+  if (!fs.existsSync(settingPath)) fs.writeFileSync(settingPath, '{}')
+  fs.writeFileSync(settingPath, JSON.stringify(settings))
+}
+
 let instantfire = true
 ipcMain.on('instantfire', (_, value) => {
   instantfire = value
+  settings.instantfire = instantfire
+  saveSetting()
 })
 let instantfire_delay = 1000
 ipcMain.on('instantfire_delay', (_, value) => {
   instantfire_delay = parseInt(value) || 0
+  settings.instantfire_delay = instantfire_delay
+  saveSetting()
 })
 let inputDelay = 30
 ipcMain.on('inputDelay', (_, value) => {
   inputDelay = parseInt(value) || 0
+  settings.inputDelay = inputDelay
+  saveSetting()
 })
 let chatinputdelay = 5
 ipcMain.on('chatinputdelay', (_, value) => {
   chatinputdelay = parseInt(value) || 0
+  settings.chatinputdelay = chatinputdelay
+  saveSetting()
 })
 let rotate_delay = 300
 ipcMain.on('rotate_delay', (_, value) => {
   rotate_delay = parseInt(value) || 0
+  settings.rotate_delay = rotate_delay
+  saveSetting()
 })
 let instant_chat = true
 ipcMain.on('instant_chat', (_, value) => {
   instant_chat = value
+  settings.instant_chat = instant_chat
+  saveSetting()
 })
 let cinematic_mode = false
 ipcMain.on('cinematic_mode', (_, value) => {
   cinematic_mode = value
+  settings.cinematic_mode = cinematic_mode
+  saveSetting()
   try {
     windows.overlay.webContents.send('cinematic_mode', cinematic_mode)
   } catch (e) {}
 })
+
+if (fs.existsSync(settingPath)) {
+  settings = JSON.parse(fs.readFileSync(settingPath, 'utf8'))
+  if (settings.instantfire !== undefined) instantfire = settings.instantfire
+  if (settings.instantfire_delay !== undefined) instantfire_delay = settings.instantfire_delay
+  if (settings.inputDelay !== undefined) inputDelay = settings.inputDelay
+  if (settings.chatinputdelay !== undefined) chatinputdelay = settings.chatinputdelay
+  if (settings.rotate_delay !== undefined) rotate_delay = settings.rotate_delay
+  if (settings.instant_chat !== undefined) instant_chat = settings.instant_chat
+  if (settings.cinematic_mode !== undefined) cinematic_mode = settings.cinematic_mode
+}
 
 let stratagemRunning = false
 let stratagemPending = false
@@ -846,13 +881,13 @@ const createMainWindow = () => {
         windows['overlay'].setAlwaysOnTop(true, 'screen-saver')
         windows['overlay'].setIgnoreMouseEvents(true)
         windows['overlay'].setSize(rect.width, parseInt(rect.height / 5))
-        windows['overlay'].setPosition(rect.x, rect.height - parseInt(rect.height / 5))
+        windows['overlay'].setPosition(rect.x, rect.y + rect.height - parseInt(rect.height / 5))
         windows['overlay'].webContents.send('visible', true)
         windows['overlay'].webContents.send('cinematic_mode', cinematic_mode)
 
         if (!windows['chat'].inited) {
           windows['chat'].setSize(parseInt(rect.height / 3), 40)
-          windows['chat'].setPosition(parseInt(rect.width - rect.height / 40 - rect.height / 3), parseInt(rect.height - rect.height / 13 - 40))
+          windows['chat'].setPosition(rect.x + parseInt(rect.width - rect.height / 40 - rect.height / 3), rect.y + parseInt(rect.height - rect.height / 13 - 40))
           windows['chat'].inited = true
         }
       } else {
@@ -883,6 +918,17 @@ const createMainWindow = () => {
       windows[window].webContents.send('visible', true)
       if (username && steamID64 && gamePath && configPath) windows.main.webContents.send('steaminfo', { username, steamID64, gamePath, configPath, configInfo })
       else windows.main.webContents.send('steaminfo', { error: 'steam not found' })
+
+      windows[window].webContents.send('initSettings', {
+        instantfire,
+        instantfire_delay,
+        inputDelay,
+        chatinputdelay,
+        rotate_delay,
+        instant_chat,
+        cinematic_mode
+      })
+
       windows[window].show()
       await sleep(20)
       windows[window].focus()
