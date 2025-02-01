@@ -184,7 +184,7 @@ ipcMain.on('mousestratagem_enabled', (_, value) => {
   settings.mousestratagem_enabled = mousestratagem_enabled
   saveSetting()
 })
-let mousestratagem_with_console = true
+let mousestratagem_with_console = false
 ipcMain.on('mousestratagem_with_console', (_, value) => {
   mousestratagem_with_console = value
   settings.mousestratagem_with_console = mousestratagem_with_console

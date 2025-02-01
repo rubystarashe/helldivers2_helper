@@ -587,7 +587,7 @@ watch(_mousestratagem_enabled, () => {
 ipcRenderer.on('mousestratagem_enabled', v => {
   _mousestratagem_enabled.value = v
 })
-const _mousestratagem_with_console = ref(true)
+const _mousestratagem_with_console = ref(false)
 watch(_mousestratagem_with_console, () => {
   ipcRenderer.send('mousestratagem_with_console', _mousestratagem_with_console.value)
 })
