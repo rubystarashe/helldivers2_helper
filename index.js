@@ -184,6 +184,12 @@ ipcMain.on('mousestratagem_enabled', (_, value) => {
   settings.mousestratagem_enabled = mousestratagem_enabled
   saveSetting()
 })
+let mousestratagem_with_console = true
+ipcMain.on('mousestratagem_with_console', (_, value) => {
+  mousestratagem_with_console = value
+  settings.mousestratagem_with_console = mousestratagem_with_console
+  saveSetting()
+})
 let mousestratagem_threshold = 50
 ipcMain.on('mousestratagem_threshold', (_, value) => {
   mousestratagem_threshold = parseInt(value) || 0
@@ -214,6 +220,7 @@ if (fs.existsSync(settingPath)) {
   if (settings.auto_eruptor_delay !== undefined) auto_eruptor_delay = settings.auto_eruptor_delay
   if (settings.apw_start_rate !== undefined) apw_start_rate = settings.apw_start_rate
   if (settings.mousestratagem_enabled !== undefined) mousestratagem_enabled = settings.mousestratagem_enabled
+  if (settings.mousestratagem_with_console !== undefined) mousestratagem_with_console = settings.mousestratagem_with_console
   if (settings.mousestratagem_threshold !== undefined) mousestratagem_threshold = settings.mousestratagem_threshold
   if (settings.mousestratagem_delay !== undefined) mousestratagem_delay = settings.mousestratagem_delay
 }
@@ -597,6 +604,10 @@ const createMainWindow = () => {
     }
   }
   const inputStratagem = async (stratagem, delay = inputDelay) => {
+    if (mouse_stratagem_state) {
+      mouse_stratagem_state = false
+      windows.overlay.webContents.send('mouse_stratagem_state', false)
+    }
     const { promise, resolve } = Promise.withResolvers()
     stratagemQueue.push(async () => {
       if (!stratagem?.keys || !stratagem?.keys.length) return
@@ -749,6 +760,8 @@ const createMainWindow = () => {
         await KeyPressAndRelease(keyBinds[mainDirection.key], inputDelay)
         await sleep(mousestratagem_delay)
         last_mouse_stratagem_point = null
+      } else {
+        await sleep(1000 / 60)
       }
     }
     mouse_stratagem_engine()
@@ -768,6 +781,7 @@ const createMainWindow = () => {
 
       if (key == keyBinds['mousestratagem']) {
         if (!mousestratagem_enabled) return
+        if (mousestratagem_with_console && stratagem_opened) return
         if (state) {
           mouse_stratagem_state = true
           windows.overlay.webContents.send('mouse_stratagem_state', true)
@@ -794,13 +808,39 @@ const createMainWindow = () => {
       } else {
         switch (key) {
           case keyBinds['map']:
-          case keyBinds['stratagem_console']:
           case keyBinds['dropopen']:
           case keyBinds['chat']:
           case keyBinds['dive']:
+          case keyBinds['stratagem_console']:
             autokey_enabled = false
             break
         }
+      }
+      switch (key) {
+        case keyBinds['map']:
+        case keyBinds['dropopen']:
+        case keyBinds['chat']:
+        case keyBinds['dive']:
+        case keyBinds['fire']:
+        case keyBinds['rotatekey']:
+        case keyBinds['rotatekey_reverse']:
+        case keyBinds['rotate_cancel']:
+        case keyBinds['weapon_1']:
+        case keyBinds['weapon_2']:
+        case keyBinds['weapon_3']:
+        case keyBinds['weapon_4']:
+        case keyBinds['weapon_5']:
+        case keyBinds['granade']:
+        case keyBinds['heal']:
+        case keyBinds['reload']:
+        case keyBinds['weapon_swap']:
+        case keyBinds['weapon_function']:
+        case keyBinds['reinforce']:
+        case keyBinds['HANGUL']:
+        case keyBinds['autokey']:
+          mouse_stratagem_state = false
+          windows.overlay.webContents.send('mouse_stratagem_state', false)
+          break;
       }
 
       if (cinematic_mode) {
@@ -873,16 +913,38 @@ const createMainWindow = () => {
           }
           return
         }
+        
+        if (key == keyBinds['dropopen'] && state) {
+          if (stratagem_opened || map_opened) return
+          await cinematic_input_queue_run()
+          return
+        }
+        if (key == keyBinds['dropopen'] && !state) {
+          if (stratagem_opened || map_opened) return
+          await cinematic_input_queue_run()
+          return
+        }
+      }
 
-        if (key == keyBinds['stratagem_console'] && state) {
+      if (key == keyBinds['stratagem_console'] && state) {
+        if (cinematic_mode) {
           if (map_opened) return
           if (stratagem_key_type == 'Hold') {
             await cinematic_input_queue_run()
             stratagem_opened = true
           }
-          return
         }
-        if (key == keyBinds['stratagem_console'] && !state) {
+        if (mousestratagem_with_console) {
+          if (stratagem_key_type == 'Hold') {
+            mouse_stratagem_state = true
+            windows.overlay.webContents.send('mouse_stratagem_state', true)
+          }
+        }
+        return
+      }
+      if (key == keyBinds['stratagem_console'] && !state) {
+        console.log('pressed')
+        if (cinematic_mode) {
           if (map_opened) return
           await cinematic_input_queue_run()
           if (stratagem_key_type == 'Hold') {
@@ -895,15 +957,15 @@ const createMainWindow = () => {
           }
           return
         }
-        
-        if (key == keyBinds['dropopen'] && state) {
-          if (stratagem_opened || map_opened) return
-          await cinematic_input_queue_run()
-          return
-        }
-        if (key == keyBinds['dropopen'] && !state) {
-          if (stratagem_opened || map_opened) return
-          await cinematic_input_queue_run()
+        if (mousestratagem_with_console) {
+          if (stratagem_key_type == 'Hold') {
+            mouse_stratagem_state = false
+            windows.overlay.webContents.send('mouse_stratagem_state', false)
+          } else {
+            console.log('mouse_stratagem_state', mouse_stratagem_state)
+            mouse_stratagem_state = !mouse_stratagem_state
+            windows.overlay.webContents.send('mouse_stratagem_state', mouse_stratagem_state)
+          }
           return
         }
       }
@@ -1133,6 +1195,7 @@ const createMainWindow = () => {
         auto_eruptor_delay,
         apw_start_rate,
         mousestratagem_enabled,
+        mousestratagem_with_console,
         mousestratagem_threshold,
         mousestratagem_delay
       })

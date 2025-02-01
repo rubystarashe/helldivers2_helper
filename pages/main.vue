@@ -177,6 +177,13 @@
           <div class="option">
             <div class="meta">
               <div class="deco"/>
+              <div class="name">스트라타젬 콘솔 조작 시 자동 활성화</div>
+            </div>
+            <input type="checkbox" class="checkbox" v-model="_mousestratagem_with_console"/>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
               <div class="name">스트라타젬 마우스 입력 임계 감도</div>
             </div>
             <input class="input" type="number" v-model="_mousestratagem_threshold"/>
@@ -580,6 +587,13 @@ watch(_mousestratagem_enabled, () => {
 ipcRenderer.on('mousestratagem_enabled', v => {
   _mousestratagem_enabled.value = v
 })
+const _mousestratagem_with_console = ref(true)
+watch(_mousestratagem_with_console, () => {
+  ipcRenderer.send('mousestratagem_with_console', _mousestratagem_with_console.value)
+})
+ipcRenderer.on('mousestratagem_with_console', v => {
+  _mousestratagem_with_console.value = v
+})
 const _mousestratagem_threshold = ref(50)
 watch(_mousestratagem_threshold, () => {
   ipcRenderer.send('mousestratagem_threshold', _mousestratagem_threshold.value)
@@ -611,6 +625,7 @@ ipcRenderer.on('initSettings', v => {
   _auto_eruptor_delay.value = v.auto_eruptor_delay
   _apw_start_rate.value = v.apw_start_rate
   _mousestratagem_enabled.value = v.mousestratagem_enabled
+  _mousestratagem_with_console.value = v.mousestratagem_with_console
   _mousestratagem_threshold.value = v.mousestratagem_threshold
   _mousestratagem_delay.value = v.mousestratagem_delay
 })
