@@ -1,4 +1,4 @@
-import { MoveMouse, Key, keyboard, getForegroundWindowHWND, getWindowText, getWindowRect, KeyPress, KeyRelease, KeyPressAndRelease, MouseLeftClick, MouseRightClick, windowFocus, sendText, MouseLeftPress, MouseLeftRelease, MouseRightPress, MouseRightRelease } from './src/user32.js'
+import { MoveMouse, Key, keyboard, getForegroundWindowHWND, getWindowText, getWindowRect, KeyPress, KeyRelease, KeyPressAndRelease, MouseLeftClick, MouseRightClick, windowFocus, sendText, MouseLeftPress, MouseLeftRelease, MouseRightPress, MouseRightRelease, GetMousePosition } from './src/user32.js'
 import { app, BrowserWindow, protocol, net, ipcMain, Notification, Menu, dialog, shell } from 'electron'
 import pkg from 'electron-updater'
 const { autoUpdater } = pkg
@@ -77,7 +77,9 @@ let keyBinds = {
 
   HANGUL: 'HANGUL',
 
-  autokey: 'XBUTTON1'
+  autokey: 'XBUTTON1',
+
+  mousestratagem: 'SPACE'
 }
 
 const settingPath = path.join(userdatapath, 'user.settings.json')
@@ -176,7 +178,24 @@ ipcMain.on('apw_start_rate', (_, value) => {
   settings.apw_start_rate = apw_start_rate
   saveSetting()
 })
-
+let mousestratagem_enabled = false
+ipcMain.on('mousestratagem_enabled', (_, value) => {
+  mousestratagem_enabled = value
+  settings.mousestratagem_enabled = mousestratagem_enabled
+  saveSetting()
+})
+let mousestratagem_threshold = 50
+ipcMain.on('mousestratagem_threshold', (_, value) => {
+  mousestratagem_threshold = parseInt(value) || 0
+  settings.mousestratagem_threshold = mousestratagem_threshold
+  saveSetting()
+})
+let mousestratagem_delay = 50
+ipcMain.on('mousestratagem_delay', (_, value) => {
+  mousestratagem_delay = parseInt(value) || 0
+  settings.mousestratagem_delay = mousestratagem_delay
+  saveSetting()
+})
 
 if (fs.existsSync(settingPath)) {
   settings = JSON.parse(fs.readFileSync(settingPath, 'utf8'))
@@ -194,6 +213,9 @@ if (fs.existsSync(settingPath)) {
   if (settings.auto_railgun_reload_delay !== undefined) auto_railgun_reload_delay = settings.auto_railgun_reload_delay
   if (settings.auto_eruptor_delay !== undefined) auto_eruptor_delay = settings.auto_eruptor_delay
   if (settings.apw_start_rate !== undefined) apw_start_rate = settings.apw_start_rate
+  if (settings.mousestratagem_enabled !== undefined) mousestratagem_enabled = settings.mousestratagem_enabled
+  if (settings.mousestratagem_threshold !== undefined) mousestratagem_threshold = settings.mousestratagem_threshold
+  if (settings.mousestratagem_delay !== undefined) mousestratagem_delay = settings.mousestratagem_delay
 }
 
 let stratagemRunning = false
@@ -694,6 +716,45 @@ const createMainWindow = () => {
   }
   cinematic_input_queue_engine()
 
+  let mouse_stratagem_state = false
+  let last_mouse_stratagem_point = null
+  const mouse_stratagem_engine = async () => {
+    if (!mouse_stratagem_state) {
+      await sleep(1000 / 60)
+      mouse_stratagem_engine()
+      return
+    }
+    if (!last_mouse_stratagem_point) last_mouse_stratagem_point = await GetMousePosition()
+    else {
+      const current = await GetMousePosition()
+            
+      // 마우스 이동 방향 계산
+      const dx = current.x - last_mouse_stratagem_point.x
+      const dy = current.y - last_mouse_stratagem_point.y
+      
+      // 가장 큰 이동 방향 찾기 (방향 수정)
+      const directions = [
+        { key: 'up', value: dy < 0 ? Math.abs(dy) : 0 },     // 위로 이동
+        { key: 'down', value: dy > 0 ? Math.abs(dy) : 0 },   // 아래로 이동
+        { key: 'left', value: dx < 0 ? Math.abs(dx) : 0 },   // 왼쪽으로 이동
+        { key: 'right', value: dx > 0 ? Math.abs(dx) : 0 }   // 오른쪽으로 이동
+      ]
+      
+      // 절대값이 가장 큰 방향을 찾음
+      const mainDirection = directions.reduce((prev, curr) => 
+        curr.value > prev.value ? curr : prev
+      )
+      
+      if (mainDirection.value > mousestratagem_threshold) {
+        await KeyPressAndRelease(keyBinds[mainDirection.key], inputDelay)
+        await sleep(mousestratagem_delay)
+        last_mouse_stratagem_point = null
+      }
+    }
+    mouse_stratagem_engine()
+  }
+  mouse_stratagem_engine()
+
   const initEngine = async () => {
     keyboard.on('EVERY', async ({ key, state }) => {
       if (focuswindow == 'Helldivers2 Chat') {
@@ -704,6 +765,19 @@ const createMainWindow = () => {
         }
       }
       if (!focuswindowIsGame()) return
+
+      if (key == keyBinds['mousestratagem']) {
+        if (!mousestratagem_enabled) return
+        if (state) {
+          mouse_stratagem_state = true
+          windows.overlay.webContents.send('mouse_stratagem_state', true)
+        } else {
+          last_mouse_stratagem_point = null
+          mouse_stratagem_state = false
+          windows.overlay.webContents.send('mouse_stratagem_state', false)
+        }
+        return
+      }
 
       if (key == keyBinds['autokey']) {
         if (state && auto_reloading) return
@@ -834,120 +908,6 @@ const createMainWindow = () => {
         }
       }
 
-      if (!state) {
-        switch (key) {
-          case keyBinds['HANGUL']:
-          case 'RMENU':
-          case 'KANJI':
-          case 'NEXT':
-          case 'RCONTROL':
-            if (stratagemPending && !instant_chat) {
-              await KeyRelease(key)
-              await KeyPressAndRelease('BACK')
-              await windows.chat.setIgnoreMouseEvents(false)
-              await windows.chat.focus()
-              windows.chat.webContents.send('chatInput', true)
-              // const chatHWND = windows.chat.getNativeWindowHandle()
-              // await setIMEMode(chatHWND)
-            }
-            return
-        }
-
-        if (key == keyBinds['chat']) {
-          if (pendingDuringChatKey) return
-          if (!stratagemPending) {
-            stratagemPending = true
-            stratagemReady = false
-            if (cinematic_mode && !map_opened) {
-              await cinematic_input_queue_run()
-              // await sleep(inputDelay)
-              await KeyPressAndRelease(keyBinds['chat'])
-            }
-            if (instant_chat) {
-              pendingDuringChatKey = true
-              await KeyRelease(key)
-              await KeyPressAndRelease('BACK')
-              await windows.chat.setIgnoreMouseEvents(false)
-              await windows.chat.focus()
-              windows.chat.webContents.send('chatInput', true)
-            }
-          } else if (keyBinds['chat'] == 'RETURN') {
-            if (cinematic_mode && !map_opened) await cinematic_input_queue_run()
-            stratagemPending = false
-            stratagemReady = false
-          }
-          return
-        }
-        if (key == 'RETURN') {
-          if (pendingDuringChatKey) return
-          if (stratagemPending) {
-            stratagemPending = false
-            if (cinematic_mode && !map_opened) {
-              await sleep(inputDelay)
-              await cinematic_input_queue_run()
-            }
-          }
-          stratagemReady = false
-          return
-        }
-
-        if (key == keyBinds['weapon_1'] ||
-            key == keyBinds['weapon_2'] ||
-            key == keyBinds['weapon_3'] ||
-            key == keyBinds['weapon_4'] ||
-            key == keyBinds['weapon_5'] ||
-            key == keyBinds['granade'] ||
-            key == keyBinds['heal']
-        ) {
-          if (key == keyBinds['weapon_1']) lastusedweapon = 1
-          if (key == keyBinds['weapon_2']) lastusedweapon = 2
-          if (key == keyBinds['weapon_3']) lastusedweapon = 3
-          if (key == keyBinds['weapon_4']) lastusedweapon = 4
-          stratagemReady = false
-          return
-        }
-  
-        if (key == keyBinds['escape']) {
-          stratagemPending = false
-          pendingDuringChatKey = false
-          return
-        }
-  
-        if (key == keyBinds['fire']) {
-          stratagemPending = false
-          if (stratagemReady) {
-            stratagemReady.lastFire = Date.now()
-            windows.overlay.webContents.send('stratagemFire', stratagemReady)
-          }
-          stratagemReady = false
-          return
-        }
-
-        // if (key == keyBinds['resupply']) {
-        //   if (stratagemRunning || stratagemPending) return
-        //   await inputStratagem({
-        //     name: 'Resupply',
-        //     keys: ['down', 'down', 'up', 'right'],
-        //     icon: '/stratagems/General Stratagems/Resupply.svg',
-        //     cooldown: 1000 * 160,
-        //     cooldown: 1000 * 15
-        //   })
-        // }
-        if (key == keyBinds['reinforce']) {
-          if (stratagemRunning || stratagemPending) return
-          await inputStratagem({
-            name: 'Reinforce',
-            keys: ['up', 'down', 'right', 'left', 'up'],
-            icon: '/stratagems/General Stratagems/Reinforce.svg',
-          })
-          return
-        }
-        if (key == keyBinds['stratagem_console'] && !stratagemRunning) {
-          stratagemReady = false
-          return
-        }
-      }
-
 
       if (key == keyBinds['rotatekey']) {
         // if (stratagemRunning || stratagemPending) return
@@ -1054,7 +1014,7 @@ const createMainWindow = () => {
   let auto_reloading = false
   const autokey_engine = async () => {
     if (!enginerunning()) {
-      await sleep(1000 / 120)
+      await sleep(1000 / 60)
       apw_start = apw_start_rate
       apw_counts = 0
       autokey_engine()
@@ -1171,7 +1131,10 @@ const createMainWindow = () => {
         auto_railgun_delay,
         auto_railgun_reload_delay,
         auto_eruptor_delay,
-        apw_start_rate
+        apw_start_rate,
+        mousestratagem_enabled,
+        mousestratagem_threshold,
+        mousestratagem_delay
       })
 
       windows[window].show()

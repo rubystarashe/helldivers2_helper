@@ -159,6 +159,37 @@
           </div>
         </div>
         <div class="section">
+          <h3 class="title">스트라타젬 마우스 입력 설정</h3>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">스트라타젬 마우스 입력 활성화</div>
+            </div>
+            <input type="checkbox" class="checkbox" v-model="_mousestratagem_enabled"/>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">입력 상태 활성화 단축키</div>
+            </div>
+            <div class="description">스페이스바</div>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">스트라타젬 마우스 입력 임계 감도</div>
+            </div>
+            <input class="input" type="number" v-model="_mousestratagem_threshold"/>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">스트라타젬 마우스 입력간 딜레이</div>
+            </div>
+            <input class="input" type="number" v-model="_mousestratagem_delay"/>
+          </div>
+        </div>
+        <div class="section">
           <h3 class="title">기계화 설정 (실험실)</h3>
           <div class="option">
             <div class="meta">
@@ -542,6 +573,27 @@ watch(_apw_start_rate, () => {
 ipcRenderer.on('apw_start_rate', v => {
   _apw_start_rate.value = v
 })
+const _mousestratagem_enabled = ref(false)
+watch(_mousestratagem_enabled, () => {
+  ipcRenderer.send('mousestratagem_enabled', _mousestratagem_enabled.value)
+})
+ipcRenderer.on('mousestratagem_enabled', v => {
+  _mousestratagem_enabled.value = v
+})
+const _mousestratagem_threshold = ref(50)
+watch(_mousestratagem_threshold, () => {
+  ipcRenderer.send('mousestratagem_threshold', _mousestratagem_threshold.value)
+})
+ipcRenderer.on('mousestratagem_threshold', v => {
+  _mousestratagem_threshold.value = v
+})
+const _mousestratagem_delay = ref(50)
+watch(_mousestratagem_delay, () => {
+  ipcRenderer.send('mousestratagem_delay', _mousestratagem_delay.value)
+})
+ipcRenderer.on('mousestratagem_delay', v => {
+  _mousestratagem_delay.value = v
+})
 
 ipcRenderer.on('initSettings', v => {
   _stratagem_instant_fire.value = v.instantfire
@@ -558,6 +610,9 @@ ipcRenderer.on('initSettings', v => {
   _auto_railgun_reload_delay.value = v.auto_railgun_reload_delay
   _auto_eruptor_delay.value = v.auto_eruptor_delay
   _apw_start_rate.value = v.apw_start_rate
+  _mousestratagem_enabled.value = v.mousestratagem_enabled
+  _mousestratagem_threshold.value = v.mousestratagem_threshold
+  _mousestratagem_delay.value = v.mousestratagem_delay
 })
 
 // onMounted(() => {

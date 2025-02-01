@@ -17,6 +17,7 @@
         <div class="hotkey" v-if="_reinforce.hotkey">{{ _reinforce.hotkey }}</div>
       </div>
     </div>
+    <div class="mouse_stratagem" v-if="_mouse_stratagem_state">마우스 스트라타젬 입력중</div>
   </div>
 </template>
 
@@ -91,6 +92,11 @@ const _cinematic_mode = ref(false)
 ipcRenderer.on('cinematic_mode', v => {
   _cinematic_mode.value = v
 })
+
+const _mouse_stratagem_state = ref(false)
+ipcRenderer.on('mouse_stratagem_state', v => {
+  _mouse_stratagem_state.value = v
+})
 </script>
 
 <style lang="scss" scoped>
@@ -98,6 +104,15 @@ ipcRenderer.on('cinematic_mode', v => {
   display: flex;
   justify-content: center;
   align-items: center;
+  .mouse_stratagem {
+    position: fixed;
+    top: 0;
+    font-size: 7vh;
+    background: white;
+    padding: 2px 4px;
+    color: black;
+    opacity: .5;
+  }
   .stratagems {
     position: fixed;
     bottom: 50vh;
