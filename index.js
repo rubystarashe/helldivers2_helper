@@ -779,6 +779,41 @@ const createMainWindow = () => {
       }
       if (!focuswindowIsGame()) return
 
+      if (key == keyBinds['stratagem_console'] && state) {
+        if (map_opened) return
+        if (stratagem_key_type == 'Hold') {
+          if (cinematic_mode) await cinematic_input_queue_run()
+          stratagem_opened = true
+          if (mousestratagem_with_console) {
+            mouse_stratagem_state = stratagem_opened
+            windows.overlay.webContents.send('mouse_stratagem_state', stratagem_opened)
+          }
+        }
+        return
+      }
+      if (key == keyBinds['stratagem_console'] && !state) {
+        if (map_opened) return
+        if (cinematic_mode) await cinematic_input_queue_run()
+        if (stratagem_key_type == 'Hold') {
+          cancelable_acting = false
+          stratagem_opened = false
+        }
+        else {
+          cancelable_acting = !cancelable_acting
+          stratagem_opened = !stratagem_opened
+        }
+        if (mousestratagem_with_console) {
+          if (stratagem_key_type == 'Hold') {
+            mouse_stratagem_state = stratagem_opened
+            windows.overlay.webContents.send('mouse_stratagem_state', stratagem_opened)
+          } else {
+            mouse_stratagem_state = stratagem_opened
+            windows.overlay.webContents.send('mouse_stratagem_state', stratagem_opened)
+          }
+          return
+        }
+      }
+
       if (key == keyBinds['mousestratagem']) {
         if (!mousestratagem_enabled) return
         if (mousestratagem_with_console && stratagem_opened) return
@@ -842,6 +877,11 @@ const createMainWindow = () => {
           windows.overlay.webContents.send('mouse_stratagem_state', false)
           break;
       }
+      switch (key) {
+        case keyBinds['fire']:
+          stratagem_opened = false
+          break
+      }
 
       if (cinematic_mode) {
         if (key == keyBinds['dive'] && !state) {
@@ -885,34 +925,6 @@ const createMainWindow = () => {
           cancelable_acting = false
           return
         }
-
-        if (key == keyBinds['map'] && state) {
-          if (stratagem_opened) return
-          if (map_key_type == 'Hold') {
-            if (!stratagem_opened) await cinematic_input_queue_run()
-            map_opened = true
-            stratagem_opened = false
-          }
-          return
-        }
-        if (key == keyBinds['map'] && !state) {
-          if (stratagem_opened)  {
-            stratagem_opened = false
-            map_opened = true
-            cancelable_acting = true
-            return
-          }
-          await cinematic_input_queue_run()
-          if (map_key_type == 'Hold') {
-            cancelable_acting = false
-            map_opened = false
-          }
-          else {
-            cancelable_acting = !cancelable_acting
-            map_opened = !map_opened
-          }
-          return
-        }
         
         if (key == keyBinds['dropopen'] && state) {
           if (stratagem_opened || map_opened) return
@@ -926,46 +938,32 @@ const createMainWindow = () => {
         }
       }
 
-      if (key == keyBinds['stratagem_console'] && state) {
-        if (cinematic_mode) {
-          if (map_opened) return
-          if (stratagem_key_type == 'Hold') {
-            await cinematic_input_queue_run()
-            stratagem_opened = true
-          }
-        }
-        if (mousestratagem_with_console) {
-          if (stratagem_key_type == 'Hold') {
-            mouse_stratagem_state = true
-            windows.overlay.webContents.send('mouse_stratagem_state', true)
-          }
+      if (key == keyBinds['map'] && state) {
+        if (stratagem_opened) return
+        if (map_key_type == 'Hold') {
+          if (cinematic_mode && !stratagem_opened) await cinematic_input_queue_run()
+          map_opened = true
+          stratagem_opened = false
         }
         return
       }
-      if (key == keyBinds['stratagem_console'] && !state) {
-        if (cinematic_mode) {
-          if (map_opened) return
-          await cinematic_input_queue_run()
-          if (stratagem_key_type == 'Hold') {
-            cancelable_acting = false
-            stratagem_opened = false
-          }
-          else {
-            cancelable_acting = !cancelable_acting
-            stratagem_opened = !stratagem_opened
-          }
+      if (key == keyBinds['map'] && !state) {
+        if (stratagem_opened)  {
+          stratagem_opened = false
+          map_opened = true
+          cancelable_acting = true
           return
         }
-        if (mousestratagem_with_console) {
-          if (stratagem_key_type == 'Hold') {
-            mouse_stratagem_state = false
-            windows.overlay.webContents.send('mouse_stratagem_state', false)
-          } else {
-            mouse_stratagem_state = !mouse_stratagem_state
-            windows.overlay.webContents.send('mouse_stratagem_state', mouse_stratagem_state)
-          }
-          return
+        if (cinematic_mode) await cinematic_input_queue_run()
+        if (map_key_type == 'Hold') {
+          cancelable_acting = false
+          map_opened = false
         }
+        else {
+          cancelable_acting = !cancelable_acting
+          map_opened = !map_opened
+        }
+        return
       }
 
 
