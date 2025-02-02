@@ -69,6 +69,19 @@ export const start_recorder = (options = {}) => {
     height: Math.min(monitor.height, rect.height)
   }
 
+  // 가장 최근에 수정된 파일의 번호를 찾아 시작 번호 설정
+  const lastSegment = fs.readdirSync(tempDir)
+    .filter(file => file.startsWith("segment_") && file.endsWith(".mp4"))
+    .map(file => ({
+      name: file,
+      time: fs.statSync(path.join(tempDir, file)).mtimeMs
+    }))
+    .sort((a, b) => b.time - a.time)[0]
+    // .map(file => parseInt(file.name.match(/segment_(\d+)\.mp4/)[1], 10))
+    // .reduce((max, num) => Math.max(max, num), 0)
+
+  const existingSegments = lastSegment ? parseInt(lastSegment.name.match(/segment_(\d+)\.mp4/)[1], 10) : 0
+
   const args = [
     '-f', 'lavfi',             // lavfi 입력 사용
     '-i', `ddagrab=output_idx=${monitor.index}:framerate=${framerate}:video_size=${monitor_rect.width}x${monitor_rect.height}:offset_x=${monitor_rect.x}:offset_y=${monitor_rect.y}`,           // ddagrab 필터 (Desktop Duplication API 사용)
@@ -79,8 +92,9 @@ export const start_recorder = (options = {}) => {
     '-sc_threshold', '0',
 
     '-f', 'segment',           // segment muxer 사용
+    '-segment_start_number', String(existingSegments), // 시작 번호 설정
     '-segment_time', '1',      // 1초 단위로 분할
-    '-segment_wrap', String(duration), // 최대 세그먼트 수(예: duration이 10이면 최신 10초)
+    '-segment_wrap', String(duration + 1), // 최대 세그먼트 수(예: duration이 10이면 최신 10초)
     '-reset_timestamps', '1',  // 각 세그먼트의 타임스탬프 초기화
     path.join(tempDir, 'segment_%03d.mp4')
   ]
