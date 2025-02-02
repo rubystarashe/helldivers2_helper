@@ -201,22 +201,29 @@ export const save_death_cam = async (seconds) => {
 
   const files = fs.readdirSync(tempDir)
     .filter(file => file.startsWith("segment_") && file.endsWith(".mp4"))
-    .map(file => path.join(tempDir, file))
+    .map(file => ({ path: path.join(tempDir, file), name: file }))
 
   if (files.length === 0) return
 
-  files.sort((a, b) => fs.statSync(a).mtimeMs - fs.statSync(b).mtimeMs)
+  files.sort((a, b) => fs.statSync(a.path).mtimeMs - fs.statSync(b.path).mtimeMs)
 
   // Promise.all을 사용하여 병렬로 ffprobe 실행
-  const validFiles = await Promise.all(files.slice().reverse().map(async (file) => {
-    try {
-      const probeCmd = `"${ffmpegProbePath}" -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "${file}"`
-      await execPromise(probeCmd)
-      return file
-    } catch (error) {
-      return null
-    }
-  })).then(results => results.filter(file => file !== null).slice(0, seconds))
+  const validFiles = await Promise.all(files.slice().reverse().map(async (file) => new Promise(async (resolve, reject) => {
+    const dest = path.join(deathcamDir, file.name)
+    fs.copyFile(file.path, dest, async (err) => {
+      if (err) {
+        return resolve(null)
+      } else {
+        try {
+          const probeCmd = `"${ffmpegProbePath}" -v error -select_streams v:0 -show_entries stream=codec_name -of default=noprint_wrappers=1:nokey=1 "${dest}"`
+          await execPromise(probeCmd)
+          return resolve(dest)
+        } catch (error) {
+          return resolve(null)
+        }
+      }
+    })
+  }))).then(results => results.filter(file => file !== null).slice(0, seconds))
 
   if (validFiles.length === 0) return
   validFiles.reverse()
