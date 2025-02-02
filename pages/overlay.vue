@@ -18,6 +18,7 @@
       </div>
     </div>
     <div class="mouse_stratagem" v-if="_mouse_stratagem_state">마우스 스트라타젬 입력중</div>
+    <div class="record" v-if="_record_alert">{{ _record_alert }}</div>
   </div>
 </template>
 
@@ -97,6 +98,23 @@ const _mouse_stratagem_state = ref(false)
 ipcRenderer.on('mouse_stratagem_state', v => {
   _mouse_stratagem_state.value = v
 })
+
+const _record_alert = ref('')
+let _record_alert_timer = null
+ipcRenderer.on('record_started', v => {
+  _record_alert.value = '다시보기를 저장하고 있습니다.'
+  if (_record_alert_timer) clearTimeout(_record_alert_timer)
+  _record_alert_timer = setTimeout(() => {
+    _record_alert.value = ''
+  }, 3000)
+})
+ipcRenderer.on('record_saved', ({ path, length }) => {
+  _record_alert.value = `${length}초 다시보기가 저장되었습니다.`
+  if (_record_alert_timer) clearTimeout(_record_alert_timer)
+  _record_alert_timer = setTimeout(() => {
+    _record_alert.value = ''
+  }, 3000)
+})
 </script>
 
 <style lang="scss" scoped>
@@ -112,6 +130,16 @@ ipcRenderer.on('mouse_stratagem_state', v => {
     padding: 2px 4px;
     color: black;
     opacity: .5;
+  }
+  .record {
+    position: fixed;
+    top: 0;
+    font-size: 7vh;
+    background: white;
+    padding: 2px 4px;
+    color: black;
+    opacity: .5;
+    margin-left: 150vh;
   }
   .stratagems {
     position: fixed;

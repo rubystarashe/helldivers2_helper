@@ -270,6 +270,81 @@
             <input class="input" type="number" v-model="_apw_start_rate"/>
           </div>
         </div>
+        <div class="section">
+          <h3 class="title">플레이 자동 녹화</h3>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">플레이 자동 녹화 활성화</div>
+            </div>
+            <input type="checkbox" class="checkbox" v-model="_autorecord"/>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">자동 녹화 단축키</div>
+            </div>
+            <div class="description">F1</div>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">최대 자동 녹화 시간</div>
+            </div>
+            <div><input class="input" type="number" v-model="_record_duration" :min="_deathcam_seconds + _deathcam_delay + 1"/><span class="unit">초</span></div>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">자동 녹화 초당 프레임</div>
+            </div>
+            <input class="input" type="number" v-model="_record_framerate"/>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">자동 녹화 품질</div>
+            </div>
+            <select class="select" v-model="_record_quality">
+              <option class="option" v-for="item in _record_quality_map" :value="item.value">{{ item.name }}</option>
+            </select>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">자동 데스캠 저장 활성화</div>
+            </div>
+            <input type="checkbox" class="checkbox" v-model="_deathcam_enabled"/>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">데스캠 녹화 시간</div>
+            </div>
+            <div><input class="input" type="number" v-model="_deathcam_seconds"/><span class="unit">초</span></div>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">데스캠 녹화 딜레이</div>
+            </div>
+            <div><input class="input" type="number" v-model="_deathcam_delay"/><span class="unit">초</span></div>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">데스캠 미리보기 활성화</div>
+            </div>
+            <input type="checkbox" class="checkbox" v-model="_deathcam_preview"/>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">데스캠 미리보기 크기 배율</div>
+            </div>
+            <input type="number" class="input" v-model="_deathcam_size" :min="20" :max="200"/>
+          </div>
+        </div>
       </div>
       <div class="textbox">
         <div class="textboxtitle">
@@ -643,6 +718,76 @@ watch(_mousestratagem_delay, () => {
 ipcRenderer.on('mousestratagem_delay', v => {
   _mousestratagem_delay.value = v
 })
+const _autorecord = ref(true)
+watch(_autorecord, () => {
+  ipcRenderer.send('autorecord', _autorecord.value)
+})
+ipcRenderer.on('autorecord', v => {
+  _autorecord.value = v
+})
+const _record_duration = ref(30)
+watch(_record_duration, () => {
+  ipcRenderer.send('record_duration', _record_duration.value)
+})
+ipcRenderer.on('record_duration', v => {
+  _record_duration.value = v
+})
+const _record_framerate = ref(60)
+watch(_record_framerate, () => {
+  ipcRenderer.send('record_framerate', _record_framerate.value)
+})
+ipcRenderer.on('record_framerate', v => {
+  _record_framerate.value = v
+})
+const _record_quality = ref(30)
+const _record_quality_map = [
+  { name: '원본', value: 5 },
+  { name: '고화질', value: 19 },
+  { name: '균형', value: 30 },
+  { name: '웹배포용', value: 40 },
+  { name: '저화질', value: 50 }
+]
+watch(_record_quality, () => {
+  ipcRenderer.send('record_quality', _record_quality.value)
+})
+ipcRenderer.on('record_quality', v => {
+  _record_quality.value = v
+})
+const _deathcam_enabled = ref(true)
+watch(_deathcam_enabled, () => {
+  ipcRenderer.send('deathcam_enabled', _deathcam_enabled.value)
+})
+ipcRenderer.on('deathcam_enabled', v => {
+  _deathcam_enabled.value = v
+})
+const _deathcam_seconds = ref(7)
+watch(_deathcam_seconds, () => {
+  ipcRenderer.send('deathcam_seconds', _deathcam_seconds.value)
+})
+ipcRenderer.on('deathcam_seconds', v => {
+  _deathcam_seconds.value = v
+})
+const _deathcam_delay = ref(2)
+watch(_deathcam_delay, () => {
+  ipcRenderer.send('deathcam_delay', _deathcam_delay.value)
+})
+ipcRenderer.on('deathcam_delay', v => {
+  _deathcam_delay.value = v
+})
+const _deathcam_preview = ref(true)
+watch(_deathcam_preview, () => {
+  ipcRenderer.send('deathcam_preview', _deathcam_preview.value)
+})
+ipcRenderer.on('deathcam_preview', v => {
+  _deathcam_preview.value = v
+})
+const _deathcam_size = ref(100)
+watch(_deathcam_size, () => {
+  ipcRenderer.send('deathcam_size', _deathcam_size.value)
+})
+ipcRenderer.on('deathcam_size', v => {
+  _deathcam_size.value = v
+})
 
 ipcRenderer.on('initSettings', v => {
   _stratagem_instant_fire.value = v.instantfire
@@ -665,6 +810,15 @@ ipcRenderer.on('initSettings', v => {
   _mousestratagem_with_console.value = v.mousestratagem_with_console
   _mousestratagem_threshold.value = v.mousestratagem_threshold
   _mousestratagem_delay.value = v.mousestratagem_delay
+  _autorecord.value = v.autorecord
+  _record_duration.value = v.record_duration
+  _record_framerate.value = v.record_framerate
+  _record_quality.value = v.record_quality
+  _deathcam_enabled.value = v.deathcam_enabled
+  _deathcam_seconds.value = v.deathcam_seconds
+  _deathcam_delay.value = v.deathcam_delay
+  _deathcam_preview.value = v.deathcam_preview
+  _deathcam_size.value = v.deathcam_size
 })
 
 // onMounted(() => {
@@ -864,6 +1018,10 @@ const f_open_config_path = () => {
               border-bottom: 1px solid rgb(150, 150, 150);
             }
           }
+          .unit {
+            font-size: 14px;
+            color: rgb(150, 150, 150);
+          }
           .checkbox {
             &[type="checkbox"] {
                 appearance: none; /* 기본(네이티브) 모양을 제거 */
@@ -878,6 +1036,19 @@ const f_open_config_path = () => {
             &[type="checkbox"]:checked {
                 border-color: rgb(255, 232, 0);
                 background-color: rgb(255, 232, 0);
+            }
+          }
+          .select {
+            border: none;
+            border-radius: 0;
+            background-color: transparent;
+            color: rgb(150, 150, 150);
+            &:focus {
+              outline: none;
+              box-shadow: none;
+            }
+            option {
+              background: black;
             }
           }
           .radio {

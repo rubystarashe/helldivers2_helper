@@ -1,10 +1,11 @@
-import { MoveMouse, Key, keyboard, getForegroundWindowHWND, getWindowText, getWindowRect, KeyPress, KeyRelease, KeyPressAndRelease, MouseLeftClick, MouseRightClick, windowFocus, sendText, MouseLeftPress, MouseLeftRelease, MouseRightPress, MouseRightRelease, GetMousePosition } from './src/user32.js'
-import { app, BrowserWindow, protocol, net, ipcMain, Notification, Menu, dialog, shell } from 'electron'
+import { MoveMouse, Key, keyboard, getForegroundWindowHWND, getWindowText, getWindowRect, KeyPress, KeyRelease, KeyPressAndRelease, MouseLeftClick, MouseRightClick, windowFocus, sendText, MouseLeftPress, MouseLeftRelease, MouseRightPress, MouseRightRelease, GetMousePosition, captureScreen } from './src/user32.js'
+import { app, BrowserWindow, protocol, net, ipcMain, Notification, Menu, dialog, shell, desktopCapturer, screen } from 'electron'
 import pkg from 'electron-updater'
 const { autoUpdater } = pkg
 import path from 'path'
 import { getCurrentSteamUser, getSteamID64, getSteamInfo, getUserConfigPath, readUserConfig } from './steam.js'
 import fs from 'fs'
+import { reset_recorder, start_recorder, pause_recorder, save_recorder, save_death_cam } from './record.js'
 import { createRequire } from 'module';
 
 const require = createRequire(import.meta.url);
@@ -27,10 +28,14 @@ const windows = {}
 app.setAppLogsPath()
 const logpath = app.getPath('logs')
 const userdatapath = app.getPath('userData')
+const videopath = app.getPath('videos')
 
 app.commandLine.appendSwitch('use-angle', 'd3d11')
+app.commandLine.appendSwitch('disable-gpu', 'false')
 app.commandLine.appendSwitch('enable-gpu')
+app.commandLine.appendSwitch('enable-transparent-visuals')
 app.commandLine.appendSwitch('enable-native-gpu-memory-buffers')
+app.commandLine.appendSwitch('enable-usermedia-screen-capturing')
 
 
 let keyBinds = {
@@ -79,7 +84,9 @@ let keyBinds = {
 
   autokey: 'XBUTTON1',
 
-  mousestratagem: 'SPACE'
+  mousestratagem: 'SPACE',
+
+  record: 'F1'
 }
 
 const settingPath = path.join(userdatapath, 'user.settings.json')
@@ -216,6 +223,96 @@ ipcMain.on('mousestratagem_delay', (_, value) => {
   saveSetting()
 })
 
+
+let autorecord = true
+ipcMain.on('autorecord', (_, value) => {
+  autorecord = value
+  settings.autorecord = autorecord
+  if (autorecord && gameRect) start_recorder(get_recorder_options())
+  if (!autorecord) reset_recorder()
+  saveSetting()
+})
+let record_duration = 30
+ipcMain.on('record_duration', (_, value) => {
+  record_duration = parseInt(value) || 0
+  settings.record_duration = record_duration
+  saveSetting()
+  reset_recorder()
+  start_recorder(get_recorder_options())
+})
+let record_framerate = 60
+ipcMain.on('record_framerate', (_, value) => {
+  record_framerate = parseInt(value) || 0
+  settings.record_framerate = record_framerate
+  saveSetting()
+  pause_recorder()
+  start_recorder(get_recorder_options())
+})
+let record_quality = 30
+ipcMain.on('record_quality', (_, value) => {
+  record_quality = parseInt(value) || 0
+  settings.record_quality = record_quality
+  saveSetting()
+  pause_recorder()
+  start_recorder(get_recorder_options())
+})
+let deathcam_enabled = true
+ipcMain.on('deathcam_enabled', (_, value) => {
+  deathcam_enabled = value
+  settings.deathcam_enabled = deathcam_enabled
+  saveSetting()
+})
+let deathcam_seconds = 7
+ipcMain.on('deathcam_seconds', (_, value) => {
+  deathcam_seconds = parseInt(value) || 0
+  settings.deathcam_seconds = deathcam_seconds
+  saveSetting()
+})
+let deathcam_delay = 2
+ipcMain.on('deathcam_delay', (_, value) => {
+  deathcam_delay = parseInt(value) || 0
+  settings.deathcam_delay = deathcam_delay
+  saveSetting()
+})
+let deathcam_preview = true
+ipcMain.on('deathcam_preview', (_, value) => {
+  deathcam_preview = value
+  settings.deathcam_preview = deathcam_preview
+  saveSetting()
+})
+let deathcam_size = 100
+ipcMain.on('deathcam_size', (_, value) => {
+  deathcam_size = parseInt(value) || 0
+  settings.deathcam_size = deathcam_size
+  saveSetting()
+})
+
+let gameHWND
+let focuswindow
+let gameRect
+let gameDisplay
+
+let recording = false
+
+const tempDir = path.join(userdatapath, 'tempvids')
+if (tempDir && fs.existsSync(tempDir)) {
+  fs.rmSync(tempDir, { recursive: true, force: true });
+}
+
+const get_recorder_options = () => {
+  return {
+    ffmpegPath: path.join(isDev ? app.getAppPath() : path.join(process.resourcesPath, 'app.asar.unpacked'), 'ffmpeg', 'ffmpeg.exe'),
+    ffmpegProbePath: path.join(isDev ? app.getAppPath() : path.join(process.resourcesPath, 'app.asar.unpacked'), 'ffmpeg', 'ffprobe.exe'),
+    tempDir,
+    finalDir: path.join(videopath, 'HELLDIVERS 2'),
+    monitor: gameDisplay,
+    rect: gameRect,
+    framerate: record_framerate,
+    quality: record_quality,
+    duration: record_duration,
+  }
+}
+
 if (fs.existsSync(settingPath)) {
   settings = JSON.parse(fs.readFileSync(settingPath, 'utf8'))
   if (settings.instantfire !== undefined) instantfire = settings.instantfire
@@ -238,6 +335,15 @@ if (fs.existsSync(settingPath)) {
   if (settings.mousestratagem_with_console !== undefined) mousestratagem_with_console = settings.mousestratagem_with_console
   if (settings.mousestratagem_threshold !== undefined) mousestratagem_threshold = settings.mousestratagem_threshold
   if (settings.mousestratagem_delay !== undefined) mousestratagem_delay = settings.mousestratagem_delay
+  if (settings.autorecord !== undefined) autorecord = settings.autorecord
+  if (settings.record_duration !== undefined) record_duration = settings.record_duration
+  if (settings.record_framerate !== undefined) record_framerate = settings.record_framerate
+  if (settings.record_quality !== undefined) record_quality = settings.record_quality
+  if (settings.deathcam_enabled !== undefined) deathcam_enabled = settings.deathcam_enabled
+  if (settings.deathcam_seconds !== undefined) deathcam_seconds = settings.deathcam_seconds
+  if (settings.deathcam_delay !== undefined) deathcam_delay = settings.deathcam_delay
+  if (settings.deathcam_preview !== undefined) deathcam_preview = settings.deathcam_preview
+  if (settings.deathcam_size !== undefined) deathcam_size = settings.deathcam_size
 }
 
 let stratagemRunning = false
@@ -505,7 +611,8 @@ const createMainWindow = () => {
     alwaysOnTop: true,
     alwaysOnTopMonotonic: true,
     skipTaskbar: true,
-    resizable: false 
+    resizable: false,
+    focusable: false
   })
 
   windows.chat = new BrowserWindow({
@@ -528,9 +635,31 @@ const createMainWindow = () => {
     evt.preventDefault()
   })
 
+  windows.record = new BrowserWindow({
+    width: 1280,
+    height: 900,
+    titleBarStyle: 'hidden',
+    title: "Helldivers2 Record",
+    transparent: true,
+    show: false,
+    webPreferences: {
+      preload: path.join(app.getAppPath(), '/preload.js'),
+      backgroundThrottling: false,
+      webSecurity: false
+    },
+    icon: path.join(app.getAppPath(), 'icon.png'),
+    frame: false,
+    alwaysOnTop: true,
+    alwaysOnTopMonotonic: true,
+    skipTaskbar: true,
+    resizable: false,
+    focusable: false
+  })
+
   windows.main.loadURL(isDev ? 'http://localhost:3000' : 'app://dist/index.html')
   windows.overlay.loadURL(isDev ? 'http://localhost:3000' : 'app://dist/index.html')
   windows.chat.loadURL(isDev ? 'http://localhost:3000' : 'app://dist/index.html')
+  windows.record.loadURL(isDev ? 'http://localhost:3000' : 'app://dist/index.html')
 
   windows.main.on('maximize', () => {
     windows.main.webContents.send('maximized', true)
@@ -560,6 +689,7 @@ const createMainWindow = () => {
     windows.main.webContents.send('initRoute', '/main')
     windows.overlay.webContents.send('initRoute', '/overlay')
     windows.chat.webContents.send('initRoute', '/chat')
+    windows.record.webContents.send('initRoute', '/record')
   })
 
   ipcMain.on('stratagemsets', (_, array) => {
@@ -794,6 +924,23 @@ const createMainWindow = () => {
         }
       }
       if (!focuswindowIsGame()) return
+
+      if (key == keyBinds['record'] && state && autorecord) {
+        while (recording) await sleep(inputDelay)
+        await record_overlay_show(3000)
+        windows.record.webContents.send('record_started', true)
+        recording = true
+        await sleep(inputDelay)
+        const filepath = await save_recorder()
+        recording = false
+        await record_overlay_show(4000)
+        if (filepath) {
+          windows.record.webContents.send('record_saved', filepath)
+        } else {
+          windows.record.webContents.send('record_saved', null)
+        }
+        return
+      }
 
       if (key == keyBinds['stratagem_console'] && state) {
         if (map_opened) return
@@ -1150,11 +1297,49 @@ const createMainWindow = () => {
     })
   }
 
-  let gameHWND
-  let focuswindow
   const focuswindowIsGame = () => focuswindow == 'HELLDIVERS™ 2'
-  setInterval(async () => {
-    if (dynamic_interval_stopper) return
+  const findRedPixel = async buffer => {
+    const countsmap = {}
+    let maxCount = 0
+    let maxKey = null
+
+    for (let i = 0; i < buffer.length; i += 4) {
+      const b = buffer[i]
+      const g = buffer[i + 1]
+      const r = buffer[i + 2]
+
+      if (r > 250 && g > 20 && g < 150 && b > 20 && b < 150) {
+        const index = `${r}${g}${b}`
+        const count = (countsmap[index] || 0) + 1
+        countsmap[index] = count
+
+        if (count > maxCount) {
+          maxCount = count
+          maxKey = index
+        }
+      }
+    }
+
+    return maxCount
+  }
+  let lastalivestate = true
+  let record_overlay_hide_timer
+  const record_overlay_show = async ms => {
+    windows['record'].show()
+    if (record_overlay_hide_timer) clearTimeout(record_overlay_hide_timer)
+    record_overlay_hide_timer = setTimeout(() => {
+      windows['record'].hide()
+      windows['record'].webContents.send('deathcam', {})
+    }, ms + 300)
+    await sleep(300)
+    return
+  }
+  const checkforegroundWindow = async () => {
+    if (dynamic_interval_stopper) {
+      await sleep(1000 / 6)
+      checkforegroundWindow()
+      return
+    }
     try {
       const HWND = await getForegroundWindowHWND()
       const text = await getWindowText(HWND)
@@ -1167,21 +1352,88 @@ const createMainWindow = () => {
         gameHWND = HWND
         windows['overlay'].setAlwaysOnTop(true, 'screen-saver')
         windows['overlay'].setIgnoreMouseEvents(true)
-        windows['overlay'].setSize(rect.width, parseInt(rect.height / 5))
-        windows['overlay'].setPosition(rect.x, rect.y + rect.height - parseInt(rect.height / 5))
         windows['overlay'].webContents.send('visible', true)
         windows['overlay'].webContents.send('cinematic_mode', cinematic_mode)
+        if (autorecord) {
+          windows['record'].setAlwaysOnTop(true, 'screen-saver')
+          windows['record'].webContents.send('visible', true)
+          windows['record'].setIgnoreMouseEvents(true)
+        }
+
+        if (JSON.stringify(gameRect) != JSON.stringify(rect)) {
+          const gamemid = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 }
+          const displays = screen.getAllDisplays()
+          const currentDisplay = displays.findIndex(display => {
+            const { x, y, width, height } = display.bounds
+            return gamemid.x >= x && gamemid.x <= x + width && gamemid.y >= y && gamemid.y <= y + height
+          })
+  
+          if (currentDisplay != -1) {
+            gameDisplay = {
+              index: currentDisplay,
+              x: displays[currentDisplay].bounds.x,
+              y: displays[currentDisplay].bounds.y,
+              width: displays[currentDisplay].bounds.width,
+              height: displays[currentDisplay].bounds.height
+            }
+          }
+
+          gameRect = rect
+          await reset_recorder()
+          
+          windows['overlay'].setSize(rect.width, parseInt(rect.height / 5))
+          windows['overlay'].setPosition(rect.x, rect.y + rect.height - parseInt(rect.height / 5))
+
+          const width = parseInt(rect.width / 100 * 16 * (deathcam_size / 50))
+          const height = parseInt(rect.width / 100 * 9 * (deathcam_size / 50))
+          windows['record'].setSize(width, height)
+          windows['record'].setPosition(rect.x + rect.width - width - parseInt(rect.height / 6), rect.y + parseInt(rect.height / 10))
+        }
+        if (autorecord) {
+          start_recorder(get_recorder_options())
+        }
+
 
         if (!windows['chat'].inited) {
           windows['chat'].setSize(parseInt(rect.height / 3), 40)
           windows['chat'].setPosition(rect.x + parseInt(rect.width - rect.height / 40 - rect.height / 3), rect.y + parseInt(rect.height - rect.height / 13 - 40))
           windows['chat'].inited = true
         }
+        
+        if (deathcam_enabled && autorecord) {
+          const startX = parseInt(rect.x + (rect.width / 2) - (rect.height / 5))
+          const startY = parseInt(rect.y + (rect.height / 2) - (rect.height / 16))
+          const centerWidth = parseInt(rect.height / 5 * 2)
+          const centerHeight = parseInt(rect.height / 16 * 2)
+          const centerbuffer = await captureScreen(0, startX, startY, centerWidth, centerHeight)
+          const reds = await findRedPixel(centerbuffer)
+          if (reds > centerWidth * 2) {
+            if (lastalivestate) {
+              await sleep(deathcam_delay * 1000)
+              recording = true
+              const deathcam = await save_death_cam(deathcam_seconds + deathcam_delay)
+              recording = false
+              if (deathcam_preview && deathcam) {
+                await record_overlay_show(deathcam.length * 1000)
+                windows['record'].webContents.send('deathcam', deathcam)
+              }
+            }
+            lastalivestate = false
+          } else {
+            lastalivestate = true
+          }
+        }
       } else {
+        if (autorecord) pause_recorder()
         windows['overlay'].webContents.send('visible', false)
       }
-    } catch (e) {}
-  }, 1000 / 6)
+    } catch (e) {
+      console.log(e)
+    }
+    await sleep(1000 / 6)
+    checkforegroundWindow()
+  }
+  checkforegroundWindow()
 
   const enginerunning = () => {
     const isgame = focuswindowIsGame()
@@ -1350,12 +1602,24 @@ const createMainWindow = () => {
         mousestratagem_enabled,
         mousestratagem_with_console,
         mousestratagem_threshold,
-        mousestratagem_delay
+        mousestratagem_delay,
+        autorecord,
+        record_duration,
+        record_framerate,
+        record_quality,
+        deathcam_enabled,
+        deathcam_seconds,
+        deathcam_delay,
+        deathcam_preview,
+        deathcam_size
       })
 
       windows[window].show()
       await sleep(20)
       windows[window].focus()
+    }
+    if (window == 'record') {
+      windows[window].webContents.send('visible', true)
     }
     windows[window].isLoaded = true
     return { isDev }
