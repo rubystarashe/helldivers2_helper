@@ -138,10 +138,14 @@ export const save_recorder = async () => {
   const finalFile = path.join(finalDir, `${formattedDate}.mp4`)
 
   const concatCmd = `"${ffmpegPath}" -f concat -safe 0 -i "${fileListPath}" -c copy "${finalFile}"`
-  exec(concatCmd, (error, stdout, stderr) => {
+  const process = exec(concatCmd, (error, stdout, stderr) => {
     if (error) {
+      fs.rmSync(workdir, { recursive: true, force: true })
+      process.kill()
       resolve(null)
     } else {
+      fs.rmSync(workdir, { recursive: true, force: true })
+      process.kill()
       resolve({ path: finalFile, length: validFiles.length })
     }
   })
@@ -193,10 +197,14 @@ export const save_death_cam = async (seconds) => {
   }
   const finalFile = path.join(finalDeathcamDir, `death_${formattedDate}.mp4`)
 
-  exec(`"${ffmpegPath}" -f concat -safe 0 -i "${fileListPath}" -c copy "${finalFile}"`, (error, stdout, stderr) => {
+  const process = exec(`"${ffmpegPath}" -f concat -safe 0 -i "${fileListPath}" -c copy "${finalFile}"`, (error, stdout, stderr) => {
     if (error) {
+      fs.rmSync(deathcamDir, { recursive: true, force: true })
+      process.kill()
       resolve(null)
     } else {
+      fs.rmSync(deathcamDir, { recursive: true, force: true })
+      process.kill()
       resolve({ path: finalFile, length: validFiles.length })
     }
   })
