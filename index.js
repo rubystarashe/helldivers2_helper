@@ -931,11 +931,11 @@ const createMainWindow = () => {
           }
         } catch (e) {}
       }
-      
+
       if (!focuswindowIsGame()) return
 
       if (key == keyBinds['record'] && state && autorecord) {
-        while (recording) await sleep(inputDelay)
+        if (recording) return
         await record_overlay_show(3000)
         windows.record.webContents.send('record_started', true)
         recording = true

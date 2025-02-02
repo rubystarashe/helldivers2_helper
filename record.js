@@ -42,12 +42,14 @@ export const pause_recorder = () => {
   recorder = null
 }
 
+let lastoption
 export const start_recorder = (options = {}) => {
   if (recorder) return
 
   const { monitor, framerate, rect, quality, duration } = options
 
   if (!monitor || !rect || !framerate || !quality || !duration) return
+  lastoption = options
   tempDir = options.tempDir
   workdir = path.join(tempDir, 'work')
   deathcamDir = path.join(tempDir, 'deathcam')
@@ -83,7 +85,37 @@ export const start_recorder = (options = {}) => {
     path.join(tempDir, 'segment_%03d.mp4')
   ]
 
-  recorder = spawn(ffmpegPath, args, { windowsHide: true })
+  recorder = spawn(ffmpegPath, args, {
+    windowsHide: true,
+    // stdio: ['ignore', 'pipe', 'pipe'] // 표준 출력과 표준 에러를 캡처
+  })
+
+  // // 표준 출력 로그
+  // recorder.stdout.on('data', (data) => {
+  //   console.log('FFmpeg stdout:', data.toString());
+  // });
+
+  // 표준 에러 로그
+  recorder.stderr.on('data', (data) => {
+    if (data.toString().includes('Conversion failed')) {
+      pause_recorder()
+      start_recorder(lastoption)
+    }
+  })
+
+  // // 기존의 에러 이벤트 처리
+  // recorder.on('error', (err) => {
+  //   console.error('Recorder error:', err);
+  // })
+
+  // recorder.on('exit', (code, signal) => {
+  //   console.log(`Recorder exited with code ${code} and signal ${signal}`)
+  // })
+}
+
+export const restart_recorder = () => {
+  pause_recorder()
+  start_recorder(lastoption)
 }
 
 export const save_recorder = async () => {
@@ -124,9 +156,13 @@ export const save_recorder = async () => {
 
   if (validFiles.length === 0) return
 
-  const fileListPath = path.join(tempDir, 'filelist.txt')
+  const fileListPath = path.join(workdir, 'filelist.txt')
   const fileListContent = validFiles.map(f => `file '${f.replace(/'/g, "'\\''")}'`).join('\n')
-  fs.writeFileSync(fileListPath, fileListContent)
+  try {
+    fs.writeFileSync(fileListPath, fileListContent) 
+  } catch (e) {
+    return null
+  }
 
   // GMT 시간으로 현재 날짜와 시간을 포맷하여 파일 이름 생성
   const now = new Date()
@@ -138,6 +174,7 @@ export const save_recorder = async () => {
   const finalFile = path.join(finalDir, `${formattedDate}.mp4`)
 
   const concatCmd = `"${ffmpegPath}" -f concat -safe 0 -i "${fileListPath}" -c copy "${finalFile}"`
+  // restart_recorder()
   const process = exec(concatCmd, (error, stdout, stderr) => {
     if (error) {
       fs.rmSync(workdir, { recursive: true, force: true })
@@ -186,7 +223,11 @@ export const save_death_cam = async (seconds) => {
 
   const fileListPath = path.join(deathcamDir, 'filelist.txt')
   const fileListContent = validFiles.map(f => `file '${f.replace(/'/g, "'\\''")}'`).join('\n')
-  fs.writeFileSync(fileListPath, fileListContent)
+  try {
+    fs.writeFileSync(fileListPath, fileListContent)
+  } catch (e) {
+    return null
+  }
 
   // GMT 시간으로 현재 날짜와 시간을 포맷하여 파일 이름 생성
   const now = new Date()
@@ -197,6 +238,7 @@ export const save_death_cam = async (seconds) => {
   }
   const finalFile = path.join(finalDeathcamDir, `death_${formattedDate}.mp4`)
 
+  // restart_recorder()
   const process = exec(`"${ffmpegPath}" -f concat -safe 0 -i "${fileListPath}" -c copy "${finalFile}"`, (error, stdout, stderr) => {
     if (error) {
       fs.rmSync(deathcamDir, { recursive: true, force: true })

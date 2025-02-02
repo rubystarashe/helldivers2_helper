@@ -143,7 +143,7 @@ ipcRenderer.on('record_saved', ({ path, length }) => {
   }
   .stratagems {
     position: fixed;
-    bottom: 50vh;
+    bottom: 42vh;
     display: flex;
     opacity: .5;
     .stratagem {
@@ -181,7 +181,7 @@ ipcRenderer.on('record_saved', ({ path, length }) => {
       }
       .hotkey {
         position: absolute;
-        top: -1.5vh;
+        top: -6vh;
         font-size: 10vh;
         background: white;
         padding: 2px 4px;
