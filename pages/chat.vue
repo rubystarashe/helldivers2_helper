@@ -69,6 +69,10 @@ const f_closeChat = () => {
   r_chat.value.value = ''
   _visible.value = false
 }
+
+ipcRenderer.on('closeChat', v => {
+  f_closeChat()
+})
 </script>
 
 <style lang="scss" scoped>

@@ -818,7 +818,7 @@ const createMainWindow = () => {
     if (chatInputting) return
     windows['chat'].setIgnoreMouseEvents(true)
     chatInputting = true
-    await windowFocus(gameHWND)
+    if (gameHWND) await windowFocus(gameHWND)
     while (!focuswindowIsGame()) {
       await sleep(1000 / 24)
     }
@@ -923,6 +923,15 @@ const createMainWindow = () => {
           }
         }
       }
+      if ((key == 'RBUTTON' || key == 'LBUTTON') && state) {
+        try {
+          if (pendingDuringChatKey) {
+            windows.chat.webContents.send('closeChat')
+            pendingDuringChatKey = false
+          }
+        } catch (e) {}
+      }
+      
       if (!focuswindowIsGame()) return
 
       if (key == keyBinds['record'] && state && autorecord) {
