@@ -1042,7 +1042,6 @@ const createMainWindow = () => {
 
       if (mousestratagem_enabled) {
         if (key == keyBinds['mousestratagem']) {
-          return
          if (mousestratagem_with_console && stratagem_opened) return
          if (state) {
            mouse_stratagem_state = true
