@@ -1040,41 +1040,45 @@ const createMainWindow = () => {
         }
       }
 
-      if (key == keyBinds['mousestratagem']) {
-        if (!mousestratagem_enabled) return
-        if (mousestratagem_with_console && stratagem_opened) return
-        if (state) {
-          mouse_stratagem_state = true
-          windows.overlay.webContents.send('mouse_stratagem_state', true)
-        } else {
-          last_mouse_stratagem_point = null
-          mouse_stratagem_state = false
-          windows.overlay.webContents.send('mouse_stratagem_state', false)
-        }
-        return
+      if (mousestratagem_enabled) {
+        if (key == keyBinds['mousestratagem']) {
+          return
+         if (mousestratagem_with_console && stratagem_opened) return
+         if (state) {
+           mouse_stratagem_state = true
+           windows.overlay.webContents.send('mouse_stratagem_state', true)
+         } else {
+           last_mouse_stratagem_point = null
+           mouse_stratagem_state = false
+           windows.overlay.webContents.send('mouse_stratagem_state', false)
+         }
+         return
+       }
       }
 
-      if (key == keyBinds['autokey']) {
-        if (state && auto_reloading) return
-        autokey_enabled = state
-        if (autokey_type == 'railgun' && !state && railgun_fired) {
-          if (keyboard.status[keyBinds['fire']]) await inputFire(0, 'release')
-          await sleep(inputDelay)
-          await KeyPressAndRelease(keyBinds['reload'], inputDelay)
-        }
-        if (!state && keyboard.status[keyBinds['fire']]) {
-          await inputFire(0, 'release')
-        }
-        return
-      } else {
-        switch (key) {
-          case keyBinds['map']:
-          case keyBinds['dropopen']:
-          case keyBinds['chat']:
-          case keyBinds['dive']:
-          case keyBinds['stratagem_console']:
-            autokey_enabled = false
-            break
+      if (autokey_type) {
+        if (key == keyBinds['autokey']) {
+          if (state && auto_reloading) return
+          autokey_enabled = state
+          if (autokey_type == 'railgun' && !state && railgun_fired) {
+            if (keyboard.status[keyBinds['fire']]) await inputFire(0, 'release')
+            await sleep(inputDelay)
+            await KeyPressAndRelease(keyBinds['reload'], inputDelay)
+          }
+          if (!state && keyboard.status[keyBinds['fire']]) {
+            await inputFire(0, 'release')
+          }
+          return
+        } else {
+          switch (key) {
+            case keyBinds['map']:
+            case keyBinds['dropopen']:
+            case keyBinds['chat']:
+            case keyBinds['dive']:
+            case keyBinds['stratagem_console']:
+              autokey_enabled = false
+              break
+          }
         }
       }
       switch (key) {
