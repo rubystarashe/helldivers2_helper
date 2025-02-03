@@ -9,12 +9,14 @@
           v-if="f_cooldown(stratagem) > 0"
           :style="{ 'clip-path': `polygon(0 ${f_cooldown(stratagem) * 100}%, 100% ${f_cooldown(stratagem) * 100}%, 100% 100%, 0% 100%)` }"
         >
-        <div class="rotatekey" v-if="stratagem.rotatekey">{{ stratagem.rotatekey }}</div>
-        <div class="hotkey" v-if="stratagem.hotkey">{{ stratagem.hotkey }}</div>
+        <div class="rotatekey" v-if="index == 0">{{ f_get_key_string(_rotatekey) }}</div>
+        <div class="rotatekey" v-else-if="index == _stratagems.length - 1">{{ f_get_key_string(_rotatekey_reverse) }}</div>
+        <div class="hotkey" v-if="stratagem.hotkey">{{ f_get_key_string(stratagem.hotkey) }}</div>
       </div>
       <div class="stratagem reinforce" v-if="_stratagems.length">
+
         <img class="icon canuse" :src="_reinforce.icon" alt="">
-        <div class="hotkey" v-if="_reinforce.hotkey">{{ _reinforce.hotkey }}</div>
+        <div class="hotkey" v-if="_reinforce.hotkey">{{ f_get_key_string(_reinforcekey) }}</div>
       </div>
     </div>
     <div class="mouse_stratagem" v-if="_mouse_stratagem_state">마우스 스트라타젬 입력중</div>
@@ -115,7 +117,53 @@ ipcRenderer.on('record_saved', ({ path, length }) => {
     _record_alert.value = ''
   }, 3000)
 })
+
+
+const f_get_key_string = (key) => {
+  const key_string_map = {
+    'RBUTTON': 'RM',
+    'HANGUL': '한/영',
+    'XBUTTON1': 'MB1',
+    'XBUTTON2': 'MB2',
+    'XBUTTON3': 'MB3',
+    'XBUTTON4': 'MB4',
+    'XBUTTON5': 'MB',
+    'XBUTTON6': 'MB6',
+    'XBUTTON7': 'MB7',
+    'XBUTTON8': 'MB8',
+    'LMENU': 'LALT',
+    'RMENU': 'RALT',
+    'OEM_PERIOD': '.>',
+    'OEM_COMMA': '<,',
+    'OEM_MINUS': '-_',
+    'OEM_PLUS': '+*',
+    'OEM_1': ';:',
+    'OEM_2': '/?',
+    'OEM_3': '`~',
+    'OEM_4': '[{',
+    'OEM_5': '|\\',
+    'OEM_6': '}]',
+    'OEM_7': '\'"',
+    'OEM_8': '``',
+    'ADD': '+',
+    'SUBTRACT': '-',
+    'MULTIPLY': '*',
+    'DIVIDE': '/'
+    
+  }
+  return key_string_map[key] || key
+}
+const _rotatekey = ref('T')
+const _rotatekey_reverse = ref('H')
+const _reinforcekey = ref('OEM_3')
+ipcRenderer.on('keybinds', v => {
+  _rotatekey.value = v.rotatekey
+  _rotatekey_reverse.value = v.rotatekey_reverse
+  _reinforcekey.value = v.reinforce
+})
 </script>
+
+
 
 <style lang="scss" scoped>
 ._oaverlay {

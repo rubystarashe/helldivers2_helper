@@ -105,6 +105,7 @@ const saveKeySetting = () => {
     autokey: keyBinds.autokey,
     record: keyBinds.record,
   }))
+  windows['overlay'].webContents.send('keybinds', keyBinds)
 }
 
 let instantfire = true
@@ -1673,6 +1674,7 @@ const createMainWindow = () => {
     if (window == 'overlay') {
       windows[window].setAlwaysOnTop(true, 'screen-saver')
       windows[window].setIgnoreMouseEvents(true)
+      windows['overlay'].webContents.send('keybinds', keyBinds)
       initEngine()
       windows[window].focus()
     }
