@@ -589,7 +589,7 @@ setInterval(async () => {
       windows.main.webContents.send('steaminfo', { username, steamID64, gamePath, configPath, configInfo })
     }
   } catch (e) {
-    console.log(e)
+    // console.log(e)
     windows.main.webContents.send('steaminfo', { username, steamID64, gamePath, configPath })
   }
 }, 2000)
@@ -723,7 +723,7 @@ const createMainWindow = () => {
     try {
       shell.openPath(configPath.replace('\\input_settings.config', ''))
     } catch (e) {
-      console.log(e)
+      // console.log(e)
     }
   })
 
@@ -943,7 +943,6 @@ const createMainWindow = () => {
   })
   ipcMain.on('save_bindkeys', (_, { target, key }) => {
     keyBinds[target] = key
-    console.log(keyBinds)
     saveKeySetting()
     keywatching = false
   })
