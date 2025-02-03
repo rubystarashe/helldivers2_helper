@@ -359,6 +359,12 @@
             </div>
             <input type="checkbox" class="checkbox" v-model="_deathcam_webp"/>
           </div>
+          <div class="option">
+            <div class="meta" :style="{ width: '100%', 'text-align': 'right' }">
+              <div class="deco"/>
+              <div class="description" :style="{ width: '100%', 'text-align': 'right' }">webp 변환 시 20mb 이하의 용량입니다</div>
+            </div>
+          </div>
         </div>
       </div>
       <div class="textbox">
