@@ -164,6 +164,12 @@ ipcMain.on('autokey_enabled', (_, value) => {
   settings.autokey_enabled = autokey_enabled
   saveSetting()
 })
+let autokey_with_goodarmor = false
+ipcMain.on('autokey_with_goodarmor', (_, value) => {
+  autokey_with_goodarmor = value
+  settings.autokey_with_goodarmor = autokey_with_goodarmor
+  saveSetting()
+})
 let autokey_type = ''
 ipcMain.on('autokey_type', (_, value) => {
   autokey_type = value
@@ -199,6 +205,24 @@ let auto_eruptor_delay = 400
 ipcMain.on('auto_eruptor_delay', (_, value) => {
   auto_eruptor_delay = value
   settings.auto_eruptor_delay = auto_eruptor_delay
+  saveSetting()
+})
+let auto_eruptor_reload_delay = 2800
+ipcMain.on('auto_eruptor_reload_delay', (_, value) => {
+  auto_eruptor_reload_delay = value
+  settings.auto_eruptor_reload_delay = auto_eruptor_reload_delay
+  saveSetting()
+})
+let auto_crossbow_reload_delay = 3300
+ipcMain.on('auto_crossbow_reload_delay', (_, value) => {
+  auto_crossbow_reload_delay = value
+  settings.auto_crossbow_reload_delay = auto_crossbow_reload_delay
+  saveSetting()
+})
+let auto_purifier_reload_delay = 2500
+ipcMain.on('auto_purifier_reload_delay', (_, value) => {
+  auto_purifier_reload_delay = value
+  settings.auto_purifier_reload_delay = auto_purifier_reload_delay
   saveSetting()
 })
 let apw_start_rate = 240
@@ -355,6 +379,7 @@ if (fs.existsSync(settingPath)) {
   if (settings.instant_chat !== undefined) instant_chat = settings.instant_chat
   if (settings.cinematic_mode !== undefined) cinematic_mode = settings.cinematic_mode
   if (settings.autokey_enabled !== undefined) autokey_enabled = settings.autokey_enabled
+  if (settings.autokey_with_goodarmor !== undefined) autokey_with_goodarmor = settings.autokey_with_goodarmor
   if (settings.autokey_type !== undefined) autokey_type = settings.autokey_type
   if (settings.autokey_type_sub !== undefined) autokey_type_sub = settings.autokey_type_sub
   if (settings.auto_arc_delay !== undefined) auto_arc_delay = settings.auto_arc_delay
@@ -447,6 +472,18 @@ const bindHelldivers2Key = key => {
     case 'NUMPAD 8':
     case 'NUMPAD 9':
       reskey = `NUMPAD${abkey.slice(-1)}`
+      break
+    case 'NUMPAD *':
+      reskey = 'MULTIPLY'
+      break
+    case 'NUMPAD /':
+      reskey = 'DIVIDE'
+      break
+    case 'NUMPAD -':
+      reskey = 'SUBTRACT'
+      break
+    case 'NUMPAD +':
+      reskey = 'ADD'
       break
     default:
       reskey = abkey
@@ -1530,9 +1567,9 @@ const createMainWindow = () => {
           const centerHeight = parseInt(rect.height / 16 * 2)
           const centerbuffer = await captureScreen(0, startX, startY, centerWidth, centerHeight)
           const reds = await findRedPixel(centerbuffer)
-          if (reds > centerWidth * 2) {
+          if (reds > centerWidth * 3) {
             if (lastalivestate) {
-              weapon_used[1] = 1
+              weapon_used[1] = (autokey_type == 'eruptor' || autokey_type_sub == 'eruptor') ? 1 : 0
               await sleep(deathcam_delay * 1000)
               recording = true
               const deathcam = await save_death_cam(deathcam_seconds + deathcam_delay, deathcam_webp)
@@ -1565,7 +1602,7 @@ const createMainWindow = () => {
   }
   let lastusedweapon = 1
   const weapon_used = {
-    1: 1,
+    1: (autokey_type == 'eruptor' || autokey_type_sub == 'eruptor') ? 1 : 0,
     2: 1,
     3: 1,
     4: 1,
@@ -1647,7 +1684,7 @@ const createMainWindow = () => {
         if (weapon_used[1] >= 5) {
           auto_reloading = true
           await KeyPressAndRelease(keyBinds['reload'], inputDelay)
-          await sleep(2300)
+          await sleep(autokey_with_goodarmor ? 2250 : 2850)
           auto_reloading = false
         } else {
           await KeyPressAndRelease(keyBinds['weapon_swap'], inputDelay)
@@ -1671,13 +1708,33 @@ const createMainWindow = () => {
         if (weapon_used[1] >= 5) {
           auto_reloading = true
           await KeyPressAndRelease(keyBinds['reload'], inputDelay)
-          await sleep(2600)
+          await sleep(autokey_with_goodarmor ? 2550 : 3350)
           auto_reloading = false
         } else {
           await KeyPressAndRelease(keyBinds['weapon_swap'], inputDelay)
           await sleep(auto_eruptor_delay)
           await KeyPressAndRelease(keyBinds['weapon_swap'], inputDelay)
           await sleep(auto_eruptor_delay)
+        }
+        break
+      case 'purifier':
+        const end = Date.now()
+        let rounds = 0
+        while (rounds < (15 - weapon_used[1])) {
+          await inputFire(10)
+          await sleep(10)
+          rounds = Math.floor((Date.now() - end) / 60) + 1
+          if (!enginerunning()) {
+            break
+          }
+        }
+        weapon_used[1] += rounds
+        if (weapon_used[1] >= 15) {
+          auto_reloading = true
+          await KeyPressAndRelease(keyBinds['reload'], inputDelay)
+          await sleep(autokey_with_goodarmor ? 1850 : 2550)
+          auto_reloading = false
+          weapon_used[1] = 0
         }
         break
       case 'apw':
@@ -1808,6 +1865,7 @@ const createMainWindow = () => {
         autokey_type,
         autokey_type_sub,
         autokey_enabled,
+        autokey_with_goodarmor,
         auto_arc_delay,
         auto_railgun_delay,
         auto_railgun_reload_delay,

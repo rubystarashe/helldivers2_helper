@@ -201,6 +201,13 @@
           <div class="option">
             <div class="meta">
               <div class="deco"/>
+              <div class="name">재장전 속도 증가 갑옷 착용 여부</div>
+            </div>
+            <input type="checkbox" class="checkbox" v-model="_autokey_with_goodarmor"/>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
               <div class="name">기계화 전투 1번 단축키</div>
             </div>
             <div class="shortcut" @click="f_set_key('autokey', '기계화 전투 단축키')">{{ f_get_key_string(_bindkeys.autokey) }}</div>
@@ -680,11 +687,18 @@ watch(_autokey_enabled, () => {
 ipcRenderer.on('autokey_enabled', v => {
   _autokey_enabled.value = v
 })
-
+const _autokey_with_goodarmor = ref(false)
+watch(_autokey_with_goodarmor, () => {
+  ipcRenderer.send('autokey_with_goodarmor', _autokey_with_goodarmor.value)
+})
+ipcRenderer.on('autokey_with_goodarmor', v => {
+  _autokey_with_goodarmor.value = v
+})
 const _autokey_type_map = [
   { name: '기계화 전투 미사용', value: '' },
   { name: '이럽터 연사 보조', value: 'eruptor' },
   { name: '폭발 석궁 연사 보조', value: 'crossbow' },
+  { name: '퓨리파이어 연사 보조', value: 'purifier' },
   { name: '레일건 자동 조작 보조', value: 'railgun' },
   { name: '아크 발사기 자동 조작 보조', value: 'arc' },
   { name: '중기관총 반동 제어 보조', value: 'heavy' },
@@ -732,6 +746,27 @@ watch(_auto_eruptor_delay, () => {
 })
 ipcRenderer.on('auto_eruptor_delay', v => {
   _auto_eruptor_delay.value = v
+})
+const _auto_eruptor_reload_delay = ref(2800)
+watch(_auto_eruptor_reload_delay, () => {
+  ipcRenderer.send('auto_eruptor_reload_delay', _auto_eruptor_reload_delay.value)
+})
+ipcRenderer.on('auto_eruptor_reload_delay', v => {
+  _auto_eruptor_reload_delay.value = v
+})
+const _auto_crossbow_reload_delay = ref(3300)
+watch(_auto_crossbow_reload_delay, () => {
+  ipcRenderer.send('auto_crossbow_reload_delay', _auto_crossbow_reload_delay.value)
+})
+ipcRenderer.on('auto_crossbow_reload_delay', v => {
+  _auto_crossbow_reload_delay.value = v
+})
+const _auto_purifier_reload_delay = ref(2000)
+watch(_auto_purifier_reload_delay, () => {
+  ipcRenderer.send('auto_purifier_reload_delay', _auto_purifier_reload_delay.value)
+})
+ipcRenderer.on('auto_purifier_reload_delay', v => {
+  _auto_purifier_reload_delay.value = v
 })
 const _apw_start_rate = ref(240)
 watch(_apw_start_rate, () => {
@@ -883,6 +918,7 @@ ipcRenderer.on('initSettings', v => {
   _autokey_enabled.value = v.autokey_enabled
   _autokey_type.value = v.autokey_type
   _autokey_type_sub.value = v.autokey_type_sub
+  _autokey_with_goodarmor.value = v.autokey_with_goodarmor
   _auto_arc_delay.value = v.auto_arc_delay
   _auto_railgun_delay.value = v.auto_railgun_delay
   _auto_railgun_reload_delay.value = v.auto_railgun_reload_delay

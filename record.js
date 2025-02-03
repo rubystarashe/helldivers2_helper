@@ -323,7 +323,7 @@ export const convertVideoToWebP = async (videoPath, outputPath, targetSizeMB, ta
       // WebP 생성
       await execPromise(`"${ffmpegPath}" -i "${videoPath}" -vf "${scaleFilter},fps=${targetFps}" -c:v libwebp -lossless 0 -compression_level 4 -q:v 75 -preset default -an -threads 4 -y "${outputPath}"`)
       currentSize = fs.statSync(outputPath).size
-      console.log(`Current WebP size: ${currentSize} bytes`)
+      // console.log(`Current WebP size: ${currentSize} bytes`)
       if (currentSize > targetSize) {
         scale = adjustScale(currentSize, targetSize, scale)
       } else {
