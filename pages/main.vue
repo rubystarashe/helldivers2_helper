@@ -201,68 +201,62 @@
           <div class="option">
             <div class="meta">
               <div class="deco"/>
-              <div class="name">기계화 전투 단축키</div>
+              <div class="name">기계화 전투 1번 단축키</div>
             </div>
             <div class="shortcut" @click="f_set_key('autokey', '기계화 전투 단축키')">{{ f_get_key_string(_bindkeys.autokey) }}</div>
           </div>
           <div class="option">
             <div class="meta">
               <div class="deco"/>
-              <div class="name">기계화 전투 사용 안함</div>
+              <div class="name">기계화 전투 1번</div>
             </div>
-            <input type="radio" class="radio" v-model="_autokey_type" :value="''">
+            <select class="select" v-model="_autokey_type">
+              <option class="option" v-for="item in _autokey_type_map" :value="item.value">{{ item.name }}</option>
+            </select>
+          </div>
+          <div class="option" v-if="(_autokey_type == 'eruptor') && !_keyBinds.weapon_swap">
+            <div class="meta" :style="{ width: '100%', 'text-align': 'right' }">
+              <div class="deco"/>
+              <div class="description" :style="{ width: '100%', 'text-align': 'right' }">장비 교체(짧은무기) 키설정 필요</div>
+            </div>
           </div>
           <div class="option">
             <div class="meta">
               <div class="deco"/>
-              <div class="name">폭발 주무기 연사</div>
+              <div class="name">기계화 전투 2번 단축키</div>
             </div>
-            <input type="radio" v-if="_keyBinds.weapon_swap" class="radio" v-model="_autokey_type" value="eruptor">
-            <div class="description" v-else>장비 교체(짧은무기)<br/>키설정 필요</div>
+            <div class="shortcut" @click="f_set_key('autokey_sub', '기계화 전투 단축키')">{{ f_get_key_string(_bindkeys.autokey_sub) }}</div>
           </div>
           <div class="option">
             <div class="meta">
               <div class="deco"/>
-              <div class="name">레일건 자동 조작 보조</div>
+              <div class="name">기계화 전투 2번</div>
             </div>
-            <input type="radio" class="radio" v-model="_autokey_type" value="railgun">
+            <select class="select" v-model="_autokey_type_sub">
+              <option class="option" v-for="item in _autokey_type_map" :value="item.value">{{ item.name }}</option>
+            </select>
           </div>
-          <div class="option">
-            <div class="meta">
+          <div class="option" v-if="(_autokey_type_sub == 'eruptor') && !_keyBinds.weapon_swap">
+            <div class="meta" :style="{ width: '100%', 'text-align': 'right' }">
               <div class="deco"/>
-              <div class="name">아크 발사기 자동 조작 보조</div>
+              <div class="description" :style="{ width: '100%', 'text-align': 'right' }">장비 교체(짧은무기) 키설정 필요</div>
             </div>
-            <input type="radio" class="radio" v-model="_autokey_type" value="arc">
           </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">중기관총 반동 제어 보조</div>
-            </div>
-            <input type="radio" class="radio" v-model="_autokey_type" value="heavy">
-          </div>
-          <div class="option">
+          <div class="option" v-if="_autokey_type == 'heavy' || _autokey_type_sub == 'heavy'">
             <div class="meta">
               <div class="deco"/>
               <div class="name">중기관총 반동 제어 감도</div>
             </div>
             <input class="input" type="number" v-model="_heavy_start_rate"/>
           </div>
-          <div class="option">
+          <div class="option" v-if="_autokey_type == 'heavy' || _autokey_type_sub == 'heavy'">
             <div class="meta">
               <div class="deco"/>
               <div class="name">중기관총 사용 RPM</div>
             </div>
             <input class="input" type="number" v-model="_heavy_rpm"/>
           </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">대물소총 연발 사격</div>
-            </div>
-            <input type="radio" class="radio" v-model="_autokey_type" value="apw">
-          </div>
-          <div class="option">
+          <div class="option" v-if="_autokey_type == 'apw' || _autokey_type_sub == 'apw'">
             <div class="meta">
               <div class="deco"/>
               <div class="name">대물소총 반동 제어 감도</div>
@@ -357,6 +351,13 @@
               <div class="name">데스캠 미리보기 크기 배율</div>
             </div>
             <input type="number" class="input" v-model="_deathcam_size" :min="20" :max="200"/>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">데스캠 webp 변환 활성화</div>
+            </div>
+            <input type="checkbox" class="checkbox" v-model="_deathcam_webp"/>
           </div>
         </div>
       </div>
@@ -673,12 +674,29 @@ watch(_autokey_enabled, () => {
 ipcRenderer.on('autokey_enabled', v => {
   _autokey_enabled.value = v
 })
-const _autokey_type = ref(null)
+
+const _autokey_type_map = [
+  { name: '기계화 전투 미사용', value: '' },
+  { name: '이럽터 연사 보조', value: 'eruptor' },
+  { name: '폭발 석궁 연사 보조', value: 'crossbow' },
+  { name: '레일건 자동 조작 보조', value: 'railgun' },
+  { name: '아크 발사기 자동 조작 보조', value: 'arc' },
+  { name: '중기관총 반동 제어 보조', value: 'heavy' },
+  { name: '대물소총 연발 사격', value: 'apw' }
+]
+const _autokey_type = ref('')
 watch(_autokey_type, () => {
   ipcRenderer.send('autokey_type', _autokey_type.value)
 })
 ipcRenderer.on('autokey_type', v => {
   _autokey_type.value = v
+})
+const _autokey_type_sub = ref('')
+watch(_autokey_type_sub, () => {
+  ipcRenderer.send('autokey_type_sub', _autokey_type_sub.value)
+})
+ipcRenderer.on('autokey_type_sub', v => {
+  _autokey_type_sub.value = v
 })
 
 const _auto_arc_delay = ref(1000)
@@ -828,6 +846,13 @@ watch(_deathcam_size, () => {
 ipcRenderer.on('deathcam_size', v => {
   _deathcam_size.value = v
 })
+const _deathcam_webp = ref(false)
+watch(_deathcam_webp, () => {
+  ipcRenderer.send('deathcam_webp', _deathcam_webp.value)
+})
+ipcRenderer.on('deathcam_webp', v => {
+  _deathcam_webp.value = v
+})
 
 const _bindkeys = ref({
   reinforce: 'OEM_3',
@@ -837,6 +862,7 @@ const _bindkeys = ref({
   HANGUL: 'HANGUL',
   mousestratagem: 'SPACE',
   autokey: 'XBUTTON1',
+  autokey_sub: 'XBUTTON2',
   record: 'F1',
 })
 
@@ -850,6 +876,7 @@ ipcRenderer.on('initSettings', v => {
   _cinematic_mode.value = v.cinematic_mode
   _autokey_enabled.value = v.autokey_enabled
   _autokey_type.value = v.autokey_type
+  _autokey_type_sub.value = v.autokey_type_sub
   _auto_arc_delay.value = v.auto_arc_delay
   _auto_railgun_delay.value = v.auto_railgun_delay
   _auto_railgun_reload_delay.value = v.auto_railgun_reload_delay
@@ -870,6 +897,7 @@ ipcRenderer.on('initSettings', v => {
   _deathcam_delay.value = v.deathcam_delay
   _deathcam_preview.value = v.deathcam_preview
   _deathcam_size.value = v.deathcam_size
+  _deathcam_webp.value = v.deathcam_webp
   _bindkeys.value = v.keyBinds
 })
 
@@ -1191,6 +1219,7 @@ const f_format_size = (size) => {
             border-radius: 0;
             background-color: transparent;
             color: rgb(150, 150, 150);
+            text-align: right;
             &:focus {
               outline: none;
               box-shadow: none;

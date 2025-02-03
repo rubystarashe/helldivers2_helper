@@ -12,6 +12,10 @@ let finalDeathcamDir
 let ffmpegPath
 let ffmpegProbePath
 
+const sleep = (ms) => {
+  return new Promise(resolve => setTimeout(resolve, ms))
+}
+
 const execPromise = (command) => {
   return new Promise((resolve, reject) => {
     exec(command, (error, stdout, stderr) => {
@@ -204,7 +208,7 @@ export const save_recorder = async () => {
   return await promise
 }
 
-export const save_death_cam = async (seconds) => {
+export const save_death_cam = async (seconds, deathcam_webp) => {
   if (!recorder) return
 
   const { promise, resolve, reject } = Promise.withResolvers()
@@ -268,9 +272,68 @@ export const save_death_cam = async (seconds) => {
     } else {
       fs.rmSync(deathcamDir, { recursive: true, force: true })
       process.kill()
+      const webp = async () => {
+        while (!fs.existsSync(finalFile)) {
+          await sleep(500)
+        }
+        convertVideoToWebP(finalFile, path.join(finalDeathcamDir, `death_${formattedDate}.webp`), 20, Math.min(lastoption.framerate || 1, 30), 3)
+      }
+      if (deathcam_webp) webp()
       resolve({ path: finalFile, length: validFiles.length })
     }
   })
 
+
   return await promise
 }
+
+
+const getVideoInfo = (videoPath) => {
+  const command = `"${ffmpegProbePath}" -v error -select_streams v:0 -show_entries stream=width,height,r_frame_rate -of json "${videoPath}"`
+  const output = execSync(command)
+  const info = JSON.parse(output)
+  const { width, height, r_frame_rate } = info.streams[0]
+  const fps = eval(r_frame_rate)
+  return { width, height, fps }
+}
+const calculateScale = (originalSize, targetSize, originalFps, targetFps, ziprate) => {
+  const fpsRatio = originalFps / targetFps; // FPS 차이가 적을수록 스케일이 낮아져야 함
+  const sizeRatio = targetSize / originalSize; // 용량 차이가 클수록 스케일이 낮아져야 함
+  return Math.max(0.5, Math.min(0.92, Math.sqrt(fpsRatio * sizeRatio) / ziprate))
+}
+
+const adjustScale = (currentSize, targetSize, currentScale) => {
+  const sizeRatio = targetSize / currentSize
+  return currentScale * Math.sqrt(sizeRatio) / 1.1
+}
+
+export const convertVideoToWebP = async (videoPath, outputPath, targetSizeMB, targetFps = 30, ziprate = 4) => {
+  // const targetSize = targetSizeMB * 1024 * 1024
+  const targetSize = targetSizeMB * 1000 * 1000
+  const originalSize = fs.statSync(videoPath).size
+  const { width, height, fps: originalFps } = getVideoInfo(videoPath)
+
+  let scale = calculateScale(originalSize, targetSize, originalFps, targetFps, ziprate)
+  let currentSize = Infinity
+
+  while (currentSize > targetSize) {
+    const scaleFilter = `scale=iw*${scale}:ih*${scale}`
+    // console.log(`Attempting WebP conversion with scale: ${scale}`)
+    try {
+      // WebP 생성
+      await execPromise(`"${ffmpegPath}" -i "${videoPath}" -vf "${scaleFilter},fps=${targetFps}" -c:v libwebp -lossless 0 -compression_level 4 -q:v 75 -preset default -an -threads 4 -y "${outputPath}"`)
+      currentSize = fs.statSync(outputPath).size
+      console.log(`Current WebP size: ${currentSize} bytes`)
+      if (currentSize > targetSize) {
+        scale = adjustScale(currentSize, targetSize, scale)
+      } else {
+        fs.rmSync(videoPath, { recursive: true, force: true })
+      }
+    } catch (error) {
+      // console.log(error)
+      break
+    }
+  }
+  // console.log(`Final WebP size: ${currentSize} bytes`)
+};
+
