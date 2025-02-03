@@ -39,10 +39,6 @@ app.commandLine.appendSwitch('enable-usermedia-screen-capturing')
 
 
 let keyBinds = {
-  rotatekey: 'T',
-  rotatekey_reverse: 'H',
-  rotate_cancel: 'RBUTTON',
-
   chat: 'RETURN',
   escape: 'ESCAPE',
   fire: 'LBUTTON',
@@ -73,20 +69,20 @@ let keyBinds = {
   dropopen: 'X',
   cinematic_mode: null,
 
-  reinforce: 'OEM_3',
-
   up: 'W',
   down: 'S',
   left: 'A',
   right: 'D',
 
+
+  reinforce: 'OEM_3',
+  rotatekey: 'T',
+  rotatekey_reverse: 'H',
+  rotate_cancel: 'RBUTTON',
   HANGUL: 'HANGUL',
-
-  autokey: 'XBUTTON1',
-
   mousestratagem: 'SPACE',
-
-  record: 'F1'
+  autokey: 'XBUTTON1',
+  record: 'F1',
 }
 
 const settingPath = path.join(userdatapath, 'user.settings.json')
@@ -94,6 +90,20 @@ let settings = {}
 const saveSetting = () => {
   if (!fs.existsSync(settingPath)) fs.writeFileSync(settingPath, '{}')
   fs.writeFileSync(settingPath, JSON.stringify(settings))
+}
+const keysettingPath = path.join(userdatapath, 'user.settings.keybinds.json')
+const saveKeySetting = () => {
+  if (!fs.existsSync(keysettingPath)) fs.writeFileSync(keysettingPath, '{}')
+  fs.writeFileSync(keysettingPath, JSON.stringify({
+    reinforce: keyBinds.reinforce,
+    rotatekey: keyBinds.rotatekey,
+    rotatekey_reverse: keyBinds.rotatekey_reverse,
+    rotate_cancel: keyBinds.rotate_cancel,
+    HANGUL: keyBinds.HANGUL,
+    mousestratagem: keyBinds.mousestratagem,
+    autokey: keyBinds.autokey,
+    record: keyBinds.record,
+  }))
 }
 
 let instantfire = true
@@ -345,11 +355,23 @@ if (fs.existsSync(settingPath)) {
   if (settings.deathcam_preview !== undefined) deathcam_preview = settings.deathcam_preview
   if (settings.deathcam_size !== undefined) deathcam_size = settings.deathcam_size
 }
+if (fs.existsSync(keysettingPath)) {
+  const keyBindsRead = JSON.parse(fs.readFileSync(keysettingPath, 'utf8'))
+  if (keyBinds.reinforce) keyBinds['reinforce'] = keyBindsRead.reinforce
+  if (keyBinds.rotatekey) keyBinds['rotatekey'] = keyBindsRead.rotatekey
+  if (keyBinds.rotatekey_reverse) keyBinds['rotatekey_reverse'] = keyBindsRead.rotatekey_reverse
+  if (keyBinds.rotate_cancel) keyBinds['rotate_cancel'] = keyBindsRead.rotate_cancel
+  if (keyBinds.HANGUL) keyBinds['HANGUL'] = keyBindsRead.HANGUL
+  if (keyBinds.mousestratagem) keyBinds['mousestratagem'] = keyBindsRead.mousestratagem
+  if (keyBinds.autokey) keyBinds['autokey'] = keyBindsRead.autokey
+  if (keyBinds.record) keyBinds['record'] = keyBindsRead.record
+}
 
 let stratagemRunning = false
 let stratagemPending = false
 let stratagemReady = false
 let stratagemsets = []
+
 
 // Hold(누르고있기), Press(누르기.기본(탭, 더블탭 포함)), LongPress(길게누르기)
 let stratagem_key_type = 'Hold'
@@ -914,8 +936,36 @@ const createMainWindow = () => {
   }
   mouse_stratagem_engine()
 
+  
+  let keywatching = false
+  ipcMain.on('key_watching', (_, target) => {
+    keywatching = target
+  })
+  ipcMain.on('save_bindkeys', (_, { target, key }) => {
+    keyBinds[target] = key
+    console.log(keyBinds)
+    saveKeySetting()
+    keywatching = false
+  })
+
+  ipcMain.on('cancel_key', (_, __) => {
+    keywatching = false
+  })
+
+
   const initEngine = async () => {
     keyboard.on('EVERY', async ({ key, state }) => {
+      if (!focuswindowIsGame() && keywatching) {
+        if (key == 'LBUTTON') return
+        if (!state) {
+          // const pressingkeys = Object.entries(keyboard.status).filter(([key, state]) => state).map(([key]) => key)
+        }
+        if (state) {
+          windows.main.webContents.send('key_watching', key)
+        }
+        return
+      }
+
       if (focuswindow == 'Helldivers2 Chat') {
         if (state) {
           if (key == 'TAB' && (keyboard.status['LMENU'] || keyboard.status['RMENU'] || keyboard.status['MENU'] )) {
@@ -1192,10 +1242,10 @@ const createMainWindow = () => {
       if (!state) {
         switch (key) {
           case keyBinds['HANGUL']:
-          case 'RMENU':
-          case 'KANJI':
-          case 'NEXT':
-          case 'RCONTROL':
+          // case 'RMENU':
+          // case 'KANJI':
+          // case 'NEXT':
+          // case 'RCONTROL':
             if (stratagemPending && !instant_chat) {
               await KeyRelease(key)
               await KeyPressAndRelease('BACK')
@@ -1437,7 +1487,6 @@ const createMainWindow = () => {
         windows['overlay'].webContents.send('visible', false)
       }
     } catch (e) {
-      console.log(e)
     }
     await sleep(1000 / 6)
     checkforegroundWindow()
@@ -1511,7 +1560,10 @@ const createMainWindow = () => {
         }
         await inputFire(inputDelay)
         await sleep(inputDelay)
-        if (!enginerunning()) break
+        if (!enginerunning()) {
+          await sleep(auto_eruptor_delay)
+          break
+        }
         await KeyPressAndRelease(keyBinds['weapon_swap'], inputDelay)
         await sleep(auto_eruptor_delay)
         await KeyPressAndRelease(keyBinds['weapon_swap'], inputDelay)
@@ -1620,7 +1672,8 @@ const createMainWindow = () => {
         deathcam_seconds,
         deathcam_delay,
         deathcam_preview,
-        deathcam_size
+        deathcam_size,
+        keyBinds
       })
 
       windows[window].show()

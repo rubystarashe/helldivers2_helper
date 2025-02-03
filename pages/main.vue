@@ -61,28 +61,28 @@
               <div class="deco"/>
               <div class="name">증원 단축키</div>
             </div>
-            <div class="description">`~</div>
+            <div class="shortcut" @click="f_set_key('reinforce', '증원 단축키')">{{ f_get_key_string(_bindkeys.reinforce) }}</div>
           </div>
           <div class="option">
             <div class="meta">
               <div class="deco"/>
               <div class="name">→ 방향 로테이션 단축키</div>
             </div>
-            <div class="description">T</div>
+            <div class="shortcut" @click="f_set_key('rotatekey', '→ 방향 로테이션 단축키')">{{ f_get_key_string(_bindkeys.rotatekey) }}</div>
           </div>
           <div class="option">
             <div class="meta">
               <div class="deco"/>
               <div class="name">← 방향 로테이션 단축키</div>
             </div>
-            <div class="description">H</div>
+            <div class="shortcut" @click="f_set_key('rotatekey_reverse', '← 방향 로테이션 단축키')">{{ f_get_key_string(_bindkeys.rotatekey_reverse) }}</div>
           </div>
           <div class="option">
             <div class="meta">
               <div class="deco"/>
               <div class="name">로테이션 취소 단축키</div>
             </div>
-            <div class="description">우클릭</div>
+            <div class="shortcut" @click="f_set_key('rotate_cancel', '로테이션 취소 단축키')">{{ f_get_key_string(_bindkeys.rotate_cancel) }}</div>
           </div>
         </div>
         <div class="section">
@@ -144,7 +144,7 @@
               <div class="deco"/>
               <div class="name">한글 채팅 확장 단축키</div>
             </div>
-            <div class="description">한/영</div>
+            <div class="shortcut" @click="f_set_key('HANGUL', '한글 채팅 확장 단축키')">{{ f_get_key_string(_bindkeys.HANGUL) }}</div>
           </div>
         </div>
         <div class="section">
@@ -172,7 +172,7 @@
               <div class="deco"/>
               <div class="name">입력 상태 활성화 단축키</div>
             </div>
-            <div class="description">스페이스바</div>
+            <div class="shortcut" @click="f_set_key('mousestratagem', '스트라타젬 마우스 입력 상태 활성화 단축키')">{{ f_get_key_string(_bindkeys.mousestratagem) }}</div>
           </div>
           <div class="option">
             <div class="meta">
@@ -203,7 +203,7 @@
               <div class="deco"/>
               <div class="name">기계화 전투 단축키</div>
             </div>
-            <div class="description">마우스버튼1</div>
+            <div class="shortcut" @click="f_set_key('autokey', '기계화 전투 단축키')">{{ f_get_key_string(_bindkeys.autokey) }}</div>
           </div>
           <div class="option">
             <div class="meta">
@@ -284,7 +284,7 @@
               <div class="deco"/>
               <div class="name">자동 녹화 단축키</div>
             </div>
-            <div class="description">F1</div>
+            <div class="shortcut" @click="f_set_key('record', '자동 녹화 단축키')">{{ f_get_key_string(_bindkeys.record) }}</div>
           </div>
           <div class="option">
             <div class="meta">
@@ -354,6 +354,18 @@
         <div>당신은 장애를 갖고 있거나, 겁쟁이입니다. 하지만 이 새로운 기술을 사용하면 반드시 장애를 극복하고 두려움없는 헬다이버로 거듭날 수 있습니다.</div>
       </div>
     </div>
+    <div v-if="_key_modal" class="key_modal" @click.self="f_cancel_key">
+      <div class="inner">
+        <div class="title"><div class="deco"/>단축키 변경</div>
+        <div class="name">{{ _key_modal }}</div>
+        <div class="key">{{ f_get_key_string(_key_watching_key) }}</div>
+        <div class="buttons">
+          <div class="button cancel" @click="f_cancel_key">취소</div>
+          <div class="button save" @click="f_save_key">저장</div>
+        </div>
+      </div>
+    </div>
+
     <div class="update" v-if="c_newversion" @click="f_update_install">최신 업데이트가 다운로드 되었습니다! 클릭하여 업데이트 하세요</div>
     <div class="update" v-else-if="_progress">신규 업데이트를 다운로드 받고 있습니다. {{ _progress?.percent?.toFixed(0) || 0 }}%</div>
   </div>
@@ -416,6 +428,20 @@ onMounted(async () => {
       if (e.key === 'I' && e.ctrlKey) {
         e.preventDefault()
       }
+    }
+  }
+  // 마우스 버튼 클릭 시 기본 동작 차단
+  window.onmousedown = e => {
+    if (e.button === 3 || e.button === 4) { // 3: 뒤로가기 버튼, 4: 앞으로가기 버튼
+      e.preventDefault()
+    }
+  }
+  window.onkeydown = e => {
+    if (e.key === ' ') { // 스페이스 키 막기
+      e.preventDefault()
+    }
+    if (e.key?.startsWith('F') && e.key.length <= 3) { // F1 ~ F12 키 막기
+      e.preventDefault()
     }
   }
 })
@@ -789,6 +815,17 @@ ipcRenderer.on('deathcam_size', v => {
   _deathcam_size.value = v
 })
 
+const _bindkeys = ref({
+  reinforce: 'OEM_3',
+  rotatekey: 'T',
+  rotatekey_reverse: 'H',
+  rotate_cancel: 'RBUTTON',
+  HANGUL: 'HANGUL',
+  mousestratagem: 'SPACE',
+  autokey: 'XBUTTON1',
+  record: 'F1',
+})
+
 ipcRenderer.on('initSettings', v => {
   _stratagem_instant_fire.value = v.instantfire
   _stratagem_instant_fire_delay.value = v.instantfire_delay
@@ -819,6 +856,7 @@ ipcRenderer.on('initSettings', v => {
   _deathcam_delay.value = v.deathcam_delay
   _deathcam_preview.value = v.deathcam_preview
   _deathcam_size.value = v.deathcam_size
+  _bindkeys.value = v.keyBinds
 })
 
 // onMounted(() => {
@@ -840,9 +878,72 @@ ipcRenderer.on('steaminfo', v => {
 const f_open_config_path = () => {
   ipcRenderer.send('open_config_path')
 }
+
+const _key_modal = ref()
+const _key_watching = ref()
+const _key_watching_key = ref()
+const f_set_key = (key, name) => {
+  _key_watching.value = key
+  ipcRenderer.send('key_watching', key)
+  _key_modal.value = name
+  _key_watching_key.value = _bindkeys.value[key]
+}
+ipcRenderer.on('key_watching', v => {
+  _key_watching_key.value = v
+})
+const f_save_key = () => {
+  _bindkeys.value[_key_watching.value] = _key_watching_key.value
+  if (_key_watching_key.value) ipcRenderer.send('save_bindkeys', { target: _key_watching.value, key: _key_watching_key.value })
+  _key_watching.value = null
+  _key_watching_key.value = null
+  _key_modal.value = null
+}
+const f_cancel_key = () => {
+  _key_modal.value = null
+  _key_watching.value = null
+  _key_watching_key.value = null
+  ipcRenderer.send('cancel_key', true)
+}
+
+const f_get_key_string = (key) => {
+  const key_string_map = {
+    'RBUTTON': '마우스 우클릭',
+    'HANGUL': '한/영',
+    'SPACE': '스페이스바',
+    'XBUTTON1': '마우스버튼1',
+    'XBUTTON2': '마우스버튼2',
+    'XBUTTON3': '마우스버튼3',
+    'XBUTTON4': '마우스버튼4',
+    'XBUTTON5': '마우스버튼5',
+    'XBUTTON6': '마우스버튼6',
+    'XBUTTON7': '마우스버튼7',
+    'XBUTTON8': '마우스버튼8',
+    'LMENU': 'LALT',
+    'RMENU': 'RALT',
+    'OEM_PERIOD': '.>',
+    'OEM_COMMA': '<,',
+    'OEM_MINUS': '-_',
+    'OEM_PLUS': '+*',
+    'OEM_1': ';:',
+    'OEM_2': '/?',
+    'OEM_3': '`~',
+    'OEM_4': '[{',
+    'OEM_5': '|\\',
+    'OEM_6': '}]',
+    'OEM_7': '\'"',
+    'OEM_8': '``',
+    'ADD': '+',
+    'SUBTRACT': '-',
+    'MULTIPLY': '*',
+    'DIVIDE': '/'
+    
+  }
+  return key_string_map[key] || key
+}
 </script>
 
 <style lang="scss" scoped>
+
 ._main {
   color: white;
   display: flex;
@@ -1007,6 +1108,17 @@ const f_open_config_path = () => {
             min-width: 50px;
             width: 100%;
           }
+          .shortcut {
+            font-size: 14px;
+            font-weight: 300;
+            color: rgb(150, 150, 150);
+            text-align: right;
+            word-break: keep-all;
+            min-width: 50px;
+            width: 100%;
+            cursor: pointer;
+            height: 20px;
+          }
           .input {
             width: 50px;
             text-align: right;
@@ -1117,6 +1229,86 @@ const f_open_config_path = () => {
       }
     }
   }
+  .key_modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    padding: 20px;
+    background: rgba(0, 0, 0, .8);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    .inner {
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      .title {
+        position: absolute;
+        left: 80px;
+        top: 100px;
+        display: flex;
+        align-items: center;
+
+        font-size: 40px;
+        font-weight: 700;
+        .deco {
+          width: 7px;
+          height: 40px;
+          background: rgb(255, 232, 0);
+          margin-right: 15px;
+        }
+      }
+      .name {
+        font-size: 60px;
+        text-align: center;
+      }
+      .key {
+        background: rgb(255, 232, 0);
+        color: black;
+        padding: 10px 20px;
+        min-width: 200px;
+        font-size: 60px;
+        text-align: center;
+        margin-bottom: 70px;
+        margin-top: 40px;
+      }
+      .buttons {
+        display: flex;
+
+        justify-content: space-between;
+        .button {
+          width: 200px;
+          height: 60px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 28px;
+          font-weight: 400;
+          cursor: pointer;
+          border: 5px solid transparent;
+          &.save {
+            border-color: rgb(76, 223, 116);
+            color: rgb(76, 223, 116);
+            background: rgba(76, 223, 116, .1);
+          }
+          &.cancel {
+            border-color: rgb(100, 100, 100);
+            color: rgb(100, 100, 100);
+            background: rgba(100, 100, 100, .2);
+            margin-right: 100px;
+          }
+
+        }
+      }
+    }
+  }
+
+
   .update{
     position: fixed;
     background: rgb(255, 232, 0);
