@@ -7,6 +7,7 @@ import { getCurrentSteamUser, getSteamID64, getSteamInfo, getUserConfigPath, rea
 import fs from 'fs'
 import { reset_recorder, start_recorder, pause_recorder, save_recorder, save_death_cam } from './record.js'
 import { createRequire } from 'module';
+import fsPromises from 'fs/promises';
 
 const require = createRequire(import.meta.url);
 const lerp = require('lerp');
@@ -309,12 +310,15 @@ if (tempDir && fs.existsSync(tempDir)) {
   fs.rmSync(tempDir, { recursive: true, force: true });
 }
 
+const finalDir = path.join(videopath, 'HELLDIVERS 2')
+if (!fs.existsSync(finalDir)) fs.mkdirSync(finalDir, { recursive: true })
+
 const get_recorder_options = () => {
   return {
     ffmpegPath: path.join(isDev ? app.getAppPath() : path.join(process.resourcesPath, 'app.asar.unpacked'), 'ffmpeg', 'ffmpeg.exe'),
     ffmpegProbePath: path.join(isDev ? app.getAppPath() : path.join(process.resourcesPath, 'app.asar.unpacked'), 'ffmpeg', 'ffprobe.exe'),
     tempDir,
-    finalDir: path.join(videopath, 'HELLDIVERS 2'),
+    finalDir,
     monitor: gameDisplay,
     rect: gameRect,
     framerate: record_framerate,
@@ -1401,6 +1405,12 @@ const createMainWindow = () => {
     try {
       const HWND = await getForegroundWindowHWND()
       const text = await getWindowText(HWND)
+      if (focuswindow == 'HELLDIVERS™ 2' && text != 'HELLDIVERS™ 2') {
+        try {
+          getFolderSize(finalDir)
+            .then(r => windows['main'].webContents.send('video_path_size', r))
+        } catch (e) {}
+      }
       focuswindow = text
       const rect = await getWindowRect(HWND)
       if (text == 'HELLDIVERS™ 2') {
@@ -1623,8 +1633,43 @@ const createMainWindow = () => {
     windows['chat'].setPosition(0, 0)
   })
 
+  ipcMain.on('open_video_folder', () => {
+    shell.openPath(finalDir)
+  })
+  ipcMain.on('clear_video_folder', () => {
+    fs.rmSync(finalDir, { recursive: true, force: true })
+    fs.mkdirSync(finalDir, { recursive: true })
+    windows['main'].webContents.send('video_path_size', 0)
+  })
+
+  // 폴더의 총 용량을 비동기적으로 계산하는 함수
+  const getFolderSize = async (folderPath) => {
+    let totalSize = 0
+
+    const calculateSize = async (dirPath) => {
+      const files = await fsPromises.readdir(dirPath)
+
+      const sizePromises = files.map(async (file) => {
+        const filePath = path.join(dirPath, file)
+        const stats = await fsPromises.stat(filePath)
+
+        if (stats.isDirectory()) {
+          await calculateSize(filePath) // 재귀적으로 하위 디렉토리 탐색
+        } else {
+          totalSize += stats.size // 파일 크기 합산
+        }
+      })
+
+      await Promise.all(sizePromises)
+    };
+
+    await calculateSize(folderPath)
+    return totalSize;
+  }
+
   ipcMain.handle('loaded', async (_, window) => {
     if (windows[window].isLoaded) return { isDev }
+
     if (window == 'overlay') {
       windows[window].setAlwaysOnTop(true, 'screen-saver')
       windows[window].setIgnoreMouseEvents(true)
@@ -1641,6 +1686,10 @@ const createMainWindow = () => {
       windows[window].webContents.send('visible', true)
       if (username && steamID64 && gamePath && configPath) windows.main.webContents.send('steaminfo', { username, steamID64, gamePath, configPath, configInfo })
       // else windows.main.webContents.send('steaminfo', { error: 'steam not found' })
+      
+      try {
+        windows['main'].webContents.send('video_path_size', await getFolderSize(finalDir))
+      } catch (e) {}
 
       windows[window].webContents.send('initSettings', {
         instantfire,

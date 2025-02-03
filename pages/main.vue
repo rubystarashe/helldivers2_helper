@@ -282,6 +282,20 @@
           <div class="option">
             <div class="meta">
               <div class="deco"/>
+              <div class="name">동영상 저장 위치 열기</div>
+            </div>
+            <div class="button" @click="f_open_video_folder">폴더 열기</div>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">저장된 동영상 전부 삭제</div>
+            </div>
+            <div class="button" :class="{ disabled: !_video_path_size }" @click="f_clear_video_folder">{{ _video_path_size ? f_format_size(_video_path_size) : '동영상 없음' }}</div>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
               <div class="name">자동 녹화 단축키</div>
             </div>
             <div class="shortcut" @click="f_set_key('record', '자동 녹화 단축키')">{{ f_get_key_string(_bindkeys.record) }}</div>
@@ -940,10 +954,32 @@ const f_get_key_string = (key) => {
   }
   return key_string_map[key] || key
 }
+
+const f_open_video_folder = () => {
+  ipcRenderer.send('open_video_folder')
+}
+const f_clear_video_folder = () => {
+  ipcRenderer.send('clear_video_folder')
+}
+
+const _video_path_size = ref(0)
+ipcRenderer.on('video_path_size', v => {
+  _video_path_size.value = v
+})
+
+const f_format_size = (size) => {
+  const units = ['B', 'KB', 'MB', 'GB', 'TB']
+  let index = 0
+  while (size >= 1024 && index < units.length - 1) {
+    size /= 1024
+    index++
+  }
+  return `${size.toFixed(2)} ${units[index]}`
+}
 </script>
 
-<style lang="scss" scoped>
 
+<style lang="scss" scoped>
 ._main {
   color: white;
   display: flex;
@@ -1196,8 +1232,13 @@ const f_get_key_string = (key) => {
             padding: 3px 6px;
             font-size: 14px;
             color: black;
-            font-weight: 500;
+          font-weight: 500;
             cursor: pointer;
+            &.disabled {
+              pointer-events: none;
+              color: rgb(100, 100, 100);
+              background: rgba(100, 100, 100, .2);
+            }
           }
         }
       }
@@ -1307,8 +1348,6 @@ const f_get_key_string = (key) => {
       }
     }
   }
-
-
   .update{
     position: fixed;
     background: rgb(255, 232, 0);
