@@ -125,13 +125,13 @@
             </div>
             <input class="input" type="number" v-model="_chatinputdelay"/>
           </div>
-          <div class="option">
+          <!-- <div class="option">
             <div class="meta">
               <div class="deco"/>
               <div class="name">한글 채팅 확장 창 좌측상단으로</div>
             </div>
             <div class="button" @click="f_chat_lefttop">초기화</div>
-          </div>
+          </div> -->
           <div class="option">
             <div class="meta">
               <div class="deco"/>
