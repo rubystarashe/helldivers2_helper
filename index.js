@@ -1049,6 +1049,7 @@ const createMainWindow = () => {
       }
 
       if (key == keyBinds['record'] && state && autorecord) {
+        if (gameDisplay.rotate) return
         if (recording) return
         await record_overlay_show(3000)
         windows.record.webContents.send('record_started', true)
@@ -1505,6 +1506,8 @@ const createMainWindow = () => {
       }
       focuswindow = text
       const rect = await getWindowRect(HWND)
+      rect.x = Math.max(0, rect.x)
+      rect.y = Math.max(0, rect.y)
       if (text == 'HELLDIVERS™ 2') {
         if (!windows['overlay'].isVisible() && stratagemsets.length) windows['overlay'].show()
         if (!windows['chat'].isVisible()) windows['chat'].show()
@@ -1522,7 +1525,7 @@ const createMainWindow = () => {
 
         if (JSON.stringify(gameRect) != JSON.stringify(rect)) {
           const gamemid = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 }
-          const displays = screen.getAllDisplays()
+          const displays = screen.getAllDisplays().sort((a, b) => a.id - b.id)
           const currentDisplay = displays.findIndex(display => {
             const { x, y, width, height } = display.bounds
             return gamemid.x >= x && gamemid.x <= x + width && gamemid.y >= y && gamemid.y <= y + height
@@ -1533,41 +1536,59 @@ const createMainWindow = () => {
               index: currentDisplay,
               x: displays[currentDisplay].bounds.x,
               y: displays[currentDisplay].bounds.y,
+              rotate: displays[currentDisplay].rotation,
+              scaleFactor: displays[currentDisplay].scaleFactor,
               width: displays[currentDisplay].bounds.width,
               height: displays[currentDisplay].bounds.height
             }
           }
 
+          windows['main'].webContents.send('game_display', gameDisplay)
+
           gameRect = rect
           await reset_recorder()
-          
-          windows['overlay'].setSize(rect.width, parseInt(rect.height / 5))
-          windows['overlay'].setPosition(rect.x, rect.y + rect.height - parseInt(rect.height / 5))
+          windows['overlay'].setResizable(true)
+          windows['overlay'].setSize(parseInt(rect.width / gameDisplay.scaleFactor), parseInt(rect.height / 5 / gameDisplay.scaleFactor))
+          windows['overlay'].setResizable(false)
+
+
+          const overlayX = rect.x
+          const overlayY = rect.y + rect.height - parseInt(rect.height / 5)
+          windows['overlay'].setPosition(parseInt(overlayX / gameDisplay.scaleFactor), parseInt(overlayY / gameDisplay.scaleFactor))
 
           const width = parseInt(rect.width / 100 * 16 * (deathcam_size / 50))
           const height = parseInt(rect.width / 100 * 9 * (deathcam_size / 50))
-          windows['record'].setSize(width, height)
-          windows['record'].setPosition(rect.x + rect.width - width - parseInt(rect.height / 6), rect.y + parseInt(rect.height / 10))
+          const recordX = rect.x + rect.width - width - parseInt(rect.height / 6)
+          const recordY = rect.y + parseInt(rect.height / 10)
+          windows['record'].setResizable(true)
+          windows['record'].setSize(parseInt(width / gameDisplay.scaleFactor), parseInt(height / gameDisplay.scaleFactor))
+          windows['record'].setResizable(false)
+          windows['record'].setPosition(parseInt(recordX / gameDisplay.scaleFactor), parseInt(recordY / gameDisplay.scaleFactor))
+
+          windows['chat'].setResizable(true)
+          windows['chat'].setSize(parseInt(rect.height / 3 / gameDisplay.scaleFactor), parseInt(40 / gameDisplay.scaleFactor))
+          windows['chat'].setResizable(false)
+          const chatX = rect.x + parseInt(rect.width - rect.height / 40 - rect.height / 3)
+          const chatY = rect.y + parseInt(rect.height - rect.height / 13 - 40)
+          windows['chat'].setPosition(parseInt(chatX / gameDisplay.scaleFactor), parseInt(chatY / gameDisplay.scaleFactor))
         }
         if (autorecord) {
           start_recorder(get_recorder_options())
         }
-
-
-        if (!windows['chat'].inited) {
-          windows['chat'].setSize(parseInt(rect.height / 3), 40)
-          windows['chat'].setPosition(rect.x + parseInt(rect.width - rect.height / 40 - rect.height / 3), rect.y + parseInt(rect.height - rect.height / 13 - 40))
-          windows['chat'].inited = true
-        }
         
-        if (deathcam_enabled && autorecord) {
-          const startX = parseInt(rect.x + (rect.width / 2) - (rect.height / 5))
-          const startY = parseInt(rect.y + (rect.height / 2) - (rect.height / 16))
+        if (deathcam_enabled && autorecord && !gameDisplay.rotate) {
+          const startX = parseInt((rect.x + (rect.width / 2) - (rect.height / 5)))
+          const startY = parseInt((rect.y + (rect.height / 2) - (rect.height / 16)))
           const centerWidth = parseInt(rect.height / 5 * 2)
           const centerHeight = parseInt(rect.height / 16 * 2)
           const centerbuffer = await captureScreen(0, startX, startY, centerWidth, centerHeight)
           const reds = await findRedPixel(centerbuffer)
-          if (reds > centerWidth * 3) {
+
+          let rate = 5
+          if (rect.height < 950) rate = 2
+          // console.log(startX, startY, centerWidth, centerHeight, reds)
+          
+          if (reds > centerHeight * rate) {
             if (lastalivestate) {
               weapon_used[1] = (autokey_type == 'eruptor' || autokey_type_sub == 'eruptor') ? 1 : 0
               await sleep(deathcam_delay * 1000)
@@ -1589,6 +1610,7 @@ const createMainWindow = () => {
         windows['overlay'].webContents.send('visible', false)
       }
     } catch (e) {
+      console.log(e)
     }
     await sleep(1000 / 6)
     checkforegroundWindow()
@@ -1672,7 +1694,8 @@ const createMainWindow = () => {
       case 'eruptor':
         if (lastusedweapon != 1) {
           await KeyPressAndRelease(keyBinds['weapon_1'], inputDelay)
-          await sleep(auto_eruptor_delay * 2)
+          await sleep(auto_eruptor_delay * 2) // 조정필요
+          if (!enginerunning()) break
         }
         await inputFire(inputDelay * 2)
         weapon_used[1]++
@@ -1696,7 +1719,8 @@ const createMainWindow = () => {
       case 'crossbow':
         if (lastusedweapon != 1) {
           await KeyPressAndRelease(keyBinds['weapon_1'], inputDelay)
-          await sleep(auto_eruptor_delay * 2)
+          await sleep(auto_eruptor_delay * 2) // 조정필요
+          if (!enginerunning()) break
         }
         await inputFire(inputDelay * 2)
         weapon_used[1]++
@@ -1708,7 +1732,7 @@ const createMainWindow = () => {
         if (weapon_used[1] >= 5) {
           auto_reloading = true
           await KeyPressAndRelease(keyBinds['reload'], inputDelay)
-          await sleep(autokey_with_goodarmor ? 2550 : 3350)
+          await sleep(autokey_with_goodarmor ? 2600 : 3350)
           auto_reloading = false
         } else {
           await KeyPressAndRelease(keyBinds['weapon_swap'], inputDelay)
@@ -1741,6 +1765,7 @@ const createMainWindow = () => {
         if (lastusedweapon != 3) {
           await KeyPressAndRelease(keyBinds['weapon_3'], inputDelay)
           await sleep(900)
+          if (!enginerunning()) break
         }
         await inputFire(inputDelay)
         let recover = Date.now() + (150 - inputDelay) // 400rpm = 150ms

@@ -67,10 +67,10 @@ export const start_recorder = (options = {}) => {
   }
 
   const monitor_rect = {
-    x: Math.max(0, monitor.x - rect.x),
-    y: Math.max(0, monitor.y - rect.y),
-    width: Math.min(monitor.width, rect.width),
-    height: Math.min(monitor.height, rect.height)
+    x: Math.max(0, rect.x - monitor.x),
+    y: Math.max(0, rect.y - monitor.y),
+    width: parseInt(Math.min(monitor.width, rect.width)),
+    height: parseInt(Math.min(monitor.height, rect.height))
   }
 
   // 가장 최근에 수정된 파일의 번호를 찾아 시작 번호 설정
@@ -89,7 +89,7 @@ export const start_recorder = (options = {}) => {
   const args = [
     '-f', 'lavfi',             // lavfi 입력 사용
     '-i', `ddagrab=output_idx=${monitor.index}:framerate=${framerate}:video_size=${monitor_rect.width}x${monitor_rect.height}:offset_x=${monitor_rect.x}:offset_y=${monitor_rect.y}`,           // ddagrab 필터 (Desktop Duplication API 사용)
-    
+
     '-c:v', 'h264_nvenc',      // NVIDIA 하드웨어 인코더 사용
     '-cq:v', String(quality),             // 품질(quantizer) 옵션
     '-g', String(framerate),
@@ -103,6 +103,8 @@ export const start_recorder = (options = {}) => {
     path.join(tempDir, 'segment_%03d.mp4')
   ]
 
+  // console.log(`ddagrab=output_idx=${monitor.index}:framerate=${framerate}:video_size=${monitor_rect.width}x${monitor_rect.height}:offset_x=${monitor_rect.x}:offset_y=${monitor_rect.y}`)
+
   recorder = spawn(ffmpegPath, args, {
     windowsHide: true,
     // stdio: ['ignore', 'pipe', 'pipe'] // 표준 출력과 표준 에러를 캡처
@@ -115,6 +117,7 @@ export const start_recorder = (options = {}) => {
 
   // 표준 에러 로그
   recorder.stderr.on('data', (data) => {
+    // console.log(data.toString())
     if (data.toString().includes('Conversion failed')) {
       pause_recorder()
       start_recorder(lastoption)
