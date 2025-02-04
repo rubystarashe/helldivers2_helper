@@ -279,6 +279,13 @@
             </div>
             <input class="input" type="number" v-model="_heavy_rpm"/>
           </div>
+          <div class="option" v-if="_autokey_type == 'purifier' || _autokey_type_sub == 'purifier' || _autokey_type_sub2 == 'purifier'">
+            <div class="meta">
+              <div class="deco"/>
+              <div class="name">퓨리파이어 반동 제어 감도</div>
+            </div>
+            <input class="input" type="number" v-model="_purifier_move_rate"/>
+          </div>
           <div class="option" v-if="_autokey_type == 'apw' || _autokey_type_sub == 'apw' || _autokey_type_sub2 == 'apw'">
             <div class="meta">
               <div class="deco"/>
@@ -828,6 +835,13 @@ watch(_heavy_start_rate, () => {
 ipcRenderer.on('heavy_start_rate', v => {
   _heavy_start_rate.value = v
 })
+const _purifier_move_rate = ref(10)
+watch(_purifier_move_rate, () => {
+  ipcRenderer.send('purifier_move_rate', _purifier_move_rate.value)
+})
+ipcRenderer.on('purifier_move_rate', v => {
+  _purifier_move_rate.value = v
+})
 const _mousestratagem_enabled = ref(false)
 watch(_mousestratagem_enabled, () => {
   ipcRenderer.send('mousestratagem_enabled', _mousestratagem_enabled.value)
@@ -979,6 +993,7 @@ ipcRenderer.on('initSettings', v => {
   _apw_start_rate.value = v.apw_start_rate
   _heavy_rpm.value = v.heavy_rpm
   _heavy_start_rate.value = v.heavy_start_rate
+  _purifier_move_rate.value = v.purifier_move_rate
   _mousestratagem_enabled.value = v.mousestratagem_enabled
   _mousestratagem_with_console.value = v.mousestratagem_with_console
   _mousestratagem_threshold.value = v.mousestratagem_threshold

@@ -250,9 +250,16 @@ ipcMain.on('heavy_rpm', (_, value) => {
   settings.heavy_rpm = heavy_rpm
   saveSetting()
 })
+let purifier_move_rate = 10
+ipcMain.on('purifier_move_rate', (_, value) => {
+  purifier_move_rate = parseInt(value) || 0
+  settings.purifier_move_rate = purifier_move_rate
+  saveSetting()
+})
 
 let mousestratagem_enabled = false
 ipcMain.on('mousestratagem_enabled', (_, value) => {
+
   mousestratagem_enabled = value
   settings.mousestratagem_enabled = mousestratagem_enabled
   saveSetting()
@@ -410,6 +417,7 @@ if (fs.existsSync(settingPath)) {
   if (settings.apw_start_rate !== undefined) apw_start_rate = settings.apw_start_rate
   if (settings.heavy_start_rate !== undefined) heavy_start_rate = settings.heavy_start_rate
   if (settings.heavy_rpm !== undefined) heavy_rpm = settings.heavy_rpm
+  if (settings.purifier_move_rate !== undefined) purifier_move_rate = settings.purifier_move_rate
   if (settings.mousestratagem_enabled !== undefined) mousestratagem_enabled = settings.mousestratagem_enabled
   if (settings.mousestratagem_with_console !== undefined) mousestratagem_with_console = settings.mousestratagem_with_console
   if (settings.mousestratagem_threshold !== undefined) mousestratagem_threshold = settings.mousestratagem_threshold
@@ -1820,15 +1828,29 @@ const createMainWindow = () => {
         const end = Date.now()
         let rounds = 0
         while (rounds < (15 - weapon_used[1])) {
-          await inputFire(10)
-          await sleep(10)
-          rounds = Math.floor((Date.now() - end) / 60) + 1
+          await inputFire(20)
+          await sleep(20)
+          const newround = Math.ceil((Date.now() - end) / 60)
+          if (newround > rounds) {
+            let move = Math.max(0, (purifier_move_rate - rounds) * 1.5)
+            if (move) {
+              if (keyboard.status[keyBinds['move_forward']] ||
+                keyboard.status[keyBinds['move_back']] ||
+                keyboard.status[keyBinds['move_left']] ||
+                keyboard.status[keyBinds['move_right']]
+              ) {
+                move *= 2
+              }
+              MoveMouse(0, parseFloat(move))
+            }
+          }
+          rounds = newround
           if (!enginerunning()) {
             break
           }
         }
-        weapon_used[1] += Math.max(1, rounds)
-        if (weapon_used[1] >= 15) {
+        weapon_used[1] += Math.max(1, ((Date.now() - end) / 60))
+        if (weapon_used[1] > 15) {
           if (cannot_reload) {
             await sleep(inputDelay)
             break
@@ -2010,6 +2032,7 @@ const createMainWindow = () => {
         apw_start_rate,
         heavy_start_rate,
         heavy_rpm,
+        purifier_move_rate,
         mousestratagem_enabled,
         mousestratagem_with_console,
         mousestratagem_threshold,
