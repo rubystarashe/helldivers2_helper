@@ -400,6 +400,13 @@
           <div class="option">
             <div class="meta">
               <div class="deco"/>
+              <div class="name">데스캠 최대 저장 개수</div>
+            </div>
+            <input type="number" class="input" v-model="_deathcam_max_counts" :min="1"/>
+          </div>
+          <div class="option">
+            <div class="meta">
+              <div class="deco"/>
               <div class="name">데스캠 webp 변환 활성화</div>
             </div>
             <input type="checkbox" class="checkbox" v-model="_deathcam_webp"/>
@@ -940,6 +947,13 @@ watch(_deathcam_size, () => {
 ipcRenderer.on('deathcam_size', v => {
   _deathcam_size.value = v
 })
+const _deathcam_max_counts = ref(10)
+watch(_deathcam_max_counts, () => {
+  ipcRenderer.send('deathcam_max_counts', _deathcam_max_counts.value)
+})
+ipcRenderer.on('deathcam_max_counts', v => {
+  _deathcam_max_counts.value = v
+})
 const _deathcam_webp = ref(false)
 watch(_deathcam_webp, () => {
   ipcRenderer.send('deathcam_webp', _deathcam_webp.value)
@@ -1004,6 +1018,7 @@ ipcRenderer.on('initSettings', v => {
   _record_quality.value = v.record_quality
   _deathcam_enabled.value = v.deathcam_enabled
   _deathcam_seconds.value = v.deathcam_seconds
+  _deathcam_max_counts.value = v.deathcam_max_counts
   _deathcam_delay.value = v.deathcam_delay
   _deathcam_preview.value = v.deathcam_preview
   _deathcam_size.value = v.deathcam_size

@@ -340,9 +340,16 @@ ipcMain.on('deathcam_preview', (_, value) => {
   settings.deathcam_preview = deathcam_preview
   saveSetting()
 })
+let deathcam_max_counts = 10
+ipcMain.on('deathcam_max_counts', (_, value) => {
+  deathcam_max_counts = parseInt(value) || 0
+  settings.deathcam_max_counts = deathcam_max_counts
+  saveSetting()
+})
 let deathcam_size = 100
 ipcMain.on('deathcam_size', (_, value) => {
   deathcam_size = parseInt(value) || 0
+
   settings.deathcam_size = deathcam_size
   saveSetting()
 })
@@ -429,6 +436,7 @@ if (fs.existsSync(settingPath)) {
   if (settings.deathcam_enabled !== undefined) deathcam_enabled = settings.deathcam_enabled
   if (settings.deathcam_seconds !== undefined) deathcam_seconds = settings.deathcam_seconds
   if (settings.deathcam_delay !== undefined) deathcam_delay = settings.deathcam_delay
+  if (settings.deathcam_max_counts !== undefined) deathcam_max_counts = settings.deathcam_max_counts
   if (settings.deathcam_preview !== undefined) deathcam_preview = settings.deathcam_preview
   if (settings.deathcam_size !== undefined) deathcam_size = settings.deathcam_size
   if (settings.deathcam_webp !== undefined) deathcam_webp = settings.deathcam_webp
@@ -795,7 +803,11 @@ const createMainWindow = () => {
     windows.main.maximize()
   })
   ipcMain.on('unmaximize', (e, m) => {
-    windows.main.unmaximize()
+    if (windows.main.isMaximized()) {
+      windows.main.unmaximize()
+    } else {
+      windows.main.restore()
+    }
   })
   ipcMain.on('close', (e, m) => {
     windows.main.close()
@@ -1665,9 +1677,39 @@ const createMainWindow = () => {
               if (deathcam_preview && deathcam) {
                 await record_overlay_show(deathcam.length * 1000)
                 windows['record'].webContents.send('deathcam', deathcam)
+                const deathcam_filenames = {}
+                fs.readdirSync(path.join(finalDir, 'deathcam')).forEach(file => {
+                  // 파일 이름에서 확장자 제거하고 'death_' 접두어 제거
+                  if (!file.startsWith('death_')) return
+                  const basename = path.basename(file, path.extname(file)).replace('death_', '')
+                  if (!deathcam_filenames[basename]) deathcam_filenames[basename] = []
+                  deathcam_filenames[basename].push(path.join(finalDir, 'deathcam', file))
+                })
+
+                // 날짜 기준으로 정렬 (최신순)
+                const sortedDates = Object.keys(deathcam_filenames).sort((a, b) => {
+                  const dateA = new Date(a.split('-').slice(0, 3).join('-') + 'T' + a.split('-').slice(3).join(':'))
+                  const dateB = new Date(b.split('-').slice(0, 3).join('-') + 'T' + b.split('-').slice(3).join(':'))
+                  return dateB - dateA
+                })
+
+                // deathcam_max_counts 초과하는 오래된 파일들 삭제
+                if (sortedDates.length > deathcam_max_counts) {
+                  const filesToDelete = sortedDates.slice(deathcam_max_counts)
+                  filesToDelete.forEach(date => {
+                    deathcam_filenames[date].forEach(filepath => {
+                      try {
+                        fs.unlinkSync(filepath)
+                      } catch (e) {
+                        console.log('Failed to delete:', filepath)
+                      }
+                    })
+                  })
+                }
               }
             }
             lastalivestate = false
+
           } else {
             lastalivestate = true
           }
@@ -1712,6 +1754,7 @@ const createMainWindow = () => {
   let heavy_firing = false
   let auto_reloading = false
   let autokey_type_num = 0
+  let lastRoundTime = 0
   const autokey_engine = async () => {
     if (!enginerunning()) {
       if (heavy_firing) {
@@ -1819,49 +1862,59 @@ const createMainWindow = () => {
           await sleep(auto_eruptor_delay)
         }
         break
-      case 'purifier':
-        if (lastusedweapon != 1) {
-          await KeyPressAndRelease(keyBinds['weapon_1'], inputDelay)
-          await sleep(auto_eruptor_delay * 2) // 조정필요
-          if (!enginerunning()) break
-        }
-        const end = Date.now()
-        let rounds = 0
-        while (rounds < (15 - weapon_used[1])) {
-          await inputFire(20)
-          await sleep(20)
-          const newround = Math.ceil((Date.now() - end) / 60)
-          if (newround > rounds) {
-            let move = Math.max(0, (purifier_move_rate - rounds) * 1.5)
-            if (move) {
-              if (keyboard.status[keyBinds['move_forward']] ||
-                keyboard.status[keyBinds['move_back']] ||
-                keyboard.status[keyBinds['move_left']] ||
-                keyboard.status[keyBinds['move_right']]
-              ) {
-                move *= 2
+        case 'purifier':
+          if (lastusedweapon != 1) {
+            await KeyPressAndRelease(keyBinds['weapon_1'], inputDelay)
+            await sleep(auto_eruptor_delay * 2)
+            if (!enginerunning()) break
+          }
+          const end = Date.now()
+          let rounds = 0
+          lastRoundTime = end
+          let fireInterval = 60  // 1000rpm = 60ms per shot
+          
+          while (rounds < (15 - weapon_used[1])) {
+            const beforeFire = Date.now()
+            await inputFire(20)
+            await sleep(20)
+            
+            // 마지막 발사로부터 60ms 이상 지났을 때만 발사 카운트 증가
+            const currentTime = Date.now()
+            if (currentTime - lastRoundTime >= fireInterval) {
+              rounds++
+              lastRoundTime = beforeFire  // 실제 발사 시작 시점을 기준으로 시간 측정
+              
+              let move = Math.max(0, (purifier_move_rate - rounds) * 1.5)
+              if (move) {
+                if (keyboard.status[keyBinds['move_forward']] ||
+                  keyboard.status[keyBinds['move_back']] ||
+                  keyboard.status[keyBinds['move_left']] ||
+                  keyboard.status[keyBinds['move_right']]
+                ) {
+                  move *= 2
+                }
+                MoveMouse(0, parseFloat(move))
               }
-              MoveMouse(0, parseFloat(move))
+            }
+            
+            if (!enginerunning()) {
+              break
             }
           }
-          rounds = newround
-          if (!enginerunning()) {
-            break
+          
+          weapon_used[1] += rounds
+          if (weapon_used[1] >= 15) {
+            if (cannot_reload) {
+              await sleep(inputDelay)
+              break
+            }
+            auto_reloading = true
+            await KeyPressAndRelease(keyBinds['reload'], inputDelay)
+            await sleep(autokey_with_goodarmor ? 1850 : 2550)
+            auto_reloading = false
+            weapon_used[1] = 0
           }
-        }
-        weapon_used[1] += Math.max(1, ((Date.now() - end) / 60))
-        if (weapon_used[1] > 15) {
-          if (cannot_reload) {
-            await sleep(inputDelay)
-            break
-          }
-          auto_reloading = true
-          await KeyPressAndRelease(keyBinds['reload'], inputDelay)
-          await sleep(autokey_with_goodarmor ? 1850 : 2550)
-          auto_reloading = false
-          weapon_used[1] = 0
-        }
-        break
+          break
       case 'purifier_charge':
         if (lastusedweapon != 1) {
           await KeyPressAndRelease(keyBinds['weapon_1'], inputDelay)
@@ -2044,6 +2097,7 @@ const createMainWindow = () => {
         deathcam_enabled,
         deathcam_seconds,
         deathcam_delay,
+        deathcam_max_counts,
         deathcam_preview,
         deathcam_size,
         deathcam_webp,
