@@ -84,9 +84,9 @@ let keyBinds = {
   mousestratagem: 'SPACE',
   autokey: 'XBUTTON1',
   autokey_sub: 'XBUTTON2',
+  autokey_sub2: 'MBUTTON',
   record: 'F1',
 }
-
 
 const settingPath = path.join(userdatapath, 'user.settings.json')
 let settings = {}
@@ -106,6 +106,7 @@ const saveKeySetting = () => {
     mousestratagem: keyBinds.mousestratagem,
     autokey: keyBinds.autokey,
     autokey_sub: keyBinds.autokey_sub,
+    autokey_sub2: keyBinds.autokey_sub2,
     record: keyBinds.record,
   }))
   windows['overlay'].webContents.send('keybinds', keyBinds)
@@ -180,6 +181,12 @@ let autokey_type_sub = ''
 ipcMain.on('autokey_type_sub', (_, value) => {
   autokey_type_sub = value
   settings.autokey_type_sub = autokey_type_sub
+  saveSetting()
+})
+let autokey_type_sub2 = ''
+ipcMain.on('autokey_type_sub2', (_, value) => {
+  autokey_type_sub2 = value
+  settings.autokey_type_sub2 = autokey_type_sub2
   saveSetting()
 })
 
@@ -339,10 +346,23 @@ ipcMain.on('deathcam_webp', (_, value) => {
   saveSetting()
 })
 
+
+
+let displaylength = 0
+
 let gameHWND
 let focuswindow
 let gameRect
 let gameDisplay
+
+let output_idx = 0
+ipcMain.on('output_idx', (_, value) => {
+  output_idx = parseInt(value) || 0
+  settings.output_idx = output_idx
+  reset_recorder()
+  if (gameDisplay) gameDisplay.output_idx = output_idx
+  saveSetting()
+})
 
 let recording = false
 
@@ -382,6 +402,7 @@ if (fs.existsSync(settingPath)) {
   if (settings.autokey_with_goodarmor !== undefined) autokey_with_goodarmor = settings.autokey_with_goodarmor
   if (settings.autokey_type !== undefined) autokey_type = settings.autokey_type
   if (settings.autokey_type_sub !== undefined) autokey_type_sub = settings.autokey_type_sub
+  if (settings.autokey_type_sub2 !== undefined) autokey_type_sub2 = settings.autokey_type_sub2
   if (settings.auto_arc_delay !== undefined) auto_arc_delay = settings.auto_arc_delay
   if (settings.auto_railgun_delay !== undefined) auto_railgun_delay = settings.auto_railgun_delay
   if (settings.auto_railgun_reload_delay !== undefined) auto_railgun_reload_delay = settings.auto_railgun_reload_delay
@@ -403,6 +424,8 @@ if (fs.existsSync(settingPath)) {
   if (settings.deathcam_preview !== undefined) deathcam_preview = settings.deathcam_preview
   if (settings.deathcam_size !== undefined) deathcam_size = settings.deathcam_size
   if (settings.deathcam_webp !== undefined) deathcam_webp = settings.deathcam_webp
+  if (settings.output_idx !== undefined) output_idx = settings.output_idx
+  if (settings.displaylength !== undefined) displaylength = settings.displaylength
 }
 if (fs.existsSync(keysettingPath)) {
   const keyBindsRead = JSON.parse(fs.readFileSync(keysettingPath, 'utf8'))
@@ -414,6 +437,7 @@ if (fs.existsSync(keysettingPath)) {
   if (keyBinds.mousestratagem) keyBinds['mousestratagem'] = keyBindsRead.mousestratagem
   if (keyBinds.autokey) keyBinds['autokey'] = keyBindsRead.autokey
   if (keyBinds.autokey_sub) keyBinds['autokey_sub'] = keyBindsRead.autokey_sub
+  if (keyBinds.autokey_sub2) keyBinds['autokey_sub2'] = keyBindsRead.autokey_sub2
   if (keyBinds.record) keyBinds['record'] = keyBindsRead.record
 }
 
@@ -1047,9 +1071,13 @@ const createMainWindow = () => {
       if (key == keyBinds['reload'] && state) {
         weapon_used[lastusedweapon] = 0
       }
+      if (key == keyBinds['dive'] && state) {
+        cannot_reload = true
+        setTimeout(() => cannot_reload = false, 1500)
+      }
 
       if (key == keyBinds['record'] && state && autorecord) {
-        if (gameDisplay.rotate) return
+        // if (gameDisplay.rotate) return
         if (recording) return
         await record_overlay_show(3000)
         windows.record.webContents.send('record_started', true)
@@ -1118,15 +1146,15 @@ const createMainWindow = () => {
 
       if (autokey_type) {
         if (key == keyBinds['autokey']) {
-          if (state && auto_reloading) return
+          // if (state && auto_reloading) return
           autokey_enabled = state
-          autokey_type_is_main = true
+          autokey_type_num = 0
           if (autokey_type == 'railgun' && !state && railgun_fired) {
             if (keyboard.status[keyBinds['fire']]) await inputFire(0, 'release')
             await sleep(inputDelay)
             await KeyPressAndRelease(keyBinds['reload'], inputDelay)
           }
-          if (!state && keyboard.status[keyBinds['fire']]) {
+          if (!state && keyboard.status[keyBinds['fire']] && autokey_type != 'purifier_charge') {
             await inputFire(0, 'release')
           }
           return
@@ -1135,24 +1163,24 @@ const createMainWindow = () => {
             case keyBinds['map']:
             case keyBinds['dropopen']:
             case keyBinds['chat']:
-            case keyBinds['dive']:
             case keyBinds['stratagem_console']:
               autokey_enabled = false
               break
           }
         }
+        // if (key == keyBinds['dive'] && state) autokey_enabled = false
       }
       if (autokey_type_sub) {
         if (key == keyBinds['autokey_sub']) {
-          if (state && auto_reloading) return
+          // if (state && auto_reloading) return
           autokey_enabled = state
-          autokey_type_is_main = false
+          autokey_type_num = 1
           if (autokey_type_sub == 'railgun' && !state && railgun_fired) {
             if (keyboard.status[keyBinds['fire']]) await inputFire(0, 'release')
             await sleep(inputDelay)
             await KeyPressAndRelease(keyBinds['reload'], inputDelay)
           }
-          if (!state && keyboard.status[keyBinds['fire']]) {
+          if (!state && keyboard.status[keyBinds['fire']] && autokey_type_sub != 'purifier_charge') {
             await inputFire(0, 'release')
           }
           return
@@ -1161,12 +1189,38 @@ const createMainWindow = () => {
             case keyBinds['map']:
             case keyBinds['dropopen']:
             case keyBinds['chat']:
-            case keyBinds['dive']:
             case keyBinds['stratagem_console']:
               autokey_enabled = false
               break
           }
         }
+        // if (key == keyBinds['dive'] && state) autokey_enabled = false
+      }
+      if (autokey_type_sub2) {
+        if (key == keyBinds['autokey_sub2']) {
+          // if (state && auto_reloading) return
+          autokey_enabled = state
+          autokey_type_num = 2
+          if (autokey_type_sub2 == 'railgun' && !state && railgun_fired) {
+            if (keyboard.status[keyBinds['fire']]) await inputFire(0, 'release')
+            await sleep(inputDelay)
+            await KeyPressAndRelease(keyBinds['reload'], inputDelay)
+          }
+          if (!state && keyboard.status[keyBinds['fire']] && autokey_type_sub2 != 'purifier_charge') {
+            await inputFire(0, 'release')
+          }
+          return
+        } else {
+          switch (key) {
+            case keyBinds['map']:
+            case keyBinds['dropopen']:
+            case keyBinds['chat']:
+            case keyBinds['stratagem_console']:
+              autokey_enabled = false
+              break
+          }
+        }
+        // if (key == keyBinds['dive'] && state) autokey_enabled = false
       }
       switch (key) {
         case keyBinds['map']:
@@ -1191,6 +1245,7 @@ const createMainWindow = () => {
         case keyBinds['HANGUL']:
         case keyBinds['autokey']:
         case keyBinds['autokey_sub']:
+        case keyBinds['autokey_sub2']:
           mouse_stratagem_state = false
           windows.overlay.webContents.send('mouse_stratagem_state', false)
           break;
@@ -1525,23 +1580,26 @@ const createMainWindow = () => {
 
         if (JSON.stringify(gameRect) != JSON.stringify(rect)) {
           const gamemid = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 }
+          console.log(screen.getAllDisplays())
           const displays = screen.getAllDisplays().sort((a, b) => a.id - b.id)
           const currentDisplay = displays.findIndex(display => {
             const { x, y, width, height } = display.bounds
             return gamemid.x >= x && gamemid.x <= x + width && gamemid.y >= y && gamemid.y <= y + height
           })
-  
-          if (currentDisplay != -1) {
-            gameDisplay = {
-              index: currentDisplay,
-              x: displays[currentDisplay].bounds.x,
-              y: displays[currentDisplay].bounds.y,
-              rotate: displays[currentDisplay].rotation,
-              scaleFactor: displays[currentDisplay].scaleFactor,
-              width: displays[currentDisplay].bounds.width,
-              height: displays[currentDisplay].bounds.height
-            }
+          windows['main'].webContents.send('displaylength', displays.length)
+          settings.displaylength = displays.length
+          saveSetting()
+          gameDisplay = {
+            index: currentDisplay,
+            output_idx: Math.min(output_idx, displays.length - 1),
+            x: displays[currentDisplay].bounds.x,
+            y: displays[currentDisplay].bounds.y,
+            rotate: displays[currentDisplay].rotation,
+            scaleFactor: displays[currentDisplay].scaleFactor,
+            width: displays[currentDisplay].bounds.width,
+            height: displays[currentDisplay].bounds.height
           }
+          console.log(displays, gameDisplay)
 
           windows['main'].webContents.send('game_display', gameDisplay)
 
@@ -1576,7 +1634,8 @@ const createMainWindow = () => {
           start_recorder(get_recorder_options())
         }
         
-        if (deathcam_enabled && autorecord && !gameDisplay.rotate) {
+        // if (deathcam_enabled && autorecord && !gameDisplay.rotate) {
+        if (deathcam_enabled && autorecord) {
           const startX = parseInt((rect.x + (rect.width / 2) - (rect.height / 5)))
           const startY = parseInt((rect.y + (rect.height / 2) - (rect.height / 16)))
           const centerWidth = parseInt(rect.height / 5 * 2)
@@ -1590,7 +1649,7 @@ const createMainWindow = () => {
           
           if (reds > centerHeight * rate) {
             if (lastalivestate) {
-              weapon_used[1] = (autokey_type == 'eruptor' || autokey_type_sub == 'eruptor') ? 1 : 0
+              weapon_used[1] = (autokey_type == 'eruptor' || autokey_type_sub == 'eruptor' || autokey_type_sub2 == 'eruptor') ? 1 : 0
               await sleep(deathcam_delay * 1000)
               recording = true
               const deathcam = await save_death_cam(deathcam_seconds + deathcam_delay, deathcam_webp)
@@ -1620,11 +1679,11 @@ const createMainWindow = () => {
   const enginerunning = () => {
     const isgame = focuswindowIsGame()
     if (!isgame) autokey_enabled = false
-    return autokey_enabled && (autokey_type || autokey_type_sub)
+    return autokey_enabled && (autokey_type || autokey_type_sub || autokey_type_sub2)
   }
   let lastusedweapon = 1
   const weapon_used = {
-    1: (autokey_type == 'eruptor' || autokey_type_sub == 'eruptor') ? 1 : 0,
+    1: (autokey_type == 'eruptor' || autokey_type_sub == 'eruptor' || autokey_type_sub2 == 'eruptor') ? 1 : 0,
     2: 1,
     3: 1,
     4: 1,
@@ -1638,12 +1697,13 @@ const createMainWindow = () => {
       await sleep(inputDelay)
     }
   }
+  let cannot_reload = false
   let railgun_fired = false
   let apw_start = apw_start_rate
   let heavy_start = heavy_start_rate
   let heavy_firing = false
   let auto_reloading = false
-  let autokey_type_is_main = true
+  let autokey_type_num = 0
   const autokey_engine = async () => {
     if (!enginerunning()) {
       if (heavy_firing) {
@@ -1656,7 +1716,7 @@ const createMainWindow = () => {
       autokey_engine()
       return
     }
-    switch (autokey_type_is_main ? autokey_type : autokey_type_sub) {
+    switch (autokey_type_num == 0 ? autokey_type : autokey_type_num == 1 ? autokey_type_sub : autokey_type_sub2) {
       case 'arc':
         if (lastusedweapon != 3) {
           await KeyPressAndRelease(keyBinds['weapon_3'], inputDelay)
@@ -1686,10 +1746,12 @@ const createMainWindow = () => {
         await sleep(inputDelay)
         if (!enginerunning()) break
         railgun_fired = false
-        auto_reloading = true
-        await KeyPressAndRelease(keyBinds['reload'], inputDelay)
-        await sleep(auto_railgun_reload_delay)
-        auto_reloading = false
+        if (!cannot_reload) {
+          auto_reloading = true
+          await KeyPressAndRelease(keyBinds['reload'], inputDelay)
+          await sleep(auto_railgun_reload_delay)
+          auto_reloading = false
+        } else await sleep(inputDelay)
         break
       case 'eruptor':
         if (lastusedweapon != 1) {
@@ -1705,6 +1767,10 @@ const createMainWindow = () => {
         //   break
         // }
         if (weapon_used[1] >= 5) {
+          if (cannot_reload) {
+            await sleep(inputDelay)
+            break
+          }
           auto_reloading = true
           await KeyPressAndRelease(keyBinds['reload'], inputDelay)
           await sleep(autokey_with_goodarmor ? 2250 : 2850)
@@ -1730,6 +1796,10 @@ const createMainWindow = () => {
         //   break
         // }
         if (weapon_used[1] >= 5) {
+          if (cannot_reload) {
+            await sleep(inputDelay)
+            break
+          }
           auto_reloading = true
           await KeyPressAndRelease(keyBinds['reload'], inputDelay)
           await sleep(autokey_with_goodarmor ? 2600 : 3350)
@@ -1742,6 +1812,11 @@ const createMainWindow = () => {
         }
         break
       case 'purifier':
+        if (lastusedweapon != 1) {
+          await KeyPressAndRelease(keyBinds['weapon_1'], inputDelay)
+          await sleep(auto_eruptor_delay * 2) // 조정필요
+          if (!enginerunning()) break
+        }
         const end = Date.now()
         let rounds = 0
         while (rounds < (15 - weapon_used[1])) {
@@ -1752,11 +1827,47 @@ const createMainWindow = () => {
             break
           }
         }
-        weapon_used[1] += rounds
+        weapon_used[1] += Math.max(1, rounds)
         if (weapon_used[1] >= 15) {
+          if (cannot_reload) {
+            await sleep(inputDelay)
+            break
+          }
           auto_reloading = true
           await KeyPressAndRelease(keyBinds['reload'], inputDelay)
           await sleep(autokey_with_goodarmor ? 1850 : 2550)
+          auto_reloading = false
+          weapon_used[1] = 0
+        }
+        break
+      case 'purifier_charge':
+        if (lastusedweapon != 1) {
+          await KeyPressAndRelease(keyBinds['weapon_1'], inputDelay)
+          await sleep(auto_eruptor_delay * 2) // 조정필요
+          if (!enginerunning()) break
+        }
+        while (weapon_used[1] < 15) {
+          await inputFire(0, 'press')
+          const end = Date.now() + 1100 - inputDelay
+          while (Date.now() < end) {
+            await sleep(inputDelay)
+            if (!enginerunning() && end - Date.now() > 300) break
+          }
+          await inputFire(0, 'release')
+          weapon_used[1]++
+          await sleep(inputDelay * 2)
+          if (!enginerunning()) {
+            break
+          }
+        }
+        if (weapon_used[1] >= 15) {
+          if (cannot_reload) {
+            await sleep(inputDelay)
+            break
+          }
+          auto_reloading = true
+          await KeyPressAndRelease(keyBinds['reload'], inputDelay)
+          await sleep(autokey_with_goodarmor ? 1900 : 2550)
           auto_reloading = false
           weapon_used[1] = 0
         }
@@ -1783,13 +1894,13 @@ const createMainWindow = () => {
           while (Date.now() < recover) {
             await sleep(inputDelay)
           }
-        } else {
+        } else if (!cannot_reload) {
           auto_reloading = true
           await KeyPressAndRelease(keyBinds['reload'], inputDelay)
           await sleep(1800)
           auto_reloading = false
           apw_start = apw_start_rate
-        }
+        } else await sleep(inputDelay)
         break
       case 'heavy':
         if (!heavy_firing) heavy_firing = Date.now()
@@ -1889,6 +2000,7 @@ const createMainWindow = () => {
         cinematic_mode,
         autokey_type,
         autokey_type_sub,
+        autokey_type_sub2,
         autokey_enabled,
         autokey_with_goodarmor,
         auto_arc_delay,
@@ -1912,6 +2024,8 @@ const createMainWindow = () => {
         deathcam_preview,
         deathcam_size,
         deathcam_webp,
+        output_idx,
+        displaylength,
         keyBinds
       })
 

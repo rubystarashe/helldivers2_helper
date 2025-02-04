@@ -29,9 +29,10 @@ const execPromise = (command) => {
 }
 
 export const reset_recorder = async () => {
-  if (!recorder) return
-  recorder.kill()
-  recorder = null
+  if (recorder) {
+    recorder.kill()
+    recorder = null 
+  }
   // tempDir 폴더 삭제
   if (tempDir && fs.existsSync(tempDir)) {
     fs.rmSync(tempDir, { recursive: true, force: true })
@@ -88,7 +89,7 @@ export const start_recorder = (options = {}) => {
 
   const args = [
     '-f', 'lavfi',             // lavfi 입력 사용
-    '-i', `ddagrab=output_idx=${monitor.index}:framerate=${framerate}:video_size=${monitor_rect.width}x${monitor_rect.height}:offset_x=${monitor_rect.x}:offset_y=${monitor_rect.y}`,           // ddagrab 필터 (Desktop Duplication API 사용)
+    '-i', `ddagrab=output_idx=${monitor.output_idx}:framerate=${framerate}:video_size=${monitor_rect.width}x${monitor_rect.height}:offset_x=${monitor_rect.x}:offset_y=${monitor_rect.y}`,           // ddagrab 필터 (Desktop Duplication API 사용)
 
     '-c:v', 'h264_nvenc',      // NVIDIA 하드웨어 인코더 사용
     '-cq:v', String(quality),             // 품질(quantizer) 옵션
@@ -103,7 +104,7 @@ export const start_recorder = (options = {}) => {
     path.join(tempDir, 'segment_%03d.mp4')
   ]
 
-  // console.log(`ddagrab=output_idx=${monitor.index}:framerate=${framerate}:video_size=${monitor_rect.width}x${monitor_rect.height}:offset_x=${monitor_rect.x}:offset_y=${monitor_rect.y}`)
+  console.log(`ddagrab=output_idx=${monitor.output_idx}:framerate=${framerate}:video_size=${monitor_rect.width}x${monitor_rect.height}:offset_x=${monitor_rect.x}:offset_y=${monitor_rect.y}`)
 
   recorder = spawn(ffmpegPath, args, {
     windowsHide: true,
