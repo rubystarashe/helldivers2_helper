@@ -104,7 +104,7 @@ export const start_recorder = (options = {}) => {
     path.join(tempDir, 'segment_%03d.mp4')
   ]
 
-  console.log(`ddagrab=output_idx=${monitor.output_idx}:framerate=${framerate}:video_size=${monitor_rect.width}x${monitor_rect.height}:offset_x=${monitor_rect.x}:offset_y=${monitor_rect.y}`)
+  // console.log(`ddagrab=output_idx=${monitor.output_idx}:framerate=${framerate}:video_size=${monitor_rect.width}x${monitor_rect.height}:offset_x=${monitor_rect.x}:offset_y=${monitor_rect.y}`)
 
   recorder = spawn(ffmpegPath, args, {
     windowsHide: true,

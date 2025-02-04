@@ -1580,7 +1580,7 @@ const createMainWindow = () => {
 
         if (JSON.stringify(gameRect) != JSON.stringify(rect)) {
           const gamemid = { x: rect.x + rect.width / 2, y: rect.y + rect.height / 2 }
-          console.log(screen.getAllDisplays())
+          // console.log(screen.getAllDisplays())
           const displays = screen.getAllDisplays().sort((a, b) => a.id - b.id)
           const currentDisplay = displays.findIndex(display => {
             const { x, y, width, height } = display.bounds
@@ -1599,7 +1599,7 @@ const createMainWindow = () => {
             width: displays[currentDisplay].bounds.width,
             height: displays[currentDisplay].bounds.height
           }
-          console.log(displays, gameDisplay)
+          // console.log(displays, gameDisplay)
 
           windows['main'].webContents.send('game_display', gameDisplay)
 
