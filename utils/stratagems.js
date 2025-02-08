@@ -17,7 +17,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 25
+    index: 26
   },
   {
     code: 'M-105',
@@ -37,7 +37,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 70,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 27
+    index: 28
   },
   {
     code: 'GR-8',
@@ -47,7 +47,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 23
+    index: 24
   },
   {
     code: 'FLAM-40',
@@ -251,7 +251,7 @@ export const HANGER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 24
+    index: 25
   },
   {
     name: 'Eagle Smoke Strike',
@@ -460,7 +460,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 28
+    index: 29
   },
   {
     code: 'SH-32',
@@ -596,7 +596,7 @@ export const WARGBOUNDS = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 26
+    index: 27
   },
   {
     code: 'SH-51',
@@ -627,6 +627,16 @@ export const WARGBOUNDS = [
     takedown: 1000 * 10,
     type: 'defense',
     index: 0
+  },
+  {
+    code: 'B-100',
+    name: 'Portable Hellbomb',
+    keys: ['down', 'up', 'right', 'down', 'up', 'up'],
+    icon: '/stratagems/Servants of Freedom/Hellbomb Portable.svg',
+    cooldown: 1000 * 300,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 23
   }
 ]
 

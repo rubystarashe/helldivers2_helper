@@ -322,7 +322,7 @@ ipcMain.on('deathcam_enabled', (_, value) => {
   settings.deathcam_enabled = deathcam_enabled
   saveSetting()
 })
-let deathcam_seconds = 7
+let deathcam_seconds = 5
 ipcMain.on('deathcam_seconds', (_, value) => {
   deathcam_seconds = parseInt(value) || 0
   settings.deathcam_seconds = deathcam_seconds
@@ -692,7 +692,7 @@ setInterval(async () => {
     }
   } catch (e) {
     // console.log(e)
-    windows.main.webContents.send('steaminfo', { username, steamID64, gamePath, configPath })
+    windows.main.webContents.send('steaminfo', { username, steamID64, gamePath, configPath, error: e })
   }
 }, 2000)
 
@@ -1554,6 +1554,7 @@ const createMainWindow = () => {
   }
   let lastalivestate = true
   let record_overlay_hide_timer
+  let redstime
   const record_overlay_show = async ms => {
     windows['record'].show()
     if (record_overlay_hide_timer) clearTimeout(record_overlay_hide_timer)
@@ -1668,50 +1669,55 @@ const createMainWindow = () => {
           // console.log(startX, startY, centerWidth, centerHeight, reds)
           
           if (reds > centerHeight * rate) {
-            if (lastalivestate) {
-              weapon_used[1] = (autokey_type == 'eruptor' || autokey_type_sub == 'eruptor' || autokey_type_sub2 == 'eruptor') ? 1 : 0
-              await sleep(deathcam_delay * 1000)
-              recording = true
-              const deathcam = await save_death_cam(deathcam_seconds + deathcam_delay, deathcam_webp)
-              recording = false
-              if (deathcam_preview && deathcam) {
-                await record_overlay_show(deathcam.length * 1000)
-                windows['record'].webContents.send('deathcam', deathcam)
-                const deathcam_filenames = {}
-                fs.readdirSync(path.join(finalDir, 'deathcam')).forEach(file => {
-                  // 파일 이름에서 확장자 제거하고 'death_' 접두어 제거
-                  if (!file.startsWith('death_')) return
-                  const basename = path.basename(file, path.extname(file)).replace('death_', '')
-                  if (!deathcam_filenames[basename]) deathcam_filenames[basename] = []
-                  deathcam_filenames[basename].push(path.join(finalDir, 'deathcam', file))
-                })
-
-                // 날짜 기준으로 정렬 (최신순)
-                const sortedDates = Object.keys(deathcam_filenames).sort((a, b) => {
-                  const dateA = new Date(a.split('-').slice(0, 3).join('-') + 'T' + a.split('-').slice(3).join(':'))
-                  const dateB = new Date(b.split('-').slice(0, 3).join('-') + 'T' + b.split('-').slice(3).join(':'))
-                  return dateB - dateA
-                })
-
-                // deathcam_max_counts 초과하는 오래된 파일들 삭제
-                if (sortedDates.length > deathcam_max_counts) {
-                  const filesToDelete = sortedDates.slice(deathcam_max_counts)
-                  filesToDelete.forEach(date => {
-                    deathcam_filenames[date].forEach(filepath => {
-                      try {
-                        fs.unlinkSync(filepath)
-                      } catch (e) {
-                        console.log('Failed to delete:', filepath)
-                      }
-                    })
+            if (!redstime) redstime = Date.now()
+            else if (Date.now() - redstime > 1000 || deathcam_delay < 1) {
+              if (lastalivestate) {
+                weapon_used[1] = (autokey_type == 'eruptor' || autokey_type_sub == 'eruptor' || autokey_type_sub2 == 'eruptor') ? 1 : 0
+                if (deathcam_delay >= 1) await sleep(deathcam_delay * 1000 - 1000)
+                // else await sleep(deathcam_delay * 1000)
+                recording = true
+                const deathcam = await save_death_cam(deathcam_seconds + deathcam_delay, deathcam_webp)
+                recording = false
+                redstime = null
+                if (deathcam_preview && deathcam) {
+                  await record_overlay_show(deathcam.length * 1000)
+                  windows['record'].webContents.send('deathcam', deathcam)
+                  const deathcam_filenames = {}
+                  fs.readdirSync(path.join(finalDir, 'deathcam')).forEach(file => {
+                    // 파일 이름에서 확장자 제거하고 'death_' 접두어 제거
+                    if (!file.startsWith('death_')) return
+                    const basename = path.basename(file, path.extname(file)).replace('death_', '')
+                    if (!deathcam_filenames[basename]) deathcam_filenames[basename] = []
+                    deathcam_filenames[basename].push(path.join(finalDir, 'deathcam', file))
                   })
+
+                  // 날짜 기준으로 정렬 (최신순)
+                  const sortedDates = Object.keys(deathcam_filenames).sort((a, b) => {
+                    const dateA = new Date(a.split('-').slice(0, 3).join('-') + 'T' + a.split('-').slice(3).join(':'))
+                    const dateB = new Date(b.split('-').slice(0, 3).join('-') + 'T' + b.split('-').slice(3).join(':'))
+                    return dateB - dateA
+                  })
+
+                  // deathcam_max_counts 초과하는 오래된 파일들 삭제
+                  if (sortedDates.length > deathcam_max_counts) {
+                    const filesToDelete = sortedDates.slice(deathcam_max_counts)
+                    filesToDelete.forEach(date => {
+                      deathcam_filenames[date].forEach(filepath => {
+                        try {
+                          fs.unlinkSync(filepath)
+                        } catch (e) {
+                          console.log('Failed to delete:', filepath)
+                        }
+                      })
+                    })
+                  }
                 }
               }
+              lastalivestate = false
             }
-            lastalivestate = false
-
           } else {
             lastalivestate = true
+            redstime = null
           }
         }
       } else {
@@ -1787,6 +1793,7 @@ const createMainWindow = () => {
           await KeyPressAndRelease(keyBinds['weapon_3'], inputDelay)
           await sleep(800)
         }
+        if (!enginerunning()) break
         await inputFire(0, 'press')
         railgun_fired = true
         if (!enginerunning()) break
@@ -1853,7 +1860,7 @@ const createMainWindow = () => {
           }
           auto_reloading = true
           await KeyPressAndRelease(keyBinds['reload'], inputDelay)
-          await sleep(autokey_with_goodarmor ? 2600 : 3350)
+          await sleep(autokey_with_goodarmor ? 2600 : 3400)
           auto_reloading = false
         } else {
           await KeyPressAndRelease(keyBinds['weapon_swap'], inputDelay)
@@ -2162,6 +2169,33 @@ ipcMain.on('update_install', () => {
       app.exit(1) // 오류 발생 시 종료 코드 1로 종료
     }
   }
+})
+
+const modPath = path.join(userdatapath, 'mods')
+if (!fs.existsSync(modPath)) fs.mkdirSync(modPath, { recursive: true })
+ipcMain.handle('open_modfile', async () => {
+  const { promise, resolve, reject } = Promise.withResolvers()
+  dialog.showOpenDialog(
+    {
+      title: "모드 파일 불러오기",
+      filters: [{ name: '모드 압축 파일', extensions: ['zip', '7z', 'rar', 'tar', 'gz', 'bz2', 'xz', 'wim', 'cab', 'iso', 'arj', 'lzh', 'lha', 'chm', 'z', 'taz', 'cpio', 'rpm', 'deb', 'lzma', 'tgz', 'txz', 'tbz2', 'tlz'] }],
+      properties: ['openFile', 'multiSelections']
+    }
+  ).then(({ filePaths }) => {
+    const res = []
+    for (const filePath of filePaths) {
+      const filename = filePath.split('/').pop().split('\\').pop().replace(/\.[^/.]+$/, '')
+      if (!res.find(e => e.path == filePath)) res.push({
+        name: filename,
+        path: filePath,
+        exist: fs.existsSync(path.join(modPath, filename))
+      })
+    }
+    resolve(res)
+  }).catch(e => {
+    reject(e)
+  })
+  return await promise
 })
 
 

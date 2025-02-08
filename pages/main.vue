@@ -1,430 +1,433 @@
 <template>
   <div class="_main">
-    <div class="console">
-      <div class="categories">
-        <div class="category" v-for="(stratagems, category) in c_stratagems" :key="category">
-          <h2 class="title">{{ _categories[category][_i18n] }}</h2>
-          <div class="stratagems">
-            <div class="stratagem" v-for="stratagem in stratagems" :key="stratagem.name"
-              @click="f_isSelected(stratagem) ? f_removestratagem(stratagem) : f_addstratagem(stratagem)"
-              :class="{ selected: f_isSelected(stratagem) }"
+    <MainModmanager v-show="c_pagetype == 'modmanager'"/>
+    <div class="page" v-show="c_pagetype != 'modmanager'">
+      <div class="console">
+        <div class="categories">
+          <div class="category" v-for="(stratagems, category) in c_stratagems" :key="category">
+            <h2 class="title">{{ _categories[category][_i18n] }}</h2>
+            <div class="stratagems">
+              <div class="stratagem" v-for="stratagem in stratagems" :key="stratagem.name"
+                @click="f_isSelected(stratagem) ? f_removestratagem(stratagem) : f_addstratagem(stratagem)"
+                :class="{ selected: f_isSelected(stratagem) }"
+              >
+                <img :src="stratagem.icon" alt="">
+                <!-- <span v-if="stratagem.code">{{ stratagem.code }} </span>{{ stratagem.name }} {{ stratagem.index }} -->
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="stratagemsets">
+          <div class="stratagem" v-for="i in 6" :key="i"
+            @click="f_removestratagem(_stratagemsets[i])"
+            :class="{ selected: _stratagemsets[i] }"
+          >
+            <img :src="_stratagemsets[i]?.icon" alt="">
+            <!-- <div class="name">
+              <div v-if="_stratagemsets[i]?.code">{{ _stratagemsets[i]?.code }}</div>
+              <div>{{ _stratagemsets[i]?.name }}</div>
+            </div> -->
+          </div>
+          <div class="mission" v-if="_mission_stratagems.length > 0">
+            <div class="stratagem" v-for="(stratagem, index) in _mission_stratagems" :key="stratagem.name"
+              @click="f_removestratagem(_mission_stratagems[index])"
             >
               <img :src="stratagem.icon" alt="">
-              <!-- <span v-if="stratagem.code">{{ stratagem.code }} </span>{{ stratagem.name }} {{ stratagem.index }} -->
+            </div>
+          </div>
+          <div class="default">
+            <div class="stratagem" v-for="(stratagem, index) in _default_stratagems" :key="stratagem.name"
+              @click="_default_stratagems_hidden[index] = _default_stratagems_hidden[index] ? false : true"
+              :class="{ hidden: _default_stratagems_hidden[index] }"
+            >
+              <img :src="stratagem.icon" alt="">
             </div>
           </div>
         </div>
       </div>
-      <div class="stratagemsets">
-        <div class="stratagem" v-for="i in 6" :key="i"
-          @click="f_removestratagem(_stratagemsets[i])"
-          :class="{ selected: _stratagemsets[i] }"
+      <div class="settings">
+        <div class="error" v-if="_steaminfo?.error">
+          스팀의 게임 또는 계정 정보를 불러오는데 실패했습니다. 스팀 로그인을 확인하세요.
+        </div>
+        <div class="error" v-else-if="_steaminfo?.username &&!_steaminfo?.configInfo" @click="f_open_config_path"
+          :style="{ cursor: 'pointer' }"
         >
-          <img :src="_stratagemsets[i]?.icon" alt="">
-          <!-- <div class="name">
-            <div v-if="_stratagemsets[i]?.code">{{ _stratagemsets[i]?.code }}</div>
-            <div>{{ _stratagemsets[i]?.name }}</div>
-          </div> -->
+          {{ _steaminfo?.username }} 계정의 {{ _steaminfo?.configPath }} 경로에 설정 파일이 없거나 문제가 있습니다.
         </div>
-        <div class="mission" v-if="_mission_stratagems.length > 0">
-          <div class="stratagem" v-for="(stratagem, index) in _mission_stratagems" :key="stratagem.name"
-            @click="f_removestratagem(_mission_stratagems[index])"
-          >
-            <img :src="stratagem.icon" alt="">
-          </div>
-        </div>
-        <div class="default">
-          <div class="stratagem" v-for="(stratagem, index) in _default_stratagems" :key="stratagem.name"
-            @click="_default_stratagems_hidden[index] = _default_stratagems_hidden[index] ? false : true"
-            :class="{ hidden: _default_stratagems_hidden[index] }"
-          >
-            <img :src="stratagem.icon" alt="">
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="settings">
-      <div class="error" v-if="_steaminfo?.error">
-        스팀의 게임 또는 계정 정보를 불러오는데 실패했습니다. 스팀 로그인을 확인하세요.
-      </div>
-      <div class="error" v-else-if="_steaminfo?.username &&!_steaminfo?.configInfo" @click="f_open_config_path"
-        :style="{ cursor: 'pointer' }"
-      >
-        {{ _steaminfo?.username }} 계정의 {{ _steaminfo?.configPath }} 경로에 설정 파일이 없거나 문제가 있습니다.
-      </div>
-      <!-- <div class="username" v-else-if="_steaminfo?.username">{{ _steaminfo.username }}</div> -->
-      <div class="options">
-        <div class="section">
-          <h3 class="title">단축키 설정</h3>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">증원 단축키</div>
+        <!-- <div class="username" v-else-if="_steaminfo?.username">{{ _steaminfo.username }}</div> -->
+        <div class="options">
+          <div class="section">
+            <h3 class="title">단축키 설정</h3>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">증원 단축키</div>
+              </div>
+              <div class="shortcut" @click="f_set_key('reinforce', '증원 단축키')">{{ f_get_key_string(_bindkeys.reinforce) }}</div>
             </div>
-            <div class="shortcut" @click="f_set_key('reinforce', '증원 단축키')">{{ f_get_key_string(_bindkeys.reinforce) }}</div>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">→ 방향 로테이션 단축키</div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">→ 방향 로테이션 단축키</div>
+              </div>
+              <div class="shortcut" @click="f_set_key('rotatekey', '→ 방향 로테이션 단축키')">{{ f_get_key_string(_bindkeys.rotatekey) }}</div>
             </div>
-            <div class="shortcut" @click="f_set_key('rotatekey', '→ 방향 로테이션 단축키')">{{ f_get_key_string(_bindkeys.rotatekey) }}</div>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">← 방향 로테이션 단축키</div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">← 방향 로테이션 단축키</div>
+              </div>
+              <div class="shortcut" @click="f_set_key('rotatekey_reverse', '← 방향 로테이션 단축키')">{{ f_get_key_string(_bindkeys.rotatekey_reverse) }}</div>
             </div>
-            <div class="shortcut" @click="f_set_key('rotatekey_reverse', '← 방향 로테이션 단축키')">{{ f_get_key_string(_bindkeys.rotatekey_reverse) }}</div>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">로테이션 취소 단축키</div>
-            </div>
-            <div class="shortcut" @click="f_set_key('rotate_cancel', '로테이션 취소 단축키')">{{ f_get_key_string(_bindkeys.rotate_cancel) }}</div>
-          </div>
-        </div>
-        <div class="section">
-          <h3 class="title">성능 설정</h3>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">스트라타젬 즉시 투척</div>
-            </div>
-            <input type="checkbox" class="checkbox" v-model="_stratagem_instant_fire"/>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">스트라타젬 투척 딜레이</div>
-            </div>
-            <input class="input" type="number" v-model="_stratagem_instant_fire_delay"/>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">스트라타젬 로테이션 선택 딜레이</div>
-            </div>
-            <input class="input" type="number" v-model="_rotate_delay"/>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">모든 동작 기본 딜레이</div>
-            </div>
-            <input class="input" type="number" v-model="_default_delay"/>
-          </div>
-        </div>
-        <div class="section">
-          <h3 class="title">한글 채팅창 설정</h3>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">한글 채팅 입력 딜레이</div>
-            </div>
-            <input class="input" type="number" v-model="_chatinputdelay"/>
-          </div>
-          <!-- <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">한글 채팅 확장 창 좌측상단으로</div>
-            </div>
-            <div class="button" @click="f_chat_lefttop">초기화</div>
-          </div> -->
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">채팅 입력 시 자동 한글 확장 켜기</div>
-            </div>
-            <input type="checkbox" class="checkbox" v-model="_instant_chat"/>
-          </div>
-          <div class="option" v-if="!_instant_chat">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">한글 채팅 확장 단축키</div>
-            </div>
-            <div class="shortcut" @click="f_set_key('HANGUL', '한글 채팅 확장 단축키')">{{ f_get_key_string(_bindkeys.HANGUL) }}</div>
-          </div>
-        </div>
-        <div class="section">
-          <h3 class="title">시네마틱 모드 설정</h3>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">시네마틱 모드 활성화</div>
-            </div>
-            <input type="checkbox" v-if="_keyBinds.cinematic_mode" class="checkbox" v-model="_cinematic_mode"/>
-            <div class="description" v-else>HUD 켜기/끄기<br/>키설정 필요</div>
-          </div>
-        </div>
-        <div class="section">
-          <h3 class="title">스트라타젬 마우스 입력 설정</h3>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">스트라타젬 마우스 입력 활성화</div>
-            </div>
-            <input type="checkbox" class="checkbox" v-model="_mousestratagem_enabled"/>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">입력 상태 활성화 단축키</div>
-            </div>
-            <div class="shortcut" @click="f_set_key('mousestratagem', '스트라타젬 마우스 입력 상태 활성화 단축키')">{{ f_get_key_string(_bindkeys.mousestratagem) }}</div>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">스트라타젬 콘솔 조작 시 자동 활성화</div>
-            </div>
-            <input type="checkbox" class="checkbox" v-model="_mousestratagem_with_console"/>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">스트라타젬 마우스 입력 임계 감도</div>
-            </div>
-            <input class="input" type="number" v-model="_mousestratagem_threshold"/>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">스트라타젬 마우스 입력간 딜레이</div>
-            </div>
-            <input class="input" type="number" v-model="_mousestratagem_delay"/>
-          </div>
-        </div>
-        <div class="section">
-          <h3 class="title">기계화 설정</h3>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">재장전 속도 증가 갑옷 착용 여부</div>
-            </div>
-            <input type="checkbox" class="checkbox" v-model="_autokey_with_goodarmor"/>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">기계화 전투 1번 단축키</div>
-            </div>
-            <div class="shortcut" @click="f_set_key('autokey', '기계화 전투 단축키')">{{ f_get_key_string(_bindkeys.autokey) }}</div>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">기계화 전투 1번</div>
-            </div>
-            <select class="select" v-model="_autokey_type">
-              <option class="option" v-for="item in _autokey_type_map" :value="item.value">{{ item.name }}</option>
-            </select>
-          </div>
-          <div class="option" v-if="(_autokey_type == 'eruptor') && !_keyBinds.weapon_swap">
-            <div class="meta" :style="{ width: '100%', 'text-align': 'right' }">
-              <div class="deco"/>
-              <div class="description" :style="{ width: '100%', 'text-align': 'right' }">장비 교체(짧은무기) 키설정 필요</div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">로테이션 취소 단축키</div>
+              </div>
+              <div class="shortcut" @click="f_set_key('rotate_cancel', '로테이션 취소 단축키')">{{ f_get_key_string(_bindkeys.rotate_cancel) }}</div>
             </div>
           </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">기계화 전투 2번 단축키</div>
+          <div class="section">
+            <h3 class="title">성능 설정</h3>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">스트라타젬 즉시 투척</div>
+              </div>
+              <input type="checkbox" class="checkbox" v-model="_stratagem_instant_fire"/>
             </div>
-            <div class="shortcut" @click="f_set_key('autokey_sub', '기계화 전투 단축키')">{{ f_get_key_string(_bindkeys.autokey_sub) }}</div>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">기계화 전투 2번</div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">스트라타젬 투척 딜레이</div>
+              </div>
+              <input class="input" type="number" v-model="_stratagem_instant_fire_delay"/>
             </div>
-            <select class="select" v-model="_autokey_type_sub">
-              <option class="option" v-for="item in _autokey_type_map" :value="item.value">{{ item.name }}</option>
-            </select>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">기계화 전투 3번 단축키</div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">스트라타젬 로테이션 선택 딜레이</div>
+              </div>
+              <input class="input" type="number" v-model="_rotate_delay"/>
             </div>
-            <div class="shortcut" @click="f_set_key('autokey_sub2', '기계화 전투 단축키')">{{ f_get_key_string(_bindkeys.autokey_sub2) }}</div>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">기계화 전투 3번</div>
-            </div>
-            <select class="select" v-model="_autokey_type_sub2">
-              <option class="option" v-for="item in _autokey_type_map" :value="item.value">{{ item.name }}</option>
-            </select>
-          </div>
-          <div class="option" v-if="(_autokey_type_sub == 'eruptor') && !_keyBinds.weapon_swap">
-            <div class="meta" :style="{ width: '100%', 'text-align': 'right' }">
-              <div class="deco"/>
-              <div class="description" :style="{ width: '100%', 'text-align': 'right' }">장비 교체(짧은무기) 키설정 필요</div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">모든 동작 기본 딜레이</div>
+              </div>
+              <input class="input" type="number" v-model="_default_delay"/>
             </div>
           </div>
-          <div class="option" v-if="_autokey_type == 'heavy' || _autokey_type_sub == 'heavy' || _autokey_type_sub2 == 'heavy'">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">중기관총 반동 제어 감도</div>
+          <div class="section">
+            <h3 class="title">한글 채팅창 설정</h3>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">한글 채팅 입력 딜레이</div>
+              </div>
+              <input class="input" type="number" v-model="_chatinputdelay"/>
             </div>
-            <input class="input" type="number" v-model="_heavy_start_rate"/>
+            <!-- <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">한글 채팅 확장 창 좌측상단으로</div>
+              </div>
+              <div class="button" @click="f_chat_lefttop">초기화</div>
+            </div> -->
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">채팅 입력 시 자동 한글 확장 켜기</div>
+              </div>
+              <input type="checkbox" class="checkbox" v-model="_instant_chat"/>
+            </div>
+            <div class="option" v-if="!_instant_chat">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">한글 채팅 확장 단축키</div>
+              </div>
+              <div class="shortcut" @click="f_set_key('HANGUL', '한글 채팅 확장 단축키')">{{ f_get_key_string(_bindkeys.HANGUL) }}</div>
+            </div>
           </div>
-          <div class="option" v-if="_autokey_type == 'heavy' || _autokey_type_sub == 'heavy' || _autokey_type_sub2 == 'heavy'">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">중기관총 사용 RPM</div>
+          <div class="section">
+            <h3 class="title">시네마틱 모드 설정</h3>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">시네마틱 모드 활성화</div>
+              </div>
+              <input type="checkbox" v-if="_keyBinds.cinematic_mode" class="checkbox" v-model="_cinematic_mode"/>
+              <div class="description" v-else>HUD 켜기/끄기<br/>키설정 필요</div>
             </div>
-            <input class="input" type="number" v-model="_heavy_rpm"/>
           </div>
-          <div class="option" v-if="_autokey_type == 'purifier' || _autokey_type_sub == 'purifier' || _autokey_type_sub2 == 'purifier'">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">퓨리파이어 반동 제어 감도</div>
+          <div class="section">
+            <h3 class="title">스트라타젬 마우스 입력 설정</h3>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">스트라타젬 마우스 입력 활성화</div>
+              </div>
+              <input type="checkbox" class="checkbox" v-model="_mousestratagem_enabled"/>
             </div>
-            <input class="input" type="number" v-model="_purifier_move_rate"/>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">입력 상태 활성화 단축키</div>
+              </div>
+              <div class="shortcut" @click="f_set_key('mousestratagem', '스트라타젬 마우스 입력 상태 활성화 단축키')">{{ f_get_key_string(_bindkeys.mousestratagem) }}</div>
+            </div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">스트라타젬 콘솔 조작 시 자동 활성화</div>
+              </div>
+              <input type="checkbox" class="checkbox" v-model="_mousestratagem_with_console"/>
+            </div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">스트라타젬 마우스 입력 임계 감도</div>
+              </div>
+              <input class="input" type="number" v-model="_mousestratagem_threshold"/>
+            </div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">스트라타젬 마우스 입력간 딜레이</div>
+              </div>
+              <input class="input" type="number" v-model="_mousestratagem_delay"/>
+            </div>
           </div>
-          <div class="option" v-if="_autokey_type == 'apw' || _autokey_type_sub == 'apw' || _autokey_type_sub2 == 'apw'">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">대물소총 반동 제어 감도</div>
+          <div class="section">
+            <h3 class="title">기계화 설정</h3>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">재장전 속도 증가 갑옷 착용 여부</div>
+              </div>
+              <input type="checkbox" class="checkbox" v-model="_autokey_with_goodarmor"/>
             </div>
-            <input class="input" type="number" v-model="_apw_start_rate"/>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">기계화 전투 1번 단축키</div>
+              </div>
+              <div class="shortcut" @click="f_set_key('autokey', '기계화 전투 단축키')">{{ f_get_key_string(_bindkeys.autokey) }}</div>
+            </div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">기계화 전투 1번</div>
+              </div>
+              <select class="select" v-model="_autokey_type">
+                <option class="option" v-for="item in _autokey_type_map" :value="item.value">{{ item.name }}</option>
+              </select>
+            </div>
+            <div class="option" v-if="(_autokey_type == 'eruptor') && !_keyBinds.weapon_swap">
+              <div class="meta" :style="{ width: '100%', 'text-align': 'right' }">
+                <div class="deco"/>
+                <div class="description" :style="{ width: '100%', 'text-align': 'right' }">장비 교체(짧은무기) 키설정 필요</div>
+              </div>
+            </div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">기계화 전투 2번 단축키</div>
+              </div>
+              <div class="shortcut" @click="f_set_key('autokey_sub', '기계화 전투 단축키')">{{ f_get_key_string(_bindkeys.autokey_sub) }}</div>
+            </div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">기계화 전투 2번</div>
+              </div>
+              <select class="select" v-model="_autokey_type_sub">
+                <option class="option" v-for="item in _autokey_type_map" :value="item.value">{{ item.name }}</option>
+              </select>
+            </div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">기계화 전투 3번 단축키</div>
+              </div>
+              <div class="shortcut" @click="f_set_key('autokey_sub2', '기계화 전투 단축키')">{{ f_get_key_string(_bindkeys.autokey_sub2) }}</div>
+            </div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">기계화 전투 3번</div>
+              </div>
+              <select class="select" v-model="_autokey_type_sub2">
+                <option class="option" v-for="item in _autokey_type_map" :value="item.value">{{ item.name }}</option>
+              </select>
+            </div>
+            <div class="option" v-if="(_autokey_type_sub == 'eruptor') && !_keyBinds.weapon_swap">
+              <div class="meta" :style="{ width: '100%', 'text-align': 'right' }">
+                <div class="deco"/>
+                <div class="description" :style="{ width: '100%', 'text-align': 'right' }">장비 교체(짧은무기) 키설정 필요</div>
+              </div>
+            </div>
+            <div class="option" v-if="_autokey_type == 'heavy' || _autokey_type_sub == 'heavy' || _autokey_type_sub2 == 'heavy'">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">중기관총 반동 제어 감도</div>
+              </div>
+              <input class="input" type="number" v-model="_heavy_start_rate"/>
+            </div>
+            <div class="option" v-if="_autokey_type == 'heavy' || _autokey_type_sub == 'heavy' || _autokey_type_sub2 == 'heavy'">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">중기관총 사용 RPM</div>
+              </div>
+              <input class="input" type="number" v-model="_heavy_rpm"/>
+            </div>
+            <div class="option" v-if="_autokey_type == 'purifier' || _autokey_type_sub == 'purifier' || _autokey_type_sub2 == 'purifier'">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">퓨리파이어 반동 제어 감도</div>
+              </div>
+              <input class="input" type="number" v-model="_purifier_move_rate"/>
+            </div>
+            <div class="option" v-if="_autokey_type == 'apw' || _autokey_type_sub == 'apw' || _autokey_type_sub2 == 'apw'">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">대물소총 반동 제어 감도</div>
+              </div>
+              <input class="input" type="number" v-model="_apw_start_rate"/>
+            </div>
           </div>
-        </div>
-        <div class="section">
-          <h3 class="title">플레이 자동 녹화</h3>
-          <!-- <div class="option" v-if="_game_display.rotate">
-            <div class="meta" :style="{ width: '100%', 'text-align': 'right' }">
-              <div class="deco"/>
-              <div class="description" :style="{ width: '100%', 'text-align': 'right' }">모니터가 회전 상태여서 녹화할 수 없습니다</div>
+          <div class="section">
+            <h3 class="title">플레이 자동 녹화</h3>
+            <!-- <div class="option" v-if="_game_display.rotate">
+              <div class="meta" :style="{ width: '100%', 'text-align': 'right' }">
+                <div class="deco"/>
+                <div class="description" :style="{ width: '100%', 'text-align': 'right' }">모니터가 회전 상태여서 녹화할 수 없습니다</div>
+              </div>
+            </div> -->
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">플레이 자동 녹화 활성화</div>
+              </div>
+              <input type="checkbox" class="checkbox" v-model="_autorecord"/>
             </div>
-          </div> -->
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">플레이 자동 녹화 활성화</div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">동영상 저장 위치 열기</div>
+              </div>
+              <div class="button" @click="f_open_video_folder">폴더 열기</div>
             </div>
-            <input type="checkbox" class="checkbox" v-model="_autorecord"/>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">동영상 저장 위치 열기</div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">저장된 동영상 전부 삭제</div>
+              </div>
+              <div class="button" :class="{ disabled: !_video_path_size }" @click="f_clear_video_folder">{{ _video_path_size ? f_format_size(_video_path_size) : '동영상 없음' }}</div>
             </div>
-            <div class="button" @click="f_open_video_folder">폴더 열기</div>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">저장된 동영상 전부 삭제</div>
+            <div class="option" v-if="_displaylength > 1">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">녹화 대상 모니터 번호</div>
+              </div>
+              <select class="select" v-model="_output_idx">
+                <option class="option" v-for="item in _displaylength" :value="item - 1">{{ item - 1 }}</option>
+              </select>
             </div>
-            <div class="button" :class="{ disabled: !_video_path_size }" @click="f_clear_video_folder">{{ _video_path_size ? f_format_size(_video_path_size) : '동영상 없음' }}</div>
-          </div>
-          <div class="option" v-if="_displaylength > 1">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">녹화 대상 모니터 번호</div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">자동 녹화 단축키</div>
+              </div>
+              <div class="shortcut" @click="f_set_key('record', '자동 녹화 단축키')">{{ f_get_key_string(_bindkeys.record) }}</div>
             </div>
-            <select class="select" v-model="_output_idx">
-              <option class="option" v-for="item in _displaylength" :value="item - 1">{{ item - 1 }}</option>
-            </select>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">자동 녹화 단축키</div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">최대 자동 녹화 시간</div>
+              </div>
+              <div><input class="input" type="number" v-model="_record_duration" :min="_deathcam_seconds + _deathcam_delay + 1"/><span class="unit">초</span></div>
             </div>
-            <div class="shortcut" @click="f_set_key('record', '자동 녹화 단축키')">{{ f_get_key_string(_bindkeys.record) }}</div>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">최대 자동 녹화 시간</div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">자동 녹화 초당 프레임</div>
+              </div>
+              <input class="input" type="number" v-model="_record_framerate"/>
             </div>
-            <div><input class="input" type="number" v-model="_record_duration" :min="_deathcam_seconds + _deathcam_delay + 1"/><span class="unit">초</span></div>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">자동 녹화 초당 프레임</div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">자동 녹화 품질</div>
+              </div>
+              <select class="select" v-model="_record_quality">
+                <option class="option" v-for="item in _record_quality_map" :value="item.value">{{ item.name }}</option>
+              </select>
             </div>
-            <input class="input" type="number" v-model="_record_framerate"/>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">자동 녹화 품질</div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">자동 데스캠 저장 활성화</div>
+              </div>
+              <input type="checkbox" class="checkbox" v-model="_deathcam_enabled"/>
             </div>
-            <select class="select" v-model="_record_quality">
-              <option class="option" v-for="item in _record_quality_map" :value="item.value">{{ item.name }}</option>
-            </select>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">자동 데스캠 저장 활성화</div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">데스캠 녹화 시간</div>
+              </div>
+              <div><input class="input" type="number" v-model="_deathcam_seconds"/><span class="unit">초</span></div>
             </div>
-            <input type="checkbox" class="checkbox" v-model="_deathcam_enabled"/>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">데스캠 녹화 시간</div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">데스캠 녹화 딜레이</div>
+              </div>
+              <div><input class="input" type="number" v-model="_deathcam_delay"/><span class="unit">초</span></div>
             </div>
-            <div><input class="input" type="number" v-model="_deathcam_seconds"/><span class="unit">초</span></div>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">데스캠 녹화 딜레이</div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">데스캠 미리보기 활성화</div>
+              </div>
+              <input type="checkbox" class="checkbox" v-model="_deathcam_preview"/>
             </div>
-            <div><input class="input" type="number" v-model="_deathcam_delay"/><span class="unit">초</span></div>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">데스캠 미리보기 활성화</div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">데스캠 미리보기 크기 배율</div>
+              </div>
+              <input type="number" class="input" v-model="_deathcam_size" :min="20" :max="200"/>
             </div>
-            <input type="checkbox" class="checkbox" v-model="_deathcam_preview"/>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">데스캠 미리보기 크기 배율</div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">데스캠 최대 저장 개수</div>
+              </div>
+              <input type="number" class="input" v-model="_deathcam_max_counts" :min="1"/>
             </div>
-            <input type="number" class="input" v-model="_deathcam_size" :min="20" :max="200"/>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">데스캠 최대 저장 개수</div>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">데스캠 webp 변환 활성화</div>
+              </div>
+              <input type="checkbox" class="checkbox" v-model="_deathcam_webp"/>
             </div>
-            <input type="number" class="input" v-model="_deathcam_max_counts" :min="1"/>
-          </div>
-          <div class="option">
-            <div class="meta">
-              <div class="deco"/>
-              <div class="name">데스캠 webp 변환 활성화</div>
-            </div>
-            <input type="checkbox" class="checkbox" v-model="_deathcam_webp"/>
-          </div>
-          <div class="option">
-            <div class="meta" :style="{ width: '100%', 'text-align': 'right' }">
-              <div class="deco"/>
-              <div class="description" :style="{ width: '100%', 'text-align': 'right' }">webp 변환 시 20MB 이하의 용량이 됩니다</div>
+            <div class="option">
+              <div class="meta" :style="{ width: '100%', 'text-align': 'right' }">
+                <div class="deco"/>
+                <div class="description" :style="{ width: '100%', 'text-align': 'right' }">webp 변환 시 20MB 이하의 용량이 됩니다</div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
-      <div class="textbox">
-        <div class="textboxtitle">
-          <div class="textboxdeco"/>
-          <div class="textboxname">선택적 복지 콘솔</div>
+        <div class="textbox">
+          <div class="textboxtitle">
+            <div class="textboxdeco"/>
+            <div class="textboxname">선택적 복지 콘솔</div>
+          </div>
+          <div>당신은 장애를 갖고 있거나, 겁쟁이입니다. 하지만 이 새로운 기술을 사용하면 반드시 장애를 극복하고 두려움없는 헬다이버로 거듭날 수 있습니다.</div>
         </div>
-        <div>당신은 장애를 갖고 있거나, 겁쟁이입니다. 하지만 이 새로운 기술을 사용하면 반드시 장애를 극복하고 두려움없는 헬다이버로 거듭날 수 있습니다.</div>
       </div>
     </div>
     <div v-if="_key_modal" class="key_modal" @click.self="f_cancel_key">
@@ -445,6 +448,8 @@
 </template>
 
 <script setup>
+const c_pagetype = computed(() => useRoute().query.type)
+
 definePageMeta({
   layout: 'main'
 })
@@ -919,7 +924,7 @@ watch(_deathcam_enabled, () => {
 ipcRenderer.on('deathcam_enabled', v => {
   _deathcam_enabled.value = v
 })
-const _deathcam_seconds = ref(7)
+const _deathcam_seconds = ref(5)
 watch(_deathcam_seconds, () => {
   ipcRenderer.send('deathcam_seconds', _deathcam_seconds.value)
 })
@@ -1145,10 +1150,15 @@ ipcRenderer.on('game_display', v => {
 ._main {
   color: white;
   display: flex;
-  height: 100%;
+  height: calc(100% - 80px);
   padding: 20px;
+  padding-top: 0;
   justify-content: space-around;
   box-sizing: border-box;
+  .page {
+    display: flex;
+    justify-content: space-around;
+  }
   img {
     -webkit-user-drag: none;
     user-drag: none;
@@ -1162,6 +1172,7 @@ ipcRenderer.on('game_display', v => {
       display: flex;
       .category {
         margin: 10px;
+        margin-top: 0;
         .title {
           margin: 0;
         }
@@ -1444,7 +1455,6 @@ ipcRenderer.on('game_display', v => {
     display: flex;
     justify-content: center;
     align-items: center;
-
     .inner {
       padding: 20px;
       display: flex;
