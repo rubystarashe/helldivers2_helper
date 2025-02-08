@@ -631,7 +631,7 @@ export const WARGBOUNDS = [
   {
     code: 'B-100',
     name: 'Portable Hellbomb',
-    keys: ['down', 'up', 'right', 'down', 'up', 'up'],
+    keys: ['down', 'right', 'up', 'up', 'up'],
     icon: '/stratagems/Servants of Freedom/Hellbomb Portable.svg',
     cooldown: 1000 * 300,
     takedown: 1000 * 10,
