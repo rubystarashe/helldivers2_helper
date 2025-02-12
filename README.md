@@ -1,5 +1,6 @@
 ![image](https://github.com/user-attachments/assets/d25b5189-cb9d-4646-ae79-acd29caaa466)
 ![image](https://github.com/user-attachments/assets/1f75fb70-9b6a-482c-87b7-9886666d29d1)
+![2025-02-03 16-40-17 (online-video-cutter com) (1) (2)](https://github.com/user-attachments/assets/6891beeb-04bc-43a8-bcfd-d1bf32c32ea5)
 
 # 요약
 개발사가 공식적으로 허용한 기계화 보조장치를 세련된 인터페이스와 유저경험장치로 녹여낸 민주주의의 역작입니다.
