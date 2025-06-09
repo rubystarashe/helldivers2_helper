@@ -753,7 +753,8 @@ const createMainWindow = () => {
     frame: false,
     focusable: true,
     skipTaskbar: true,
-    resizable: false
+    resizable: false,
+    type: 'toolbar'
   })
   windows.chat.on('page-title-updated', (evt) => {
     evt.preventDefault()
