@@ -1,6 +1,7 @@
 import WinReg from 'winreg'
 import path from 'path'
 import fs from 'fs/promises'
+import fetch from 'node-fetch'
 
 const getCurrentSteamUser = () => {
     return new Promise((resolve, reject) => {
@@ -26,7 +27,15 @@ const getCurrentSteamUser = () => {
     })
 }
 
-const getSteamID64 = () => {
+// SteamID3를 SteamID64로 변환하는 함수
+const convertSteamID3To64 = (steamID3) => {
+    if (!steamID3) return null
+    
+    // SteamID64 = 76561197960265728 + accountId
+    return (76561197960265728n + BigInt(steamID3)).toString()
+}
+
+const getSteamID3 = () => {
     return new Promise((resolve, reject) => {
         const regKey = new WinReg({
             hive: WinReg.HKCU,
@@ -49,6 +58,15 @@ const getSteamID64 = () => {
             }
         })
     })
+}
+
+const getSteamID64 = async () => {
+    const steamID3 = await getSteamID3()
+    const steamID64 = convertSteamID3To64(steamID3)
+    if (!steamID64) {
+        throw new Error('SteamID64 변환에 실패했습니다.')
+    }
+    return steamID64
 }
 
 const getGameInstallPath = (appId) => {
@@ -84,7 +102,7 @@ const getGameInstallPath = (appId) => {
     })
 };
 
-const getUserConfigPath = async (steamID64, appId) => {
+const getUserConfigPath = async (steamID3, appId) => {
     return new Promise((resolve, reject) => {
         const steamRegKey = new WinReg({
             hive: WinReg.HKCU,
@@ -100,7 +118,7 @@ const getUserConfigPath = async (steamID64, appId) => {
             const configPath = path.join(
                 pathItem.value,
                 'userdata',
-                steamID64,
+                steamID3,
                 appId,
                 'remote',
                 'input_settings.config'
@@ -198,7 +216,7 @@ const parseConfigToJson = (configData) => {
     }
 };
 
-const readUserConfig = async (steamID64, appId, configPath) => {
+const readUserConfig = async (steamID3, appId, configPath) => {
     try {
         
         // 파일 존재 여부 확인
@@ -233,10 +251,10 @@ const readUserConfig = async (steamID64, appId, configPath) => {
 const getSteamInfo = async () => {
     try {
         const username = await getCurrentSteamUser()
-        const steamID64 = await getSteamID64()
+        const steamID3 = await getSteamID3()
         const gamePath = await getGameInstallPath('553850')
-        const configPath = await getUserConfigPath(steamID64, '553850')
-        const configInfo = await readUserConfig(steamID64, '553850', configPath)
+        const configPath = await getUserConfigPath(steamID3, '553850')
+        const configInfo = await readUserConfig(steamID3, '553850', configPath)
         
         // console.log('현재 로그인된 사용자:', username)
         // console.log('Steam64 ID:', steamID64)
@@ -245,7 +263,7 @@ const getSteamInfo = async () => {
         
         return { 
             username, 
-            steamID64, 
+            steamID3, 
             gamePath,
             configInfo
         };
@@ -255,11 +273,45 @@ const getSteamInfo = async () => {
     }
 }
 
+const getSteamProfileJoinLink = async (steamID64) => {
+    try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 5000); // 5초 타임아웃
+
+        const response = await fetch(`https://steamcommunity.com/profiles/${steamID64}`, {
+            signal: controller.signal
+        });
+        
+        clearTimeout(timeoutId);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const html = await response.text();
+        
+        // Join Game 버튼의 href 속성에서 lobby ID 추출
+        const match = html.match(/href="steam:\/\/joinlobby\/\d+\/(\d+)\/\d+"/);
+        if (match && match[1]) {
+            return match[1];
+        }
+        return null;
+    } catch (error) {
+        if (error.name === 'AbortError') {
+            throw new Error('Steam 프로필 페이지 접근 시간이 초과되었습니다.');
+        }
+        console.error('Steam 프로필 페이지 접근 오류:', error.message);
+        throw error;
+    }
+}
+
 export {
     getCurrentSteamUser,
+    getSteamID3,
     getSteamID64,
     getGameInstallPath,
     getUserConfigPath,
     readUserConfig,
-    getSteamInfo
+    getSteamInfo,
+    getSteamProfileJoinLink
 };
