@@ -1,5 +1,5 @@
 import { MoveMouse, Key, keyboard, getForegroundWindowHWND, getWindowText, getWindowRect, KeyPress, KeyRelease, KeyPressAndRelease, MouseLeftClick, MouseRightClick, windowFocus, sendText, MouseLeftPress, MouseLeftRelease, MouseRightPress, MouseRightRelease, GetMousePosition, captureScreen } from './src/user32.js'
-import { app, BrowserWindow, protocol, net, ipcMain, Notification, Menu, dialog, shell, desktopCapturer, screen } from 'electron'
+import { app, BrowserWindow, protocol, net, ipcMain, Notification, Menu, dialog, shell, desktopCapturer, screen, clipboard } from 'electron'
 import pkg from 'electron-updater'
 const { autoUpdater } = pkg
 import path from 'path'
@@ -1087,7 +1087,13 @@ const createMainWindow = () => {
         } catch (e) {}
       }
 
-      if (!focuswindowIsGame()) return
+      if (!focuswindowIsGame()) {
+        // 컨트롤+C 키 입력 감지
+        if (key === 'C' && state && keyboard.status['LCONTROL']) {
+          handleSteamProtocol()
+        }
+        return
+      }
       if (key == keyBinds['reload'] && state) {
         weapon_used[lastusedweapon] = 0
       }
@@ -2238,4 +2244,12 @@ if (!app.requestSingleInstanceLock()) {
 if (process.platform === 'win32')
 {
   app.setAppUserModelId('Helldivers2 Helper')
+}
+
+// 스팀 프로토콜 처리, 자동 입장 기능
+const handleSteamProtocol = async () => {
+  const currentContent = clipboard.readText()
+  if (currentContent.startsWith('steam://')) {
+    shell.openExternal(currentContent)
+  }
 }
