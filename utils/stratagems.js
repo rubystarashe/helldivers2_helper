@@ -7,7 +7,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 16
+    index: 1
   },
   {
     code: 'APW-1',
@@ -17,7 +17,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 26
+    index: 5
   },
   {
     code: 'M-105',
@@ -37,7 +37,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 70,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 28
+    index: 13
   },
   {
     code: 'GR-8',
@@ -47,7 +47,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 24
+    index: 18
   },
   {
     code: 'FLAM-40',
@@ -57,7 +57,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 21
+    index: 8
   },
   {
     code: 'AC-8',
@@ -67,7 +67,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 3
+    index: 14
   },
   {
     code: 'MG-206',
@@ -77,7 +77,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 5
+    index: 3
   },
   {
     code: 'RL-77',
@@ -87,7 +87,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 7
+    index: 15
   },
   {
     code: 'MLS-4X',
@@ -97,7 +97,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 120,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 0
+    index: 12
   },
   {
     code: 'RS-422',
@@ -107,7 +107,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 8
+    index: 4
   },
   {
     code: 'FAF-14',
@@ -117,7 +117,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 14
+    index: 16
   },
   {
     code: 'StA-X3',
@@ -127,7 +127,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 410,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 18
+    index: 17
   },
 ];
 
@@ -148,7 +148,7 @@ export const ORBITAL_CANNONS = [
     cooldown: 1000 * 100,
     takedown: 1000 * 10,
     type: 'attack',
-    index: 11
+    index: 2
   },
   {
     name: 'Orbital 120MM HE Barrage',
@@ -157,7 +157,7 @@ export const ORBITAL_CANNONS = [
     cooldown: 1000 * 180,
     takedown: 1000 * 10,
     type: 'attack',
-    index: 17
+    index: 4
   },
   {
     name: 'Orbital 380MM HE Barrage',
@@ -166,7 +166,7 @@ export const ORBITAL_CANNONS = [
     cooldown: 1000 * 240,
     takedown: 1000 * 10,
     type: 'attack',
-    index: 15
+    index: 6
   },
   {
     name: 'Orbital Walking Barrage',
@@ -175,7 +175,7 @@ export const ORBITAL_CANNONS = [
     cooldown: 1000 * 240,
     takedown: 1000 * 10,
     type: 'attack',
-    index: 3
+    index: 5
   },
   {
     name: 'Orbital Laser',
@@ -184,7 +184,7 @@ export const ORBITAL_CANNONS = [
     cooldown: 1000 * 300,
     takedown: 1000 * 10,
     type: 'attack',
-    index: 13
+    index: 8
   },
   {
     name: 'Orbital Napalm Barrage',
@@ -193,7 +193,7 @@ export const ORBITAL_CANNONS = [
     cooldown: 1000 * 240,
     takedown: 1000 * 10,
     type: 'attack',
-    index: 12
+    index: 3
   },
   {
     name: 'Orbital Railcannon Strike',
@@ -202,7 +202,7 @@ export const ORBITAL_CANNONS = [
     cooldown: 1000 * 210,
     takedown: 1000 * 10,
     type: 'attack',
-    index: 8
+    index: 7
   },
 ];
 
@@ -214,7 +214,7 @@ export const HANGER = [
     cooldown: 1000 * 8,
     takedown: 1000 * 5,
     type: 'attack',
-    index: 4
+    index: 13
   },
   {
     name: 'Eagle Airstrike',
@@ -223,7 +223,7 @@ export const HANGER = [
     cooldown: 1000 * 8,
     takedown: 1000 * 5,
     type: 'attack',
-    index: 2
+    index: 15
   },
   {
     name: 'Eagle Cluster Bomb',
@@ -232,7 +232,7 @@ export const HANGER = [
     cooldown: 1000 * 8,
     takedown: 1000 * 5,
     type: 'attack',
-    index: 9
+    index: 16
   },
   {
     name: 'Eagle Napalm Airstrike',
@@ -241,7 +241,7 @@ export const HANGER = [
     cooldown: 1000 * 8,
     takedown: 1000 * 5,
     type: 'attack',
-    index: 16
+    index: 17
   },
   {
     code: 'LIFT-850',
@@ -251,7 +251,7 @@ export const HANGER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 25
+    index: 22
   },
   {
     name: 'Eagle Smoke Strike',
@@ -260,7 +260,7 @@ export const HANGER = [
     cooldown: 1000 * 8,
     takedown: 1000 * 5,
     type: 'attack',
-    index: 6
+    index: 18
   },
   {
     name: 'Eagle 110MM Rocket Pods',
@@ -269,7 +269,7 @@ export const HANGER = [
     cooldown: 1000 * 8,
     takedown: 1000 * 5,
     type: 'attack',
-    index: 18
+    index: 14
   },
   {
     name: 'Eagle 500KG Bomb',
@@ -278,7 +278,7 @@ export const HANGER = [
     cooldown: 1000 * 8,
     takedown: 1000 * 5,
     type: 'attack',
-    index: 0
+    index: 12
   },
   {
     code: 'M-102',
@@ -288,7 +288,7 @@ export const HANGER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 20
+    index: 29
   },
 ];
 
@@ -300,7 +300,7 @@ export const BRIDGE = [
     cooldown: 1000 * 90,
     takedown: 1000 * 10,
     type: 'attack',
-    index: 14
+    index: 0
   },
   {
     name: 'Orbital Gas Strike',
@@ -309,7 +309,7 @@ export const BRIDGE = [
     cooldown: 1000 * 75,
     takedown: 1000 * 10,
     type: 'attack',
-    index: 7
+    index: 10
   },
   {
     name: 'Orbital EMS Strike',
@@ -318,7 +318,7 @@ export const BRIDGE = [
     cooldown: 1000 * 75,
     takedown: 1000 * 10,
     type: 'attack',
-    index: 5
+    index: 9
   },
   {
     name: 'Orbital Smoke Strike',
@@ -327,7 +327,7 @@ export const BRIDGE = [
     cooldown: 1000 * 100,
     takedown: 1000 * 10,
     type: 'attack',
-    index: 10
+    index: 11
   },
   {
     code: 'E/MG-101',
@@ -337,7 +337,7 @@ export const BRIDGE = [
     cooldown: 1000 * 180,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 13
+    index: 10
   },
   {
     code: 'FX-12',
@@ -347,7 +347,7 @@ export const BRIDGE = [
     cooldown: 1000 * 90,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 3
+    index: 7
   },
   {
     code: 'A/ARC-3',
@@ -357,7 +357,17 @@ export const BRIDGE = [
     cooldown: 1000 * 120,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 7
+    index: 11
+  },
+  {
+    code: 'E/GL-21',
+    name: 'Grenadier Battlement',
+    keys: ['down', 'right', 'down', 'left', 'right'],
+    icon: '/stratagems/Bridge/Grenadier Battlement.svg',
+    cooldown: 1000 * 120,
+    takedown: 1000 * 10,
+    type: 'defense',
+    index: 8
   },
 ];
 
@@ -370,7 +380,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 180,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 9
+    index: 14
   },
   {
     code: 'B-1',
@@ -390,7 +400,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 15
+    index: 6
   },
   {
     code: 'LAS-98',
@@ -400,7 +410,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 10
+    index: 9
   },
   {
     code: 'MD-I4',
@@ -410,7 +420,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 180,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 12
+    index: 15
   },
   {
     code: 'AX/LAS-5',
@@ -420,7 +430,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 22
+    index: 27
   },
   {
     code: 'SH-20',
@@ -430,7 +440,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 300,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 17
+    index: 25
   },
   {
     code: 'ARC-3',
@@ -440,7 +450,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 12
+    index: 11
   },
   {
     code: 'MD-17',
@@ -450,7 +460,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 180,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 2
+    index: 12
   },
   {
     code: 'LAS-99',
@@ -460,7 +470,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 29
+    index: 10
   },
   {
     code: 'SH-32',
@@ -470,17 +480,17 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 6
+    index: 23
   },
   {
     code: 'MD-8',
     name: 'Gas Mines',
     keys: ['down', 'left', 'left', 'right'],
-    icon: '/stratagems/_Experimental Stratagems/Gas Mine.svg',
-    cooldown: 1000 * 180,
+    icon: '/stratagems/Engineering Bay/Gas Mine.svg',
+    cooldown: 1000 * 120,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 14
+    index: 13
   },
 ];
 
@@ -493,7 +503,7 @@ export const ROBOTICS_WORKSHOP = [
     cooldown: 1000 * 90,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 10
+    index: 1
   },
   {
     code: 'A/G-16',
@@ -503,7 +513,7 @@ export const ROBOTICS_WORKSHOP = [
     cooldown: 1000 * 150,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 6
+    index: 0
   },
   {
     code: 'A/M-12',
@@ -513,7 +523,7 @@ export const ROBOTICS_WORKSHOP = [
     cooldown: 1000 * 180,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 8
+    index: 6
   },
   {
     code: 'AX/AR-23',
@@ -523,7 +533,7 @@ export const ROBOTICS_WORKSHOP = [
     cooldown: 1000 * 300,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 13
+    index: 26
   },
   {
     code: 'A/AC-8',
@@ -533,7 +543,7 @@ export const ROBOTICS_WORKSHOP = [
     cooldown: 1000 * 150,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 11
+    index: 4
   },
   {
     code: 'A/MLS-4X',
@@ -543,7 +553,7 @@ export const ROBOTICS_WORKSHOP = [
     cooldown: 1000 * 150,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 5
+    index: 3
   },
   {
     code: 'A/M-23',
@@ -553,7 +563,7 @@ export const ROBOTICS_WORKSHOP = [
     cooldown: 1000 * 180,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 4
+    index: 5
   },
   {
     code: 'EXO-45',
@@ -563,7 +573,7 @@ export const ROBOTICS_WORKSHOP = [
     cooldown: 1000 * 600,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 4
+    index: 31
   },
   {
     code: 'EXO-49',
@@ -573,7 +583,7 @@ export const ROBOTICS_WORKSHOP = [
     cooldown: 1000 * 600,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 1
+    index: 30
   },
 ];
 
@@ -586,7 +596,7 @@ export const WARGBOUNDS = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 9
+    index: 7
   },
   {
     code: 'AX/TX-13',
@@ -596,7 +606,7 @@ export const WARGBOUNDS = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 27
+    index: 28
   },
   {
     code: 'SH-51',
@@ -606,7 +616,7 @@ export const WARGBOUNDS = [
     cooldown: 1000 * 300,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 11
+    index: 24
   },
   {
     code: 'E/AT-12',
@@ -616,7 +626,7 @@ export const WARGBOUNDS = [
     cooldown: 1000 * 180,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 0
+    index: 9
   },
   {
     code: 'A/FLAM-40',
@@ -626,7 +636,7 @@ export const WARGBOUNDS = [
     cooldown: 1000 * 150,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 0
+    index: 2
   },
   {
     code: 'B-100',
@@ -636,7 +646,27 @@ export const WARGBOUNDS = [
     cooldown: 1000 * 300,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 23
+    index: 20
+  },
+  {
+    code: 'LIFT-860',
+    name: 'Hover Pack',
+    keys: ['down', 'up', 'up', 'down', 'left', 'right'],
+    icon: '/stratagems/Borderline Justice/Hover Pack.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 21
+  },
+  {
+    code: 'CQC-1',
+    name: 'One True Flag',
+    keys: ['down', 'left', 'right', 'right', 'up'],
+    icon: '/stratagems/Masters of Ceremony/One True Flag.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 0
   }
 ]
 
