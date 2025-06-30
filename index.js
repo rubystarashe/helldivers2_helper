@@ -1,9 +1,9 @@
 import { MoveMouse, Key, keyboard, getForegroundWindowHWND, getWindowText, getWindowRect, KeyPress, KeyRelease, KeyPressAndRelease, MouseLeftClick, MouseRightClick, windowFocus, sendText, MouseLeftPress, MouseLeftRelease, MouseRightPress, MouseRightRelease, GetMousePosition, captureScreen } from './src/user32.js'
-import { app, BrowserWindow, protocol, net, ipcMain, Notification, Menu, dialog, shell, desktopCapturer, screen } from 'electron'
+import { app, BrowserWindow, protocol, net, ipcMain, Notification, Menu, dialog, shell, desktopCapturer, screen, clipboard } from 'electron'
 import pkg from 'electron-updater'
 const { autoUpdater } = pkg
 import path from 'path'
-import { getCurrentSteamUser, getSteamID64, getSteamInfo, getUserConfigPath, readUserConfig } from './steam.js'
+import { getCurrentSteamUser, getSteamID3, getSteamID64, getSteamInfo, getUserConfigPath, readUserConfig, getSteamProfileJoinLink } from './steam.js'
 import fs from 'fs'
 import { reset_recorder, start_recorder, pause_recorder, save_recorder, save_death_cam } from './record.js'
 import { createRequire } from 'module';
@@ -535,26 +535,26 @@ const bindHelldivers2Key = key => {
 
 let dynamic_interval_stopper = false
 let gameId = '553850'
-let steamID64
+let steamID3
 let gamePath
 let username
 let configPath
 let configInfo
 setInterval(async () => {
   if (dynamic_interval_stopper) return
-  if (!steamID64 || !gamePath || !username || !configPath) {
+  if (!steamID3 || !gamePath || !username || !configPath) {
     try {
-      steamID64 = await getSteamID64()
-      gamePath = await getUserConfigPath(steamID64, gameId)
+      steamID3 = await getSteamID3()
+      gamePath = await getUserConfigPath(steamID3, gameId)
       username = await getCurrentSteamUser()
-      configPath = await getUserConfigPath(steamID64, gameId)
+      configPath = await getUserConfigPath(steamID3, gameId)
     } catch (e) {
       windows.main.webContents.send('steaminfo', { error: e })
     }
   }
   try {
     const before = JSON.stringify(keyBinds)
-    configInfo = await readUserConfig(steamID64, gameId, configPath)
+    configInfo = await readUserConfig(steamID3, gameId, configPath)
     if (configInfo?.json) {
       const { json } = configInfo
       const { Stratagem, Avatar, Player, Misc } = json || {}
@@ -688,11 +688,11 @@ setInterval(async () => {
     if (before != JSON.stringify(keyBinds)) {
       windows.main.webContents.send('keyBinds', keyBinds)
       stratagemPending = false
-      windows.main.webContents.send('steaminfo', { username, steamID64, gamePath, configPath, configInfo })
+      windows.main.webContents.send('steaminfo', { username, steamID3, gamePath, configPath, configInfo })
     }
   } catch (e) {
     // console.log(e)
-    windows.main.webContents.send('steaminfo', { username, steamID64, gamePath, configPath, error: e })
+    windows.main.webContents.send('steaminfo', { username, steamID3, gamePath, configPath, error: e })
   }
 }, 2000)
 
@@ -753,7 +753,8 @@ const createMainWindow = () => {
     frame: false,
     focusable: true,
     skipTaskbar: true,
-    resizable: false
+    resizable: false,
+    type: 'toolbar'
   })
   windows.chat.on('page-title-updated', (evt) => {
     evt.preventDefault()
@@ -1087,7 +1088,13 @@ const createMainWindow = () => {
         } catch (e) {}
       }
 
-      if (!focuswindowIsGame()) return
+      if (!focuswindowIsGame()) {
+        // 컨트롤+C 키 입력 감지
+        if (key === 'C' && state && keyboard.status['LCONTROL']) {
+          handleSteamProtocol()
+        }
+        return
+      }
       if (key == keyBinds['reload'] && state) {
         weapon_used[lastusedweapon] = 0
       }
@@ -2065,7 +2072,7 @@ const createMainWindow = () => {
     if (window == 'main') {
       windows[window].webContents.send('keyBinds', keyBinds)
       windows[window].webContents.send('visible', true)
-      if (username && steamID64 && gamePath && configPath) windows.main.webContents.send('steaminfo', { username, steamID64, gamePath, configPath, configInfo })
+      if (username && steamID3 && gamePath && configPath) windows.main.webContents.send('steaminfo', { username, steamID3, gamePath, configPath, configInfo })
       // else windows.main.webContents.send('steaminfo', { error: 'steam not found' })
       
       try {
@@ -2239,3 +2246,37 @@ if (process.platform === 'win32')
 {
   app.setAppUserModelId('Helldivers2 Helper')
 }
+
+// 스팀 프로토콜 처리, 자동 입장 기능
+const handleSteamProtocol = async () => {
+  const currentContent = clipboard.readText()
+  if (currentContent.startsWith('steam://')) {
+    shell.openExternal(currentContent)
+  }
+}
+
+// 게임 참여 링크 복사 기능
+ipcMain.on('copy-game-invite', async () => {
+  try {
+    const steamID64 = await getSteamID64()
+    if (!steamID64) {
+      windows.main.webContents.send('copy-game-invite-result', { error: '스팀 ID를 찾을 수 없습니다.' })
+      return
+    }
+    
+    const lobbyID = await getSteamProfileJoinLink(steamID64)
+    if (!lobbyID) {
+      windows.main.webContents.send('copy-game-invite-result', { error: '게임 로비를 찾을 수 없습니다.' })
+      return
+    }
+    
+    const inviteLink = `steam://joinlobby/553850/${lobbyID}/${steamID64}`
+    clipboard.writeText(inviteLink)
+    windows.main.webContents.send('copy-game-invite-result', { success: true })
+  } catch (error) {
+    console.error('게임 참여 링크 복사 오류:', error.message)
+    windows.main.webContents.send('copy-game-invite-result', { 
+      error: error.message || '게임 참여 링크를 가져오는데 실패했습니다.' 
+    })
+  }
+})

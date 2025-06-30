@@ -20,6 +20,7 @@
     "electron-updater": "^6.3.9",
     "ffi-rs": "^1.2.4",
     "lerp": "^1.0.3",
+    "node-fetch": "^3.3.2",
     "socket.io-client": "^4.8.1",
     "winreg": "^1.2.5"
   },

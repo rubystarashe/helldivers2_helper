@@ -57,6 +57,21 @@
         <!-- <div class="username" v-else-if="_steaminfo?.username">{{ _steaminfo.username }}</div> -->
         <div class="options">
           <div class="section">
+            <h3 class="title">게임 초대</h3>
+            <div class="option">
+              <div class="meta">
+                <div class="deco"/>
+                <div class="name">게임 참여 링크 복사</div>
+              </div>
+              <button class="copy-button" @click="f_copy_game_invite" :disabled="_is_copying">
+                {{ _is_copying ? '복사 중...' : '복사하기' }}
+              </button>
+            </div>
+            <div v-if="_copy_result" class="copy-result" :class="{ error: _copy_result.error }">
+              {{ _copy_result.error || '클립보드에 복사되었습니다.' }}
+            </div>
+          </div>
+          <div class="section">
             <h3 class="title">단축키 설정</h3>
             <div class="option">
               <div class="meta">
@@ -1143,6 +1158,21 @@ const _game_display = ref({})
 ipcRenderer.on('game_display', v => {
   _game_display.value = v
 })
+
+const _copy_result = ref(null)
+const _is_copying = ref(false)
+const f_copy_game_invite = () => {
+  _is_copying.value = true
+  ipcRenderer.send('copy-game-invite')
+}
+
+ipcRenderer.on('copy-game-invite-result', (result) => {
+  _copy_result.value = result
+  _is_copying.value = false
+  setTimeout(() => {
+    _copy_result.value = null
+  }, 10000)
+})
 </script>
 
 <style lang="scss" scoped>
@@ -1537,6 +1567,41 @@ ipcRenderer.on('game_display', v => {
   .disabled {
     opacity: .5;
     pointer-events: none;
+  }
+  .copy-button {
+    padding: 8px 16px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    
+    &:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+    
+    &:hover:not(:disabled) {
+      background: #45a049;
+    }
+  }
+
+  .copy-result {
+    margin-top: 8px;
+    padding: 8px;
+    border-radius: 4px;
+    background: #e8f5e9;
+    color: #2e7d32;
+    
+    &.error {
+      background: #ffebee;
+      color: #c62828;
+    }
+  }
+  .steam-id {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #666;
   }
 }
 </style>
