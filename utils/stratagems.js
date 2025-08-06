@@ -747,6 +747,62 @@ export const GENERAL_STRATEGEMS = [
   },
 ];
 
+export const CONTROL_GROUP = [
+  {
+    code: 'LIFT-182',
+    name: 'Warp Pack',
+    keys: ['down', 'left', 'right', 'down', 'left', 'right'],
+    icon: '/stratagems/Control Group/Warp Pack.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 32
+  },
+  {
+    code: 'PLAS-45',
+    name: 'Epoch',
+    keys: ['down', 'left', 'up', 'left', 'right'],
+    icon: '/stratagems/Control Group/Epoch.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 33
+  },
+  {
+    code: 'A/LAS-98',
+    name: 'Laser Sentry',
+    keys: ['down', 'up', 'right', 'down', 'up', 'right'],
+    icon: '/stratagems/Control Group/Laser Sentry.svg',
+    cooldown: 1000 * 150,
+    takedown: 1000 * 10,
+    type: 'defense',
+    index: 16
+  },
+]
+
+export const FORCE_OF_LAW = [
+  {
+    code: 'GL-52',
+    name: 'De-Escalator',
+    keys: ['left', 'right', 'up', 'left', 'right'],
+    icon: '/stratagems/Force of Law/GL-52 De-Escalator.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 34
+  },
+  {
+    code: 'AX/ARC-3',
+    name: '“Guard Dog” K-9',
+    keys: ['down', 'up', 'left', 'up', 'right', 'left'],
+    icon: '/stratagems/Force of Law/Guard Dog K-9.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 35
+  },
+]
+
 export const STRATAGEMS = {
   PATRIOTIC_ADMINISTRATION_CENTER,
   ORBITAL_CANNONS,
@@ -755,5 +811,7 @@ export const STRATAGEMS = {
   ENGINEERING_BAY,
   ROBOTICS_WORKSHOP,
   GENERAL_STRATEGEMS,
-  WARGBOUNDS
+  WARGBOUNDS,
+  CONTROL_GROUP,
+  FORCE_OF_LAW
 }

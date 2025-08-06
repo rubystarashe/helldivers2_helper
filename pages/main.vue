@@ -766,6 +766,7 @@ const _autokey_type_map = [
   { name: '퓨리파이어 연사 제어 보조', value: 'purifier' },
   { name: '퓨리파이어 충전사격 보조', value: 'purifier_charge' },
   { name: '레일건 자동 조작 보조', value: 'railgun' },
+  { name: '에포크 자동 조작 보조', value: 'epoch' },
   { name: '아크 발사기 자동 조작 보조', value: 'arc' },
   { name: '중기관총 반동 제어 보조', value: 'heavy' },
   { name: '대물소총 연발 사격', value: 'apw' }
@@ -799,6 +800,22 @@ watch(_auto_arc_delay, () => {
 ipcRenderer.on('auto_arc_delay', v => {
   _auto_arc_delay.value = v
 })
+
+const _auto_epoch_delay = ref(2300)
+watch(_auto_epoch_delay, () => {
+  ipcRenderer.send('auto_epoch_delay', _auto_epoch_delay.value)
+})
+ipcRenderer.on('auto_railgun_delay', v => {
+  _auto_railgun_delay.value = v
+})
+const _auto_epoch_reload_delay = ref(4200)
+watch(_auto_epoch_reload_delay, () => {
+  ipcRenderer.send('auto_epoch_reload_delay', _auto_epoch_reload_delay.value)
+})
+ipcRenderer.on('auto_epoch_reload_delay', v => {
+  _auto_epoch_reload_delay.value = v
+})
+
 const _auto_railgun_delay = ref(2900)
 watch(_auto_railgun_delay, () => {
   ipcRenderer.send('auto_railgun_delay', _auto_railgun_delay.value)

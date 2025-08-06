@@ -36,7 +36,7 @@
                   <div class="subcategory" v-for="(dd, subcategory) in d">
                     <h3 class="subcategoryname">{{ f_get_category_i18n(subcategory) }}</h3>
                     <div class="list">
-                      <div class="item" v-for="name in dd">
+                      <div class="item" v-for="name in dd" :class="{ selected: _adding_mod_codes[name] }" @click="f_add_mod_code(name)">
                         <img :class="[category, subcategory]" :src="`/mods/${category}/${subcategory}/${name}.webp`" alt="">
                         <div class="name">{{ name }}</div>
                       </div>
@@ -50,7 +50,7 @@
                   <div class="subcategory" v-for="(d, category) in c_stratagems">
                     <h3 class="subcategoryname">{{ f_get_category_i18n(category) }}</h3>
                     <div class="list">
-                      <div class="item" v-for="{ name, icon } in d">
+                      <div class="item" v-for="{ name, code, icon } in d" :class="{ selected: _adding_mod_codes[code || name] }" @click="f_add_mod_code(code || name)">
                         <img class="stratagem" :class="[category]" :src="icon" alt="">
                       </div>
                     </div>
@@ -63,6 +63,9 @@
         </div>
         <div class="meta">
           {{ _addmod_queue[0] }}
+          <div>
+            {{ _adding_mod_codes }}
+          </div>
           <div class="buttons">
             <div class="button" @click=f_cancel>건너뛰기</div>
             <div class="button">덮어쓰기</div>
@@ -261,6 +264,23 @@ const c_stratagems = computed(() => {
   }
   return res
 })
+const c_itemmaps = computed(() => {
+  const res = []
+  for (const key in _modindexdefault) {
+    for (const subcategory in _modindexdefault[key]) {
+      for (const item of _modindexdefault[key][subcategory]) {
+        res.push(item)
+      }
+    }
+  }
+  for (const stratagems of Object.values(c_stratagems.value)) {
+    for (const stratagem of stratagems) {
+      res.push(stratagem.code || stratagem.name)
+    }
+  }
+  return res
+})
+
 
 const f_get_category_i18n = category => {
   switch (category) {
@@ -301,8 +321,26 @@ const f_cancel = () => {
     _addmod_queue.value.shift()
   }
 }
-</script>
+const c_focus_mod = computed(() => {
+  return _addmod_queue.value[0]
+})
 
+const _adding_mod_codes = ref({})
+watch(c_focus_mod, () => {
+  if (c_focus_mod.value) {
+    c_itemmaps.value.forEach(e => {
+      const name = c_focus_mod.value.name?.toUpperCase()
+      if (name.includes(e) || name.includes(e.replace('-', ''))) {
+        _adding_mod_codes.value[e] = true
+      }
+    })
+  }
+})
+const f_add_mod_code = code => {
+  if (_adding_mod_codes.value[code]) delete _adding_mod_codes.value[code]
+  else _adding_mod_codes.value[code] = true
+}
+</script>
 
 <style lang="scss" scoped>
 ._modmanager {

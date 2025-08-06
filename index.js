@@ -196,6 +196,20 @@ ipcMain.on('auto_arc_delay', (_, value) => {
   settings.auto_arc_delay = auto_arc_delay
   saveSetting()
 })
+
+let auto_epoch_delay = 2300
+ipcMain.on('auto_epoch_delay', (_, value) => {
+  auto_epoch_delay = value
+  settings.auto_epoch_delay = auto_epoch_delay
+  saveSetting()
+})
+let auto_epoch_reload_delay = 4200
+ipcMain.on('auto_epoch_reload_delay', (_, value) => {
+  auto_epoch_reload_delay = value
+  settings.auto_epoch_reload_delay = auto_epoch_reload_delay
+  saveSetting()
+})
+
 let auto_railgun_delay = 2900
 ipcMain.on('auto_railgun_delay', (_, value) => {
   auto_railgun_delay = value
@@ -418,6 +432,8 @@ if (fs.existsSync(settingPath)) {
   if (settings.autokey_type_sub !== undefined) autokey_type_sub = settings.autokey_type_sub
   if (settings.autokey_type_sub2 !== undefined) autokey_type_sub2 = settings.autokey_type_sub2
   if (settings.auto_arc_delay !== undefined) auto_arc_delay = settings.auto_arc_delay
+  if (settings.auto_epoch_delay !== undefined) auto_epoch_delay = settings.auto_epoch_delay
+  if (settings.auto_epoch_reload_delay !== undefined) auto_epoch_reload_delay = settings.auto_epoch_reload_delay
   if (settings.auto_railgun_delay !== undefined) auto_railgun_delay = settings.auto_railgun_delay
   if (settings.auto_railgun_reload_delay !== undefined) auto_railgun_reload_delay = settings.auto_railgun_reload_delay
   if (settings.auto_eruptor_delay !== undefined) auto_eruptor_delay = settings.auto_eruptor_delay
@@ -1176,7 +1192,7 @@ const createMainWindow = () => {
           // if (state && auto_reloading) return
           autokey_enabled = state
           autokey_type_num = 0
-          if (autokey_type == 'railgun' && !state && railgun_fired) {
+          if ((autokey_type == 'railgun' || autokey_type == 'epoch') && !state && railgun_fired) {
             if (keyboard.status[keyBinds['fire']]) await inputFire(0, 'release')
             await sleep(inputDelay)
             await KeyPressAndRelease(keyBinds['reload'], inputDelay)
@@ -1202,7 +1218,7 @@ const createMainWindow = () => {
           // if (state && auto_reloading) return
           autokey_enabled = state
           autokey_type_num = 1
-          if (autokey_type_sub == 'railgun' && !state && railgun_fired) {
+          if ((autokey_type_sub == 'railgun' || autokey_type_sub == 'epoch') && !state && railgun_fired) {
             if (keyboard.status[keyBinds['fire']]) await inputFire(0, 'release')
             await sleep(inputDelay)
             await KeyPressAndRelease(keyBinds['reload'], inputDelay)
@@ -1228,7 +1244,7 @@ const createMainWindow = () => {
           // if (state && auto_reloading) return
           autokey_enabled = state
           autokey_type_num = 2
-          if (autokey_type_sub2 == 'railgun' && !state && railgun_fired) {
+          if ((autokey_type_sub2 == 'railgun' || autokey_type_sub2 == 'epoch') && !state && railgun_fired) {
             if (keyboard.status[keyBinds['fire']]) await inputFire(0, 'release')
             await sleep(inputDelay)
             await KeyPressAndRelease(keyBinds['reload'], inputDelay)
@@ -1795,6 +1811,30 @@ const createMainWindow = () => {
         await sleep(inputDelay)
         // console.timeEnd('arc')
         break
+      case 'epoch':
+        if (lastusedweapon != 3) {
+          await KeyPressAndRelease(keyBinds['weapon_3'], inputDelay)
+          await sleep(800)
+        }
+        if (!enginerunning()) break
+        await inputFire(0, 'press')
+        railgun_fired = true
+        if (!enginerunning()) break
+        await eunginesleep(auto_epoch_delay)
+        if (!enginerunning()) break
+        await inputFire(0, 'release')
+        if (!enginerunning()) break
+        await sleep(inputDelay)
+        if (!enginerunning()) break
+        railgun_fired = false
+        weapon_used[3]++
+        if (weapon_used[3] >= 3 && !cannot_reload) {
+          auto_reloading = true
+          await KeyPressAndRelease(keyBinds['reload'], inputDelay)
+          await sleep(auto_epoch_reload_delay)
+          auto_reloading = false
+        } else await sleep(inputDelay)
+        break
       case 'railgun':
         if (lastusedweapon != 3) {
           await KeyPressAndRelease(keyBinds['weapon_3'], inputDelay)
@@ -1885,7 +1925,7 @@ const createMainWindow = () => {
           const end = Date.now()
           let rounds = 0
           lastRoundTime = end
-          let fireInterval = 60  // 1000rpm = 60ms per shot
+          let fireInterval = 100  // 1000rpm = 60ms per shot
           
           while (rounds < (15 - weapon_used[1])) {
             const beforeFire = Date.now()
@@ -2093,6 +2133,8 @@ const createMainWindow = () => {
         autokey_enabled,
         autokey_with_goodarmor,
         auto_arc_delay,
+        auto_epoch_delay,
+        auto_epoch_reload_delay,
         auto_railgun_delay,
         auto_railgun_reload_delay,
         auto_eruptor_delay,

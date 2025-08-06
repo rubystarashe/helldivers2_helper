@@ -11,7 +11,7 @@
         </h1>
         <div class="navi">
           <NuxtLink to="/main" class="button" :class="{ selected: !$route.query.type }">접근성 설정</NuxtLink>
-          <NuxtLink to="/main?type=modmanager" class="button disabled" :class="{ selected: $route.query.type == 'modmanager' }">모드 관리</NuxtLink>
+          <NuxtLink to="/main?type=modmanager" class="button" :class="{ selected: $route.query.type == 'modmanager' }">모드 관리</NuxtLink>
         </div>
       </div>
       <slot/>
