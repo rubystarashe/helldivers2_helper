@@ -801,7 +801,7 @@ ipcRenderer.on('auto_arc_delay', v => {
   _auto_arc_delay.value = v
 })
 
-const _auto_epoch_delay = ref(2300)
+const _auto_epoch_delay = ref(2900)
 watch(_auto_epoch_delay, () => {
   ipcRenderer.send('auto_epoch_delay', _auto_epoch_delay.value)
 })
