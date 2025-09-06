@@ -160,8 +160,11 @@ ipcMain.on('cinematic_mode', (_, value) => {
 })
 
 let autokey_enabled = false
+let autokey_cancelable = true
+let autokey_canceled = false
 ipcMain.on('autokey_enabled', (_, value) => {
   autokey_enabled = value
+  autokey_canceled = false
   settings.autokey_enabled = autokey_enabled
   saveSetting()
 })
@@ -1191,6 +1194,7 @@ const createMainWindow = () => {
         if (key == keyBinds['autokey']) {
           // if (state && auto_reloading) return
           autokey_enabled = state
+          autokey_canceled = false
           autokey_type_num = 0
           if ((autokey_type == 'railgun' || autokey_type == 'epoch') && !state && railgun_fired) {
             if (keyboard.status[keyBinds['fire']]) await inputFire(0, 'release')
@@ -1221,7 +1225,8 @@ const createMainWindow = () => {
             case keyBinds['dropopen']:
             case keyBinds['chat']:
             case keyBinds['stratagem_console']:
-              autokey_enabled = false
+              // autokey_enabled = false
+              if (autokey_cancelable) autokey_canceled = true
               break
           }
         }
@@ -1231,6 +1236,7 @@ const createMainWindow = () => {
         if (key == keyBinds['autokey_sub']) {
           // if (state && auto_reloading) return
           autokey_enabled = state
+          autokey_canceled = false
           autokey_type_num = 1
           if ((autokey_type_sub == 'railgun' || autokey_type_sub == 'epoch') && !state && railgun_fired) {
             if (keyboard.status[keyBinds['fire']]) await inputFire(0, 'release')
@@ -1261,7 +1267,8 @@ const createMainWindow = () => {
             case keyBinds['dropopen']:
             case keyBinds['chat']:
             case keyBinds['stratagem_console']:
-              autokey_enabled = false
+              // autokey_enabled = false
+              if (autokey_cancelable) autokey_canceled = true
               break
           }
         }
@@ -1271,6 +1278,7 @@ const createMainWindow = () => {
         if (key == keyBinds['autokey_sub2']) {
           // if (state && auto_reloading) return
           autokey_enabled = state
+          autokey_canceled = false
           autokey_type_num = 2
           if ((autokey_type_sub2 == 'railgun' || autokey_type_sub2 == 'epoch') && !state && railgun_fired) {
             if (keyboard.status[keyBinds['fire']]) await inputFire(0, 'release')
@@ -1301,7 +1309,8 @@ const createMainWindow = () => {
             case keyBinds['dropopen']:
             case keyBinds['chat']:
             case keyBinds['stratagem_console']:
-              autokey_enabled = false
+              // autokey_enabled = false
+              if (autokey_cancelable) autokey_canceled = true
               break
           }
         }
@@ -1799,14 +1808,18 @@ const createMainWindow = () => {
 
   const enginerunning = () => {
     const isgame = focuswindowIsGame()
-    if (!isgame) autokey_enabled = false
+    if (!isgame) {
+      autokey_enabled = false
+      autokey_canceled = false
+    }
+    if (autokey_canceled) return false
     return autokey_enabled && (autokey_type || autokey_type_sub || autokey_type_sub2)
   }
   let lastusedweapon = 1
   const weapon_used = {
     1: (autokey_type == 'eruptor' || autokey_type_sub == 'eruptor' || autokey_type_sub2 == 'eruptor') ? 1 : 0,
     2: 1,
-    3: (autokey_type == 'epoch' || autokey_type_sub == 'epoch' || autokey_type_sub2 == 'epoch') ? 0 : 1,
+    3: ((autokey_type == 'epoch' || autokey_type_sub == 'epoch' || autokey_type_sub2 == 'epoch') || (autokey_type == 'crossbow3' || autokey_type_sub == 'crossbow3' || autokey_type_sub2 == 'crossbow3')) ? 0 : 1,
     4: 1,
     5: 1
   }
@@ -1839,7 +1852,8 @@ const createMainWindow = () => {
       autokey_engine()
       return
     }
-    switch (autokey_type_num == 0 ? autokey_type : autokey_type_num == 1 ? autokey_type_sub : autokey_type_sub2) {
+    const target = autokey_type_num == 0 ? autokey_type : autokey_type_num == 1 ? autokey_type_sub : autokey_type_sub2
+    switch (target) {
       case 'arc':
         if (lastusedweapon != 3) {
           await KeyPressAndRelease(keyBinds['weapon_3'], inputDelay)
@@ -1934,32 +1948,60 @@ const createMainWindow = () => {
         }
         break
       case 'crossbow':
-        if (lastusedweapon != 1) {
+      case 'crossbow2':
+      case 'crossbow3':
+        if (lastusedweapon != 1 && target != 'crossbow3') {
           await KeyPressAndRelease(keyBinds['weapon_1'], inputDelay)
           await sleep(auto_eruptor_delay * 2) // 조정필요
           if (!enginerunning()) break
         }
+        if (lastusedweapon != 3 && target == 'crossbow3') {
+          await KeyPressAndRelease(keyBinds['weapon_3'], inputDelay)
+          await sleep(auto_eruptor_delay * 2) // 조정필요
+          if (!enginerunning()) break
+        }
         await inputFire(inputDelay * 2)
-        weapon_used[1]++
+        if (target == 'crossbow') weapon_used[1]++
+        if (target == 'crossbow2') weapon_used[1]++
+        if (target == 'crossbow3') weapon_used[3]++
         await sleep(inputDelay)
         // if (!enginerunning()) {
         //   await sleep(auto_eruptor_delay)
         //   break
         // }
-        if (weapon_used[1] >= 5) {
+        if ((target == 'crossbow' && weapon_used[1] >= 5) || (target == 'crossbow2' && weapon_used[1] >= 10) || (target == 'crossbow3' && weapon_used[3] >= 10)) {
           if (cannot_reload) {
             await sleep(inputDelay)
             break
           }
           auto_reloading = true
           await KeyPressAndRelease(keyBinds['reload'], inputDelay)
-          await sleep(autokey_with_goodarmor ? 2600 : 3400)
+          if (target == 'crossbow') await sleep(autokey_with_goodarmor ? 2600 : 3400)
+          if (target == 'crossbow2') await sleep(autokey_with_goodarmor ? 1900 : 2500)
+          if (target == 'crossbow3') await sleep(3500)
           auto_reloading = false
         } else {
-          await KeyPressAndRelease(keyBinds['weapon_swap'], inputDelay)
-          await sleep(auto_eruptor_delay)
-          await KeyPressAndRelease(keyBinds['weapon_swap'], inputDelay)
-          await sleep(auto_eruptor_delay)
+          if (cannot_reload) {
+            while (cannot_reload) {
+              await sleep(inputDelay)
+            }
+            break
+          }
+          await sleep(25)
+          await KeyPressAndRelease(keyBinds['heal'], inputDelay)
+          await sleep(25)
+          autokey_cancelable = false
+          await KeyPressAndRelease(keyBinds['map'], inputDelay)
+          await sleep(25)
+          autokey_cancelable = true
+          if (map_key_type == 'Press' && !enginerunning()) {     
+            await KeyPressAndRelease(keyBinds['map'], inputDelay)
+            await sleep(25)
+          }
+          // await KeyPressAndRelease(keyBinds['weapon_swap'], inputDelay)
+          // await sleep(auto_eruptor_delay)
+          // await KeyPressAndRelease(keyBinds['weapon_swap'], inputDelay)
+          // await sleep(auto_eruptor_delay)
         }
         break
         case 'purifier':
@@ -1969,14 +2011,14 @@ const createMainWindow = () => {
             if (!enginerunning()) break
           }
           const end = Date.now()
-          let rounds = 0
+          let rounds = 1
           lastRoundTime = end
-          let fireInterval = 100  // 1000rpm = 60ms per shot
+          let fireInterval = 60000 / 560  // 1000rpm = 60ms per shot
           
           while (rounds < (15 - weapon_used[1])) {
             const beforeFire = Date.now()
-            await inputFire(20)
-            await sleep(20)
+            await inputFire(15)
+            await sleep(15)
             
             // 마지막 발사로부터 60ms 이상 지났을 때만 발사 카운트 증가
             const currentTime = Date.now()

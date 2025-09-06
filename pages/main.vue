@@ -761,8 +761,10 @@ ipcRenderer.on('autokey_with_goodarmor', v => {
 })
 const _autokey_type_map = [
   { name: '기계화 전투 미사용', value: '' },
-  { name: '이럽터 연사 보조', value: 'eruptor' },
+  // { name: '이럽터 연사 보조', value: 'eruptor' },
   { name: '폭발 석궁 연사 보조', value: 'crossbow' },
+  { name: '퍼니셔 플라스마 연사 보조', value: 'crossbow2' },
+  { name: '유탄 발사기 연사 보조', value: 'crossbow3' },
   { name: '퓨리파이어 연사 제어 보조', value: 'purifier' },
   { name: '퓨리파이어 충전사격 보조', value: 'purifier_charge' },
   { name: '레일건 자동 조작 보조', value: 'railgun' },
