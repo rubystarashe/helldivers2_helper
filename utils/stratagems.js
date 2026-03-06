@@ -745,6 +745,20 @@ export const GENERAL_STRATEGEMS = [
     type: 'general',
     index: 6
   },
+  {
+    name: 'Call In Super Destroyer',
+    keys: ['up', 'up', 'down', 'down', 'left', 'right', 'left', 'right'],
+    icon: '/stratagems/General Stratagems/Call In Super Destroyer.svg',
+    type: 'general',
+    index: 7
+  },
+  {
+    name: 'Cargo Container',
+    keys: ['up', 'up', 'down', 'down',  'right', 'down'],
+    icon: '/stratagems/General Stratagems/Cargo Container.svg',
+    type: 'general',
+    index: 8
+  },
 ];
 
 export const CONTROL_GROUP = [
@@ -783,9 +797,9 @@ export const CONTROL_GROUP = [
 export const FORCE_OF_LAW = [
   {
     code: 'GL-52',
-    name: 'De-Escalator',
-    keys: ['left', 'right', 'up', 'left', 'right'],
-    icon: '/stratagems/Force of Law/GL-52 De-Escalator.svg',
+    name: 'Speargun',
+    keys: ['down', 'right', 'down', 'left', 'up','right'],
+    icon: '/stratagems/Dust Devils/Speargun.svg',
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
@@ -836,6 +850,119 @@ export const DUST_DEVILS = [
   },
 ]
 
+export const NEW_SUPPLY_UPGRADE = [
+  {
+    code: 'EAT-700',
+    name: 'EAT-700 Expendable Napalm',
+    keys: ['down', 'down', 'left', 'up', 'right'],
+    icon: '/stratagems/Dust Devils/Expendable Napalm.svg',
+    cooldown: 1000 * 70,
+    takedown: 1000 * 3,
+    type: 'supply',
+    index: 101
+  },
+  {
+    code: 'MS-11',
+    name: 'MS-11 Solo Silo',
+    keys: ['down', 'up', 'right', 'down', 'down'],
+    icon: '/stratagems/Dust Devils/Solo Silo.svg',
+    cooldown: 1000 * 120,
+    takedown: 1000 * 4,
+    type: 'supply',
+    index: 102
+  },
+  {
+    code: 'EAT-411',
+    name: 'EAT-411 Leveller',
+    keys: ['down', 'down', 'left', 'up', 'right'],
+    icon: '/stratagems/Siege Breakers/EAT-411.svg',
+    cooldown: 1000 * 70,
+    takedown: 1000 * 3,
+    type: 'supply',
+    index: 103
+  },
+  {
+    code: 'GL-52',
+    name: 'GL-52 De-Escalator',
+    keys: ['down', 'right', 'up', 'left', 'right'],
+    icon: '/stratagems/Force of Law/GL-52 De-Escalator.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 104
+  },
+  {
+    code: 'GL-28',
+    name: 'GL-28 Belt-Fed Grenade Launcher',
+    keys: ['down', 'left', 'up', 'left', 'up', 'up'],
+    icon: '/stratagems/Siege Breakers/GL-28.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 105
+  },
+  {
+    code: 'AX/FLAME-75',
+    name: "AX/FLAM-75 Hot Dog",
+    keys: ['down', 'up', 'left', 'up', 'left', 'left'],
+    icon: '/stratagems/Python Commandos/Guard Dog Hot Dog.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 106
+  },
+  {
+    code: 'B/MD',
+    name: 'B/MD C4 Pack',
+    keys: ['down', 'left', 'right', 'up', 'down'],
+    icon: '/stratagems/Redacted Regiment/C4 Pack.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 107
+  },
+  {
+    code: 'TD-220',
+    name: 'TD-220 Bastion MK XVI',
+    keys: ['left', 'down', 'right', 'down', 'left', 'down', 'up', 'down', 'up'],
+    icon: '/stratagems/Siege Breakers/Bastion MK XVI.svg',
+    cooldown: 1000 * 600,
+    takedown: 1000 * 15,
+    type: 'supply',
+    index: 108
+  },
+  {
+    code: 'CQC-9',
+    name: 'CQC-9 Defoliation Tool',
+    keys: ['down', 'left', 'right', 'right', 'down'],
+    icon: '/stratagems/Python Commandos/Defoliation Tool.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 109
+  },
+  {
+    code: 'CQC-20',
+    name: 'CQC-20 Breaching Hammer',
+    keys: ['down', 'left', 'right', 'left', 'up'],
+    icon: '/stratagems/Siege Breakers/CQC-20.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 110
+  },
+  {
+    code: 'M-1000',
+    name: 'M-1000 Maxigun',
+    keys: ['down', 'left', 'right', 'down', 'up', 'up'],
+    icon: '/stratagems/Python Commandos/Maxigun.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 110
+  }
+];
+
 export const STRATAGEMS = {
   PATRIOTIC_ADMINISTRATION_CENTER,
   ORBITAL_CANNONS,
@@ -847,5 +974,6 @@ export const STRATAGEMS = {
   WARGBOUNDS,
   CONTROL_GROUP,
   FORCE_OF_LAW,
+  NEW_SUPPLY_UPGRADE,
   DUST_DEVILS
 }
