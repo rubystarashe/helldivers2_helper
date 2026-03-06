@@ -17,7 +17,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 5
+    index: 6
   },
   {
     code: 'M-105',
@@ -37,7 +37,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 70,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 13
+    index: 18
   },
   {
     code: 'GR-8',
@@ -47,7 +47,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 18
+    index: 23
   },
   {
     code: 'FLAM-40',
@@ -57,7 +57,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 8
+    index: 11
   },
   {
     code: 'AC-8',
@@ -67,7 +67,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 14
+    index: 19
   },
   {
     code: 'MG-206',
@@ -87,7 +87,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 15
+    index: 20
   },
   {
     code: 'MLS-4X',
@@ -97,7 +97,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 120,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 12
+    index: 15
   },
   {
     code: 'RS-422',
@@ -117,7 +117,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 16
+    index: 21
   },
   {
     code: 'StA-X3',
@@ -127,7 +127,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
     cooldown: 1000 * 410,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 17
+    index: 22
   },
 ];
 
@@ -251,7 +251,7 @@ export const HANGER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 22
+    index: 28
   },
   {
     name: 'Eagle Smoke Strike',
@@ -288,7 +288,7 @@ export const HANGER = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 29
+    index: 36
   },
 ];
 
@@ -337,7 +337,7 @@ export const BRIDGE = [
     cooldown: 1000 * 180,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 10
+    index: 11
   },
   {
     code: 'FX-12',
@@ -347,7 +347,7 @@ export const BRIDGE = [
     cooldown: 1000 * 90,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 7
+    index: 8
   },
   {
     code: 'A/ARC-3',
@@ -357,7 +357,7 @@ export const BRIDGE = [
     cooldown: 1000 * 120,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 11
+    index: 12
   },
   {
     code: 'E/GL-21',
@@ -367,7 +367,7 @@ export const BRIDGE = [
     cooldown: 1000 * 120,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 8
+    index: 9
   },
 ];
 
@@ -380,7 +380,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 180,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 14
+    index: 15
   },
   {
     code: 'B-1',
@@ -390,7 +390,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 19
+    index: 24
   },
   {
     code: 'GL-21',
@@ -400,7 +400,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 6
+    index: 8
   },
   {
     code: 'LAS-98',
@@ -410,7 +410,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 9
+    index: 12
   },
   {
     code: 'MD-I4',
@@ -420,7 +420,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 180,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 15
+    index: 16
   },
   {
     code: 'AX/LAS-5',
@@ -430,7 +430,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 27
+    index: 34
   },
   {
     code: 'SH-20',
@@ -440,7 +440,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 300,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 25
+    index: 30
   },
   {
     code: 'ARC-3',
@@ -450,7 +450,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 11
+    index: 14
   },
   {
     code: 'MD-17',
@@ -460,7 +460,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 180,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 12
+    index: 13
   },
   {
     code: 'LAS-99',
@@ -470,7 +470,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 10
+    index: 13
   },
   {
     code: 'SH-32',
@@ -480,7 +480,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 23
+    index: 29
   },
   {
     code: 'MD-8',
@@ -490,7 +490,7 @@ export const ENGINEERING_BAY = [
     cooldown: 1000 * 120,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 13
+    index: 14
   },
 ];
 
@@ -523,7 +523,7 @@ export const ROBOTICS_WORKSHOP = [
     cooldown: 1000 * 180,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 6
+    index: 7
   },
   {
     code: 'AX/AR-23',
@@ -533,7 +533,7 @@ export const ROBOTICS_WORKSHOP = [
     cooldown: 1000 * 300,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 26
+    index: 33
   },
   {
     code: 'A/AC-8',
@@ -543,7 +543,7 @@ export const ROBOTICS_WORKSHOP = [
     cooldown: 1000 * 150,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 4
+    index: 5
   },
   {
     code: 'A/MLS-4X',
@@ -553,7 +553,7 @@ export const ROBOTICS_WORKSHOP = [
     cooldown: 1000 * 150,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 3
+    index: 4
   },
   {
     code: 'A/M-23',
@@ -563,7 +563,7 @@ export const ROBOTICS_WORKSHOP = [
     cooldown: 1000 * 180,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 5
+    index: 6
   },
   {
     code: 'EXO-45',
@@ -573,7 +573,7 @@ export const ROBOTICS_WORKSHOP = [
     cooldown: 1000 * 600,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 31
+    index: 38
   },
   {
     code: 'EXO-49',
@@ -583,7 +583,7 @@ export const ROBOTICS_WORKSHOP = [
     cooldown: 1000 * 600,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 30
+    index: 37
   },
 ];
 
@@ -596,7 +596,7 @@ export const WARGBOUNDS = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 7
+    index: 10
   },
   {
     code: 'AX/TX-13',
@@ -606,7 +606,7 @@ export const WARGBOUNDS = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 28
+    index: 35
   },
   {
     code: 'SH-51',
@@ -616,7 +616,7 @@ export const WARGBOUNDS = [
     cooldown: 1000 * 300,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 24
+    index: 29
   },
   {
     code: 'E/AT-12',
@@ -626,7 +626,7 @@ export const WARGBOUNDS = [
     cooldown: 1000 * 180,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 9
+    index: 10
   },
   {
     code: 'A/FLAM-40',
@@ -646,7 +646,7 @@ export const WARGBOUNDS = [
     cooldown: 1000 * 300,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 20
+    index: 25
   },
   {
     code: 'LIFT-860',
@@ -656,7 +656,7 @@ export const WARGBOUNDS = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 21
+    index: 27
   },
   {
     code: 'CQC-1',
@@ -756,7 +756,7 @@ export const CONTROL_GROUP = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 32
+    index: 26
   },
   {
     code: 'PLAS-45',
@@ -766,7 +766,7 @@ export const CONTROL_GROUP = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 33
+    index: 7
   },
   {
     code: 'A/LAS-98',
@@ -776,7 +776,7 @@ export const CONTROL_GROUP = [
     cooldown: 1000 * 150,
     takedown: 1000 * 10,
     type: 'defense',
-    index: 16
+    index: 3
   },
 ]
 
@@ -789,7 +789,7 @@ export const FORCE_OF_LAW = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 34
+    index: 9
   },
   {
     code: 'AX/ARC-3',
@@ -799,7 +799,40 @@ export const FORCE_OF_LAW = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 35
+    index: 32
+  },
+]
+
+export const DUST_DEVILS = [
+  {
+    code: 'MS-11',
+    name: 'Solo Silo',
+    keys: ['down', 'up', 'right', 'down', 'down'],
+    icon: '/stratagems/Dust Devils/Solo Silo.svg',
+    cooldown: 1000 * 180,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 17
+  },
+  {
+    code: 'EAT-700',
+    name: 'Expendable Napalm',
+    keys: ['down', 'down', 'left', 'up', 'left'],
+    icon: '/stratagems/Dust Devils/Expendable Napalm.svg',
+    cooldown: 1000 * 140,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 16
+  },
+  {
+    code: 'S-11',
+    name: 'Speargun',
+    keys: ['down', 'right', 'down', 'left', 'up', 'right'],
+    icon: '/stratagems/Dust Devils/Speargun.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 5
   },
 ]
 
@@ -813,5 +846,6 @@ export const STRATAGEMS = {
   GENERAL_STRATEGEMS,
   WARGBOUNDS,
   CONTROL_GROUP,
-  FORCE_OF_LAW
+  FORCE_OF_LAW,
+  DUST_DEVILS
 }
