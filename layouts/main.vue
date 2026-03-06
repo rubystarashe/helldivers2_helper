@@ -9,10 +9,10 @@
         <h1 class="title">
           {{ $route.query.type == 'modmanager' ? '모드 관리자' : '전투 보조 및 인터페이스 설정' }}
         </h1>
-        <div class="navi">
+        <!-- <div class="navi">
           <NuxtLink to="/main" class="button" :class="{ selected: !$route.query.type }">접근성 설정</NuxtLink>
           <NuxtLink to="/main?type=modmanager" class="button" :class="{ selected: $route.query.type == 'modmanager' }">모드 관리</NuxtLink>
-        </div>
+        </div> -->
       </div>
       <slot/>
     </div>

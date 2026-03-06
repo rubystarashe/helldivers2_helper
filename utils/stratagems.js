@@ -32,7 +32,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
   {
     code: 'EAT-17',
     name: 'Expendable Anti-Tank',
-    keys: ['down', 'down', 'left', 'up', 'right'],
+    keys: ['down', 'down', 'left', 'up', 'down'],
     icon: '/stratagems/Patriotic Administration Center/Expendable Anti-Tank.svg',
     cooldown: 1000 * 70,
     takedown: 1000 * 10,
@@ -796,16 +796,6 @@ export const CONTROL_GROUP = [
 
 export const FORCE_OF_LAW = [
   {
-    code: 'GL-52',
-    name: 'Speargun',
-    keys: ['down', 'right', 'down', 'left', 'up','right'],
-    icon: '/stratagems/Dust Devils/Speargun.svg',
-    cooldown: 1000 * 480,
-    takedown: 1000 * 10,
-    type: 'supply',
-    index: 9
-  },
-  {
     code: 'AX/ARC-3',
     name: '“Guard Dog” K-9',
     keys: ['down', 'up', 'left', 'up', 'right', 'left'],
@@ -851,26 +841,6 @@ export const DUST_DEVILS = [
 ]
 
 export const NEW_SUPPLY_UPGRADE = [
-  {
-    code: 'EAT-700',
-    name: 'EAT-700 Expendable Napalm',
-    keys: ['down', 'down', 'left', 'up', 'right'],
-    icon: '/stratagems/Dust Devils/Expendable Napalm.svg',
-    cooldown: 1000 * 70,
-    takedown: 1000 * 3,
-    type: 'supply',
-    index: 101
-  },
-  {
-    code: 'MS-11',
-    name: 'MS-11 Solo Silo',
-    keys: ['down', 'up', 'right', 'down', 'down'],
-    icon: '/stratagems/Dust Devils/Solo Silo.svg',
-    cooldown: 1000 * 120,
-    takedown: 1000 * 4,
-    type: 'supply',
-    index: 102
-  },
   {
     code: 'EAT-411',
     name: 'EAT-411 Leveller',
