@@ -718,10 +718,10 @@ setInterval(async () => {
 const createMainWindow = () => {
   windows.main = new BrowserWindow({
     width: 1600,
-    height: 900,
+    height: 1000,
     titleBarStyle: 'hidden',
     minWidth: 1600,
-    minHeight: 900,
+    minHeight: 1000,
     title: "Helldivers2 Helper",
     transparent: true,
     show: false,
@@ -1240,12 +1240,12 @@ const createMainWindow = () => {
           autokey_type_num = 1
           if ((autokey_type_sub == 'railgun' || autokey_type_sub == 'epoch') && !state && railgun_fired) {
             if (keyboard.status[keyBinds['fire']]) await inputFire(0, 'release')
-            if (autokey_type == 'railgun') {
+            if (autokey_type_sub == 'railgun') {
               await sleep(inputDelay)
               await KeyPressAndRelease(keyBinds['reload'], inputDelay)
             }
             railgun_fired = false
-            if (autokey_type == 'epoch') {
+            if (autokey_type_sub == 'epoch') {
               if (Date.now() - pressedAt > 1000) {
                 weapon_used[3]++
               }
@@ -1282,12 +1282,12 @@ const createMainWindow = () => {
           autokey_type_num = 2
           if ((autokey_type_sub2 == 'railgun' || autokey_type_sub2 == 'epoch') && !state && railgun_fired) {
             if (keyboard.status[keyBinds['fire']]) await inputFire(0, 'release')
-            if (autokey_type == 'railgun') {
+            if (autokey_type_sub2 == 'railgun') {
               await sleep(inputDelay)
               await KeyPressAndRelease(keyBinds['reload'], inputDelay)
             }
             railgun_fired = false
-            if (autokey_type == 'epoch') {
+            if (autokey_type_sub2 == 'epoch') {
               if (Date.now() - pressedAt > 1000) {
                 weapon_used[3]++
               }
@@ -1960,10 +1960,12 @@ const createMainWindow = () => {
           await sleep(auto_eruptor_delay * 2) // 조정필요
           if (!enginerunning()) break
         }
-        await inputFire(inputDelay * 2)
+        await inputFire(inputDelay)
         if (target == 'crossbow') weapon_used[1]++
         if (target == 'crossbow2') weapon_used[1]++
         if (target == 'crossbow3') weapon_used[3]++
+        await sleep(inputDelay)
+        await inputFire(inputDelay)
         await sleep(inputDelay)
         // if (!enginerunning()) {
         //   await sleep(auto_eruptor_delay)
