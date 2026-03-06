@@ -783,9 +783,9 @@ export const CONTROL_GROUP = [
 export const FORCE_OF_LAW = [
   {
     code: 'GL-52',
-    name: 'De-Escalator',
-    keys: ['left', 'right', 'up', 'left', 'right'],
-    icon: '/stratagems/Force of Law/GL-52 De-Escalator.svg',
+    name: 'Speargun',
+    keys: ['down', 'right', 'down', 'left', 'up','right'],
+    icon: '/stratagems/Force of Law/S-11 Speargun.svg',
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
@@ -803,6 +803,119 @@ export const FORCE_OF_LAW = [
   },
 ]
 
+export const NEW_SUPPLY_UPGRADE = [
+  {
+    code: 'EAT-700',
+    name: 'EAT-700 Expendable Napalm',
+    keys: ['down', 'down', 'left', 'up', 'right'],
+    icon: '/stratagems/Supply/Expendable_Napalm_Stratagem_Icon.svg',
+    cooldown: 1000 * 70,
+    takedown: 1000 * 3,
+    type: 'supply',
+    index: 101
+  },
+  {
+    code: 'MS-11',
+    name: 'MS-11 Solo Silo',
+    keys: ['down', 'up', 'right', 'down', 'down'],
+    icon: '/stratagems/Supply/MS-11 Solo Silo.svg',
+    cooldown: 1000 * 120,
+    takedown: 1000 * 4,
+    type: 'supply',
+    index: 102
+  },
+  {
+    code: 'EAT-411',
+    name: 'EAT-411 Leveller',
+    keys: ['down', 'down', 'left', 'up', 'right'],
+    icon: '/stratagems/Supply/Leveller_Stratagem_Icon.svg',
+    cooldown: 1000 * 70,
+    takedown: 1000 * 3,
+    type: 'supply',
+    index: 103
+  },
+  {
+    code: 'GL-52',
+    name: 'GL-52 De-Escalator',
+    keys: ['down', 'right', 'up', 'left', 'right'],
+    icon: '/stratagems/Supply/De-Escalator_Stratagem_Icon.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 104
+  },
+  {
+    code: 'GL-28',
+    name: 'GL-28 Belt-Fed Grenade Launcher',
+    keys: ['down', 'left', 'up', 'left', 'up', 'up'],
+    icon: '/stratagems/Supply/Belt-Fed_Grenade_Launcher_Stratagem_Icon.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 105
+  },
+  {
+    code: 'AX/FLAME-75',
+    name: "AX/FLAM-75 Hot Dog",
+    keys: ['down', 'up', 'left', 'up', 'left', 'left'],
+    icon: '/stratagems/Supply/Hot_Dog_Stratagem_Icon.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 106
+  },
+  {
+    code: 'B/MD',
+    name: 'B/MD C4 Pack',
+    keys: ['down', 'left', 'right', 'up', 'down'],
+    icon: '/stratagems/Supply/C4_Pack_Stratagem_Icon.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 107
+  },
+  {
+    code: 'TD-220',
+    name: 'TD-220 Bastion MK XVI',
+    keys: ['left', 'down', 'right', 'down', 'left', 'down', 'up', 'down', 'up'],
+    icon: '/stratagems/Supply/Bastion_MK_XVI_Stratagem_Icon.svg',
+    cooldown: 1000 * 600,
+    takedown: 1000 * 15,
+    type: 'supply',
+    index: 108
+  },
+  {
+    code: 'CQC-9',
+    name: 'CQC-9 Defoliation Tool',
+    keys: ['down', 'left', 'right', 'right', 'down'],
+    icon: '/stratagems/Supply/Defoliation_Tool_Stratagem_Icon.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 109
+  },
+  {
+    code: 'CQC-20',
+    name: 'CQC-20 Breaching Hammer',
+    keys: ['down', 'left', 'right', 'left', 'up'],
+    icon: '/stratagems/Supply/Breaching_Hammer_Stratagem_Icon.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 110
+  },
+  {
+    code: 'M-1000',
+    name: 'M-1000 Maxigun',
+    keys: ['down', 'left', 'right', 'down', 'up', 'up'],
+    icon: '/stratagems/Supply/Maxigun_Stratagem_Icon.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 110
+  }
+];
+
 export const STRATAGEMS = {
   PATRIOTIC_ADMINISTRATION_CENTER,
   ORBITAL_CANNONS,
@@ -813,5 +926,6 @@ export const STRATAGEMS = {
   GENERAL_STRATEGEMS,
   WARGBOUNDS,
   CONTROL_GROUP,
-  FORCE_OF_LAW
+  FORCE_OF_LAW,
+  NEW_SUPPLY_UPGRADE
 }
