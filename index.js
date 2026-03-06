@@ -717,10 +717,10 @@ setInterval(async () => {
 
 const createMainWindow = () => {
   windows.main = new BrowserWindow({
-    width: 1600,
+    width: 1720,
     height: 1000,
     titleBarStyle: 'hidden',
-    minWidth: 1600,
+    minWidth: 1720,
     minHeight: 1000,
     title: "Helldivers2 Helper",
     transparent: true,

@@ -6,7 +6,7 @@
         <div class="categories">
           <div class="category" v-for="(stratagems, category) in c_stratagems" :key="category">
             <h2 class="title">{{ _categories[category][_i18n] }}</h2>
-            <div class="stratagems">
+            <div class="stratagems" :class="category">
               <div class="stratagem" v-for="stratagem in stratagems" :key="stratagem.name"
                 @click="f_isSelected(stratagem) ? f_removestratagem(stratagem) : f_addstratagem(stratagem)"
                 :class="{ selected: f_isSelected(stratagem) }"
@@ -547,6 +547,13 @@ ipcRenderer.on('keyBinds', keyBinds => {
 
 const _default_stratagems_hidden = ref([])
 const _mission_stratagems = ref([
+  {
+    name: 'Hellbomb',
+    keys: ['down', 'up', 'left', 'down', 'up', 'right', 'down', 'up'],
+    icon: '/stratagems/General Stratagems/Hellbomb.svg',
+    type: 'general',
+    index: 2
+  },
   {
     name: 'SEAF Artillery',
     keys: ['right', 'up', 'up', 'down'],
@@ -1244,6 +1251,9 @@ ipcRenderer.on('copy-game-invite-result', (result) => {
               border-color: rgb(255, 232, 0);
               background: rgba(0, 0, 0, .8);
             }
+          }
+          &.supply {
+            width: 420px;
           }
         }
       }
