@@ -32,7 +32,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
   {
     code: 'EAT-17',
     name: 'Expendable Anti-Tank',
-    keys: ['down', 'down', 'left', 'up', 'down'],
+    keys: ['down', 'down', 'left', 'up', 'right'],
     icon: '/stratagems/Patriotic Administration Center/Expendable Anti-Tank.svg',
     cooldown: 1000 * 70,
     takedown: 1000 * 10,
