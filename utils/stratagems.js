@@ -844,12 +844,13 @@ export const NEW_SUPPLY_UPGRADE = [
   {
     code: 'EAT-411',
     name: 'EAT-411 Leveller',
-    keys: ['down', 'down', 'left', 'up', 'right'],
+    keys: ['down', 'down', 'left', 'up', 'down'],
     icon: '/stratagems/Siege Breakers/EAT-411.svg',
     cooldown: 1000 * 70,
     takedown: 1000 * 3,
     type: 'supply',
     index: 103
+    // Fix: EAT-411 command data update by Kidokun0317
   },
   {
     code: 'GL-52',
