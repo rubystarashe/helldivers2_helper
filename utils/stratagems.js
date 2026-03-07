@@ -884,7 +884,7 @@ export const NEW_SUPPLY_UPGRADE = [
   {
     code: 'B/MD',
     name: 'B/MD C4 Pack',
-    keys: ['down', 'left', 'right', 'up', 'down'],
+    keys: ['down', 'right', 'up', 'up', 'right', 'up'],
     icon: '/stratagems/Redacted Regiment/C4 Pack.svg',
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
