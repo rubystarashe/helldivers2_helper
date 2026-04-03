@@ -32,7 +32,7 @@ export const PATRIOTIC_ADMINISTRATION_CENTER = [
   {
     code: 'EAT-17',
     name: 'Expendable Anti-Tank',
-    keys: ['down', 'down', 'left', 'up', 'down'],
+    keys: ['down', 'down', 'left', 'up', 'right'],
     icon: '/stratagems/Patriotic Administration Center/Expendable Anti-Tank.svg',
     cooldown: 1000 * 70,
     takedown: 1000 * 10,
@@ -844,12 +844,13 @@ export const NEW_SUPPLY_UPGRADE = [
   {
     code: 'EAT-411',
     name: 'EAT-411 Leveller',
-    keys: ['down', 'down', 'left', 'up', 'right'],
+    keys: ['down', 'down', 'left', 'up', 'down'],
     icon: '/stratagems/Siege Breakers/EAT-411.svg',
     cooldown: 1000 * 70,
     takedown: 1000 * 3,
     type: 'supply',
     index: 103
+    // Fix: EAT-411 command data update by Kidokun0317
   },
   {
     code: 'GL-52',
