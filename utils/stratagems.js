@@ -369,6 +369,16 @@ export const BRIDGE = [
     type: 'defense',
     index: 9
   },
+    {
+    code: 'A/GM-17',
+    name: 'A/GM-17 Gas Mortar Sentry',
+    keys: ['down', 'up', 'right', 'down', 'left'],
+    icon: '/stratagems/Entrenched Division/Gas_Mortar_Sentry.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'defense',
+    index: 17
+  },
 ];
 
 export const ENGINEERING_BAY = [
@@ -759,6 +769,13 @@ export const GENERAL_STRATEGEMS = [
     type: 'general',
     index: 8
   },
+  {
+    name: 'Dark Fluid Vessel',
+    keys: ['up', 'left', 'right', 'down', 'up', 'up'],
+    icon: '/stratagems/General Stratagems/Dark Fluid Vessel.svg',
+    type: 'general',
+    index: 9
+  },
 ];
 
 export const CONTROL_GROUP = [
@@ -930,8 +947,18 @@ export const NEW_SUPPLY_UPGRADE = [
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
-    index: 110
-  }
+    index: 111
+  },
+  {
+    code: 'B/FLAM-80',
+    name: 'B/FLAM-80 Cremator',
+    keys: ['down', 'down', 'right', 'down', 'up', 'up'],
+    icon: '/stratagems/Entrenched Division/Cremator.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 112
+  },
 ];
 
 export const STRATAGEMS = {
