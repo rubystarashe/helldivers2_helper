@@ -959,6 +959,36 @@ export const NEW_SUPPLY_UPGRADE = [
     type: 'supply',
     index: 112
   },
+    {
+    code: 'MGX-42',
+    name: 'MGX-42 Bullet Storm',
+    keys: ['down', 'left', 'down', 'right', 'up', 'left'],
+    icon: '/stratagems/Exo Experts/MGX-42 Bullet Storm.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 113
+  },
+    {
+    code: 'EXO-51',
+    name: 'EXO-51 Lumberer Exosuit',
+    keys: ['left', 'down', 'right', 'up', 'right', 'left', 'up'],
+    icon: '/stratagems/Exo Experts/EXO-51 Lumberer Exosuit.svg',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 114
+  },
+    {
+    code: 'EXO-55',
+    name: 'EXO-55 Breakthrough Exosuit',
+    keys: ['left', 'down', 'right', 'left', 'right', 'down', 'up'],
+    icon: '/stratagems/Exo Experts/EXO-55 Breakthrough Exosuit',
+    cooldown: 1000 * 480,
+    takedown: 1000 * 10,
+    type: 'supply',
+    index: 115
+  },
 ];
 
 export const STRATAGEMS = {
