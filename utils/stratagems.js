@@ -983,7 +983,7 @@ export const NEW_SUPPLY_UPGRADE = [
     code: 'EXO-55',
     name: 'EXO-55 Breakthrough Exosuit',
     keys: ['left', 'down', 'right', 'left', 'right', 'down', 'up'],
-    icon: '/stratagems/Exo Experts/EXO-55 Breakthrough Exosuit',
+    icon: '/stratagems/Exo Experts/EXO-55 Breakthrough Exosuit.svg',
     cooldown: 1000 * 480,
     takedown: 1000 * 10,
     type: 'supply',
